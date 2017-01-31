@@ -17,13 +17,15 @@ from keras.optimizers import SGD
 def createModel(textEntries, genresEntries, classEntries):
 #def trainModel(textEntries, genresEntries, actorsEntries, realEntries, classEntries):
     """
-        Creates and returns a specific model
+        Creates, fits and returns the specific model fitting the entries
         
         Parameters : 
-            textDim : width of the matrix with float values
-            genresDim : width of a matrix with binary values, that needs a Dense layer before the merge
+            textEntries : a matrix with all the float values preprocessed (keywords, overview, title, note, etc.)
+            genresEntries : a matrix of binary values that tells the movie's genres
+            classEntries : a matrix of binary values that tells the class of the movie (like/dislike)            
+            
         return :
-            the model that needs two matrix to be trained
+            the model is trained with the parameters
             
     """
     
