@@ -4,23 +4,31 @@ Created on Wed Feb 01 17:09:54 2017
 
 @author: darke
 """
-from MovieProject.preprocessing.words import *
-from MovieProject.tests.apiTMDB import *
+
+
+from apiTMDB import getGenres, getMovies, getKeywords
+from MovieProject.resources import GLOVE_DICT_FILE
+from words import meanWords, wordsToGlove
+from .tools import loadGloveDicFromFile
+
 import numpy as np
-GLOVE_FILE = 'GLOVE/glove.6B.50d.txt'
-DICO_FILE = "GLOVE/glove_dico.npy"
+from string import punctuation
+
+
 
 
 
 def preprocess(idMovies):
     """
-        Parameter : int array of ids of Movies you want to process datas
-        Return : Matrix of KeyWords,Titles,Overview and rating values calculated 
-        by Glove. One line by movie.
+        Parameter : 
+            int array of ids of Movies you want to process datas
+        Return : 
+            ndarray. Matrix of KeyWords,Titles,Overview and rating values calculated 
+            by Glove. One line by movie.
     """
     
     print "Loading GloVe dico"
-    dicoGlove = loadGloveDicFromFile(DICO_FILE)
+    dicoGlove = loadGloveDicFromFile(GLOVE_DICT_FILE)
     movies = getMovies(idMovies)
     responses = []
     
@@ -45,16 +53,18 @@ def preprocess(idMovies):
     
 def overviewProcessing(responses, dicoGlove):
     """
-        Parameter : responses array of movies you want to get overviews with
-                    the Glove dictionnary (dicoGlove)
-        Return : Matrix of Overviews values calculated by Glove. One line by movie.
+        Parameter : 
+            Responses array of movies you want to get overviews with
+            the Glove dictionnary (dicoGlove)
+        Return : 
+            ndarray. Matrix of Overviews values calculated by Glove. One line by movie.
     """
     
     meanArray = []    
     
     for response in responses:        
         
-        overview = "".join(c for c in response["overview"] if c not in string.punctuation)       
+        overview = "".join(c for c in response["overview"] if c not in punctuation)       
         overview = overview.split()
         words = []
             
@@ -65,8 +75,7 @@ def overviewProcessing(responses, dicoGlove):
         print meanWords(gArray)
         meanArray.append(meanWords(gArray))
 
-    t = np.array(meanArray)
-    return t
+    return np.array(meanArray)
     
 def keywordsProcessing(movies, dicoGlove):
     """
@@ -74,6 +83,7 @@ def keywordsProcessing(movies, dicoGlove):
                     the Glove dictionnary (dicoGlove)
         Return : Matrix of keywords values calculated by Glove. One line by movie.
     """
+    
     meanArray = []    
     for movie in movies:        
         try:
@@ -87,16 +97,18 @@ def keywordsProcessing(movies, dicoGlove):
 
 def titlesProcessing(responses, dicoGlove):
     """
-        Parameter : responses array of movies you want to process titles with
-                    the Glove dictionnary (dicoGlove)
-        Return : Matrix of titles values calculated by Glove. One line by movie.
+        Parameter : 
+            Responses array of movies you want to process titles with
+            the Glove dictionnary (dicoGlove)
+        Return : 
+            ndarray. Matrix of titles values calculated by Glove. One line by movie.
     """
     
     meanArray = []  
     
     for response in responses:        
 
-        overview = "".join(c for c in response["title"] if c not in string.punctuation)
+        overview = "".join(c for c in response["title"] if c not in punctuation)
         overview = overview.split()
         words = []
             
@@ -110,10 +122,13 @@ def titlesProcessing(responses, dicoGlove):
 
 def ratingProcessing(responses, dicoGlove):
     """
-        Parameter : responses array of movies you want to process rating with
-                    the Glove dictionnary (dicoGlove)
-        Return : Matrix of rating values calculated by Glove. One line by movie.
+        Parameter : 
+            Responses array of movies you want to process rating with
+            the Glove dictionnary (dicoGlove)
+        Return : 
+            ndarray. Matrix of rating values calculated by Glove. One line by movie.
     """
+    
     meanArray = []
     
     for response in responses:        
