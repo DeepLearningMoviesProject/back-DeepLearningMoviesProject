@@ -9,6 +9,7 @@ import numpy as np
 import tmdbsimple as tmdb
 from keras.models import Sequential
 from keras.layers import Dense
+from datetime import datetime
 
 tmdb.API_KEY = 'ff3f07bf3577a496a2f813488eb29980'
 
@@ -72,7 +73,7 @@ def trainData(X_train, Y_train):
     model.add(Dense(output_dim=15, init='normal', activation='relu'))
     model.add(Dense(output_dim=1, init='normal', activation='sigmoid'))
     model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-    model.fit(X_train, Y_train, batch_size=5, nb_epoch=100)
+    model.fit(X_train, Y_train, batch_size=500, nb_epoch=2000)
 
 def predictData(tests):
     """

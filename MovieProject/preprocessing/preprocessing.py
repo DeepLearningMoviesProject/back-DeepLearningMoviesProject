@@ -47,7 +47,10 @@ def preprocess(idMovies):
     meanRating = ratingProcessing(responses, dicoGlove)
     
     finalMatrix = np.hstack((np.hstack((np.hstack((meanKeywords,meanOverviews)),meanTitles)),meanRating))
-    return finalMatrix
+    
+    print "Processing genres..."
+    genres = genresProcessing(responses)
+    return finalMatrix, genres
     
 def overviewProcessing(responses, dicoGlove):
     """
@@ -174,7 +177,10 @@ def genresProcessing(responses):
         genresVect = np.zeros(len(TMDB_GENRES.keys()))
 
         for genre in getGenres(response["genres"]):
-            genresVect[TMDB_GENRES[genre]] = 1
+            try:
+                genresVect[TMDB_GENRES[genre]] = 1
+            except:
+                print "Unknown genre for %s -> %s" %(response["title"], genre)
 
         genresArray[i] = genresVect        
             

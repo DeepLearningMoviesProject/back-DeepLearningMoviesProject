@@ -12,6 +12,7 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense, Merge, BatchNormalization, Embedding, Flatten
 from keras.optimizers import SGD
+from MovieProject.preprocessing import preprocess
 
 
 def createModel(textEntries, genresEntries, classEntries):
@@ -78,3 +79,22 @@ def createModel(textEntries, genresEntries, classEntries):
     return final_branch
 
 
+def buildModel(ids, likes):
+    '''
+        Builds the model that matches the movies (ids) and the like/dislike
+        
+        Parameters : 
+            ids : the ids of the movies we want to build the model on
+            likes : tells whether the movie is liked or not (binary)           
+            
+        return :
+            the model trained on the movies
+    '''
+    
+    print("preprocess")
+    T, G = preprocess(ids)
+    print("create model")
+    model = createModel(T, G, likes)
+    print("model created")
+    return model
+    
