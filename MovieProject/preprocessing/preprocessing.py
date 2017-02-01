@@ -6,7 +6,7 @@ Created on Wed Feb 01 17:09:54 2017
 """
 
 
-from MovieProject.preprocessing.tools import getMovies, getKeywords, loadGloveDicFromFile
+from MovieProject.preprocessing.tools import getMovies, getKeywords, loadGloveDicFromFile, getGenres, getTmdbGenres
 from MovieProject.resources import GLOVE_DICT_FILE
 from words import meanWords, wordsToGlove
 
@@ -151,3 +151,32 @@ def ratingProcessing(responses, dicoGlove):
             meanMatrixRating = np.vstack([meanMatrixRating,response["vote_average"]/10.0])
 
     return meanMatrixRating
+
+
+
+def genresProcessing(responses):
+    """
+        Parameter:
+            Responses array of movies you want to process rating with
+            the Glove dictionnary (dicoGlove)
+        Return:
+            ndarray. Matrix of genres where each value is 1 if genre is present, 0 otherwise
+    
+    """
+    
+    TMDB_GENRES = getTmdbGenres()
+    
+    genresArray = np.empty([len(responses), len(TMDB_GENRES.keys())])
+
+    for i in range(len(responses)):
+        response = responses[i]
+  
+        genresVect = np.zeros(len(TMDB_GENRES.keys()))
+
+        for genre in getGenres(response["genres"]):
+            genresVect[TMDB_GENRES[genre]] = 1
+
+        genresArray[i] = genresVect        
+            
+    return genresArray
+

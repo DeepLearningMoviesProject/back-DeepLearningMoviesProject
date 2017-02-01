@@ -8,7 +8,11 @@ Created on Fri Jan 27 14:32:28 2017
 
 import numpy as np
 import tmdbsimple as tmdb
-import string 
+
+from os.path import isfile
+from MovieProject.resources import GENRES_FILE
+
+
 tmdb.API_KEY = 'ff3f07bf3577a496a2f813488eb29980'
 
     
@@ -21,6 +25,7 @@ def getMovies (idMovies):
     for idMovie in idMovies:
         movies.append(getMovie(idMovie))
     return movies
+
 
 def getKeywords(tmdbKeywords={}):
     """
@@ -47,7 +52,7 @@ def getGenres(tmdbGenres=[]):
     
     genres = []
     for genre in tmdbGenres:
-        genres += genre["name"].lower().encode('UTF-8').split()
+        genres.append(genre["name"].lower().encode('UTF-8'))
         
     return genres
     
@@ -60,6 +65,35 @@ def getMovie(id):
     """
     
     return tmdb.Movies(id)
+
+
+def saveTmdbGenres():
+    """
+        Download genres from TMDB and save it into binary file
+    """
+        
+    listGenres = tmdb.Genres().list()["genres"]
+    genres = {}
+    for i in range(len(listGenres)):
+        genre = listGenres[i]["name"].lower().encode('UTF-8')
+        genres[genre] = i
+    
+    np.save(GENRES_FILE, np.asarray([genres]))
+    
+    
+def getTmdbGenres():
+    """
+        Get dictionary of genres from TMDB associated with an index
+        
+        return:
+            dict object {"String":int,...}
+    """
+
+    #If the file is not present in the resource, creates it 
+    if not isfile(GENRES_FILE):
+        saveTmdbGenres()
+
+    return np.load(GENRES_FILE)[0]
 
     
 

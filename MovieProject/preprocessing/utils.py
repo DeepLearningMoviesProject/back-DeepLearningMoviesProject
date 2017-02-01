@@ -44,7 +44,7 @@ def getTmdbGenres():
     if not isfile(GENRES_FILE):
         saveTmdbGenres()
 
-    return np.load(GENRES_FILE)
+    return np.load(GENRES_FILE)[0]
 
 
 if __name__ == "__main__":

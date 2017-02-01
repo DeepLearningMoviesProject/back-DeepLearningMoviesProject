@@ -7,9 +7,6 @@ Created on Wed Feb  1 13:32:46 2017
 @author: coralie
 """
 
-# Library to remove all ponctuations
-import string
-
 list_punctuation = [",",".","!","?","[","]","(",")","{","}"]
 
 """
