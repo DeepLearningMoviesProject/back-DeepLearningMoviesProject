@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Pre-processing of texte
+Pre-processing of texts
 
 Created on Wed Feb  1 13:32:46 2017
 @author: coralie
