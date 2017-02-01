@@ -89,3 +89,5 @@ ENV/
 .ropeproject
 
 \.spyproject/
+
+MovieProject/resources/glove\.6B\.50d\.txt

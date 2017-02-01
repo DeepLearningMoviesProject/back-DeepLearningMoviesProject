@@ -6,10 +6,9 @@ Created on Wed Feb 01 17:09:54 2017
 """
 
 
-from apiTMDB import getGenres, getMovies, getKeywords
+from MovieProject.preprocessing.tools import getMovies, getKeywords, loadGloveDicFromFile
 from MovieProject.resources import GLOVE_DICT_FILE
 from words import meanWords, wordsToGlove
-from .tools import loadGloveDicFromFile
 
 import numpy as np
 from string import punctuation
@@ -38,17 +37,16 @@ def preprocess(idMovies):
             responses.append(r)
         except:
             print "Error, movie " + str (movie) + " NOT FOUND"
-
-    print "Processing Overview..."
-    meanOverview = overviewProcessing(responses, dicoGlove)
     print "Processing keywords..."
     meanKeywords = keywordsProcessing(movies, dicoGlove)
+    print "Processing Overview..."
+    meanOverviews = overviewProcessing(responses, dicoGlove)
     print "Processing titles..."
     meanTitles = titlesProcessing(responses, dicoGlove)
     print "Processing rating..."
     meanRating = ratingProcessing(responses, dicoGlove)
     
-    finalMatrix = np.concatenate(np.concatenate(np.concatenate(meanOverview, meanKeywords), meanTitles), meanRating)
+    finalMatrix = np.hstack((np.hstack((np.hstack((meanKeywords,meanOverviews)),meanTitles)),meanRating))
     return finalMatrix
     
 def overviewProcessing(responses, dicoGlove):
@@ -60,8 +58,8 @@ def overviewProcessing(responses, dicoGlove):
             ndarray. Matrix of Overviews values calculated by Glove. One line by movie.
     """
     
-    meanArray = []    
-    
+    meanMatrixOverview = []    
+    i = 0
     for response in responses:        
         
         overview = "".join(c for c in response["overview"] if c not in punctuation)       
@@ -72,10 +70,14 @@ def overviewProcessing(responses, dicoGlove):
             words += w.lower().encode('UTF-8')
      
         gArray = wordsToGlove(words, dicoGlove)
-        print meanWords(gArray)
-        meanArray.append(meanWords(gArray))
+        
+        if i == 0:
+            i = 1
+            meanMatrixOverview = meanWords(gArray)
+        else:
+            meanMatrixOverview = np.vstack([meanMatrixOverview,meanWords(gArray)])
 
-    return np.array(meanArray)
+    return meanMatrixOverview
     
 def keywordsProcessing(movies, dicoGlove):
     """
@@ -84,16 +86,22 @@ def keywordsProcessing(movies, dicoGlove):
         Return : Matrix of keywords values calculated by Glove. One line by movie.
     """
     
-    meanArray = []    
+    meanMatrixKeywords = []    
+    i = 0 
     for movie in movies:        
         try:
             response = movie.keywords()
             keywords = getKeywords(response)
             gArray = wordsToGlove(keywords, dicoGlove)
-            meanArray.append(meanWords(gArray))
+            
+            if i == 0:
+                i = 1
+                meanMatrixKeywords = meanWords(gArray)
+            else:
+                meanMatrixKeywords = np.vstack([meanMatrixKeywords,meanWords(gArray)])
         except:
              pass   
-    return meanArray
+    return meanMatrixKeywords
 
 def titlesProcessing(responses, dicoGlove):
     """
@@ -104,8 +112,8 @@ def titlesProcessing(responses, dicoGlove):
             ndarray. Matrix of titles values calculated by Glove. One line by movie.
     """
     
-    meanArray = []  
-    
+    meanMatrixTitles = []  
+    i = 0
     for response in responses:        
 
         overview = "".join(c for c in response["title"] if c not in punctuation)
@@ -114,11 +122,15 @@ def titlesProcessing(responses, dicoGlove):
             
         for w in overview:
             words += w.lower().encode('UTF-8')
-     
+            
         gArray = wordsToGlove(words, dicoGlove)
-        meanArray.append(meanWords(gArray))
+        if i == 0:
+            i = 1
+            meanMatrixTitles = meanWords(gArray)
+        else:
+            meanMatrixTitles = np.vstack([meanMatrixTitles,meanWords(gArray)])
 
-    return meanArray
+    return meanMatrixTitles
 
 def ratingProcessing(responses, dicoGlove):
     """
@@ -129,9 +141,13 @@ def ratingProcessing(responses, dicoGlove):
             ndarray. Matrix of rating values calculated by Glove. One line by movie.
     """
     
-    meanArray = []
-    
-    for response in responses:        
-        meanArray.append(response["vote_average"]/10.0)
+    meanMatrixRating = []
+    i = 0
+    for response in responses:  
+        if i == 0:
+            i = 1
+            meanMatrixRating = response["vote_average"]/10.0
+        else:
+            meanMatrixRating = np.vstack([meanMatrixRating,response["vote_average"]/10.0])
 
-    return meanArray
+    return meanMatrixRating

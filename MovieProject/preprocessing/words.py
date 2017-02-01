@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+""" 
 Created on Tue Jan 31 22:19:45 2017
 
 @author: darke
@@ -41,5 +41,11 @@ def meanWords(gWords):
         return:
             ndarray of dimensions (nb descriptors, 1)
     """
-    
-    return sum(gWords) / gWords.shape[0]
+    if gWords.shape[0] == 0:
+        i = 0
+        while (i<50):
+            i += 1
+            gWords = np.append(gWords,0.0)
+        return gWords
+    else:
+        return sum(gWords) / gWords.shape[0]
