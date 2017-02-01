@@ -15,7 +15,7 @@ from nltk.corpus import stopwords
 # TMDB simple (TMDB API wrapper)
 import tmdbsimple as tmdb
 # To pre-process texte in each abtract
-from MovieProject.preprocessing import texte
+from MovieProject.preprocessing import texts
 
 
 tmdb.API_KEY = 'ff3f07bf3577a496a2f813488eb29980'
@@ -36,7 +36,7 @@ def loadResumes(fileName, pages_max):
         films_nb = len(response[u'results'])
         for j in range (0,films_nb):
             abstract = response[u'results'][j][u'overview']
-            abstract = texte.preProcessingAbstracts(abstract)
+            abstract = texts.preProcessingAbstracts(abstract)
             file_abstracts.write(abstract+'\n')
         print i
     

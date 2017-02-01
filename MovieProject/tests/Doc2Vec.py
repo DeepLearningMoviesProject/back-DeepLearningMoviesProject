@@ -10,7 +10,7 @@ Created on Tue Jan 31 14:27:16 2017
 #gensim
 from gensim.models import Doc2Vec
 # To pre-process abtract
-from MovieProject.preprocessing import texte
+from MovieProject.preprocessing import texts
 
 modelPath = '../resources/abstracts20EpochSize100.d2v'
 
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     
     # 2) Pre-process texte
     #abstract = "The Vampire gïrl is little and pretty !!!! ..."
-    #abstract = texte.preProcessingAbstracts(abstract)
+    #abstract = texts.preProcessingAbstracts(abstract)
     #print abstract
     
     # 3) Infer vector from abstract
