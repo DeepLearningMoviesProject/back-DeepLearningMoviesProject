@@ -27,9 +27,12 @@ import numpy
 
 class LabeledLineSentence(object):
     
-    # Redefine the constructor to take a dictionary of many text file as parameter (insteed of a single text file) 
-    # (the dictionary defines the files to read and the label prefixes sentences from that document should take on)
+    """
+    Constructor of LabeledLineSentence
+    """
     def __init__(self,sources):
+        # take a dictionary of many text file as parameter (insteed of a single text file. 
+        # the dictionary defines the files to read and the label prefixes sentences from that document should take on
         self.sources = sources
         dictionary = {}
         # make sure that keys (label prefixes sentences) are unique for each text file
@@ -39,17 +42,21 @@ class LabeledLineSentence(object):
             else:
                 raise Exception('Error encountered : make sure that key(prefix) are unique for each text file.')
 
-    # Redefine the iterator of LabeledSentence
-    # (each document should be on one line, separated by new lines)
+    """
+    Iterator of LabeledLineSentence
+    """
     def __iter__(self):
+        # each document should be on one line, separated by new lines
         for source, prefix in self.sources.items():
             with utils.smart_open(source) as fin:
                 for item_no, line in enumerate(fin):
                     yield LabeledSentence(utils.to_unicode(line).split(), [prefix + '_%s' % item_no])
 
-    # Create an array of LabeledLineSentence
-    # (the method "model.build_vocab" takes an array of LabeledLineSentence)                
+    """
+    Create an array of LabeledLineSentence
+    """
     def to_array(self):
+        # the method "model.build_vocab" takes an array of LabeledLineSentence
         self.sentences = []
         for source, prefix in self.sources.items():
             with utils.smart_open(source) as txtFile:
@@ -57,28 +64,29 @@ class LabeledLineSentence(object):
                     self.sentences.append(LabeledSentence(utils.to_unicode(line).split(), [prefix + '_%s' % item_no]))
         return self.sentences
 
-    # Randomize the sequence of sentences
-    # (the model is better trained if in each training epoch, the sequence of sentences fed to the model is randomized)
+    """ 
+    Randomize the sequence of sentences
+    """
     def sentences_perm(self):
+        # (the model is better trained if in each training epoch, the sequence of sentences fed to the model is randomized)
         numpy.random.shuffle(self.sentences)
         return self.sentences
 
         
-        
-# BUILDING THE MODEL & STORE IT
-      
-# min_count: ignore all words with total frequency lower than this. We have to set this to 1, since the sentence labels only appear once.
-# window: the maximum distance between the current and predicted word within a sentence. Word2Vec uses a skip-gram model, and this is simply the window size of the skip-gram model.
-# size: dimensionality of the feature vectors in output. 100 is a good number. If you're extreme, you can go up to around 400.
-# sample: threshold for configuring which higher-frequency words are randomly downsampled
-# workers: use this many worker threads to train the model
-# DBOW mode (dm=0) is faster and creates better vectors for many purposes/datasets ?!? <- Bad idea !
 
-
+"""
+Build the model and store it
+"""
 def buildModel(sources, modelPath) :
     
     sentences = LabeledLineSentence(sources)
     
+    # min_count: ignore all words with total frequency lower than this. We have to set this to 1, since the sentence labels only appear once.
+    # window: the maximum distance between the current and predicted word within a sentence. Word2Vec uses a skip-gram model, and this is simply the window size of the skip-gram model.
+    # size: dimensionality of the feature vectors in output. 100 is a good number. If you're extreme, you can go up to around 400.
+    # sample: threshold for configuring which higher-frequency words are randomly downsampled
+    # workers: use this many worker threads to train the model
+    # DBOW mode (dm=0) is faster and creates better vectors for many purposes/datasets ?!? <- Bad idea !
     model = Doc2Vec(min_count=1, window=10, size=100, sample=1e-4, negative=5, workers=7, alpha=0.025, min_alpha=0.025)
     
     model.build_vocab(sentences.to_array())
