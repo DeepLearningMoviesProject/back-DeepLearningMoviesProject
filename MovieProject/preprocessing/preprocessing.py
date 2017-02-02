@@ -30,6 +30,9 @@ def preprocess(idMovies):
     dicoGlove = loadGloveDicFromFile(GLOVE_DICT_FILE)
     movies = getMovies(idMovies)
     responses = []
+    infoUsers = len(movies)/100.0*10
+    i = 0
+    cpt = 5
     
     for movie in movies:
         try:
@@ -37,8 +40,14 @@ def preprocess(idMovies):
             responses.append(r)
         except:
             print "Error, movie " + str (movie) + " NOT FOUND"
-    print "Processing keywords..."
+        i += 1
+        if(i > infoUsers):
+            print str(cpt)+"% requests loaded..."
+            cpt += 5
+            i = 0
+    print "50% requests loaded..."
     meanKeywords = keywordsProcessing(movies, dicoGlove)
+    print "100% requests loaded and keywords preprocessed ! "
     print "Processing Overview..."
     meanOverviews = overviewProcessing(responses, dicoGlove)
     print "Processing titles..."
@@ -91,6 +100,9 @@ def keywordsProcessing(movies, dicoGlove):
     
     meanMatrixKeywords = []    
     i = 0 
+    infoUsers = len(movies)/100.0*10
+    p = 0
+    cpt = 55
     for movie in movies:        
         try:
             response = movie.keywords()
@@ -104,6 +116,11 @@ def keywordsProcessing(movies, dicoGlove):
                 meanMatrixKeywords = np.vstack([meanMatrixKeywords,meanWords(gArray)])
         except:
              pass   
+        p += 1
+        if(p > infoUsers):
+           print str(cpt)+"% requests loaded..."
+           cpt += 5
+           p = 0
     return meanMatrixKeywords
 
 def titlesProcessing(responses, dicoGlove):

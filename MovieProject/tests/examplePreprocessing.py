@@ -22,8 +22,9 @@ def main():
     result = preprocess(idArray)
     
     print result
+
     
-    
+        
 if __name__ == "__main__" :
     main()
     
