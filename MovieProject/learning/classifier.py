@@ -5,33 +5,32 @@ Created on Tue Jan 31 16:33:30 2017
 @author: elsa
 """
 
-
-from __future__ import print_function
+#from __future__ import print_function
 
 import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense, Merge, BatchNormalization, Embedding, Flatten
 from keras.optimizers import SGD
 from MovieProject.preprocessing import preprocess
+from sklearn.cross_validation import StratifiedKFold
 
-
-def createModel(textEntries, genresEntries, classEntries):
-#def trainModel(textEntries, genresEntries, actorsEntries, realEntries, classEntries):
+def CreateTrainModel(textTrain, genresTrain, labelsTrain, textTest, genresTest, labelsTest):
     """
         Creates, fits and returns the specific model fitting the entries
         
         Parameters : 
-            textEntries : a matrix with all the float values preprocessed (keywords, overview, title, note, etc.)
-            genresEntries : a matrix of binary values that tells the movie's genres
-            classEntries : a matrix of binary values that tells the class of the movie (like/dislike)            
+            textTrain, genresTrain : the data to train on, the first one only needs embedding, the other one(s) needs dense layer before merge
+            labelsTrain : the labels of the data to train
+            textTest, genresTest : data to use for the test of the classifier
+            labelsTest : the labels of the data to test
             
         return :
             the model is trained with the parameters
             
     """
     
-    genres_dim = len(genresEntries[0])
-    text_dim = len(textEntries[0])
+    genres_dim = len(genresTrain[0])
+    text_dim = len(textTrain[0])
     
     text_input_dim = 1000
     text_output_dim = 2
@@ -72,29 +71,52 @@ def createModel(textEntries, genresEntries, classEntries):
     
     sgd = SGD(lr = 0.1, momentum = 0.9, decay = 0, nesterov = False)
     final_branch.compile(loss = 'binary_crossentropy', optimizer = sgd, metrics = ['accuracy'])
-    np.random.seed(2017)
-    
-    final_branch.fit([textEntries, genresEntries], classEntries, batch_size = 2000, nb_epoch = 100, verbose = 1)
+
+    epoch = 1000
+    batch = 500
+
+#, validation_data=([textTest, genresTest],labelsTest)
+    final_branch.fit([textTrain, genresTrain], labelsTrain, validation_data=([textTest, genresTest],labelsTest) , batch_size = batch, nb_epoch = epoch, verbose = 1)
 #    final_branch.fit([textEntries, genresEntries, actorsEntries, realEntries], classEntries, batch_size = 2000, nb_epoch = 100, verbose = 1)
+
+    # evaluate the model
+    # scores = final_branch.evaluate([textTest, genresTest],labelsTest, verbose=0)
+    # print("%s: %.2f%%" % (final_branch.metrics_names[1], scores[1]*100))
+    #cvscores.append(scores[1] * 100)
+
     return final_branch
 
 
-def buildModel(ids, likes):
+def buildModel(ids, labels):
     '''
         Builds the model that matches the movies (ids) and the like/dislike
         
         Parameters : 
             ids : the ids of the movies we want to build the model on
-            likes : tells whether the movie is liked or not (binary)           
+            labels : tells whether the movie is liked or not (binary)           
             
         return :
             the model trained on the movies
     '''
+    # fix random seed for reproducibility
+    # seed = 7
+    # np.random.seed(seed)
+
+    # kfold = StratifiedKFold(labels, n_splits=10, shuffle=True, random_state=seed)
+    # cvscores = []
+    # for train, test in kfold:
+    #     model = CreateTrainModel(T[train], G[train], labels[train], T[test], G[test], labels[test])
     
-    print("preprocess")
+    n_folds = 9
     T, G = preprocess(ids)
-    print("create model")
-    model = createModel(T, G, likes)
-    print("model created")
-    return model
-    
+    skf = StratifiedKFold(labels, n_folds=n_folds, shuffle=True)
+
+    for i, (train, test) in enumerate(skf):
+        print "Running Fold", i+1, "/", n_folds
+        print " train, test : ", train, " ", test
+        indices = np.array(train)
+        tIndice = np.array(test)
+        model = None # Clearing the NN.
+        model = CreateTrainModel(T[indices], G[indices], labels[indices], T[tIndice], G[tIndice], labels[tIndice])
+
+#print("%.2f%% (+/- %.2f%%)" % (numpy.mean(cvscores), numpy.std(cvscores)))

@@ -8,6 +8,7 @@ Created on Thu Jan 26 14:16:32 2017
 from flask import Flask, jsonify, request, abort, json
 #from testTMDB import searchData, trainData
 from MovieProject.learning import buildModel
+import numpy as np
 
 app = Flask(__name__)
 
@@ -26,11 +27,11 @@ def trainModel():
     ids = [int(key) for key in dico]
     
     #X_train = searchData(ids)
-    Y_train = [dico[key] for key in dico]
+    Y_train = np.array([dico[key] for key in dico])
     
-    print "building"
+    print "Movies loaded"
     
-    model = buildModel(ids, Y_train)
+    model = buildModel(ids, Y_train)    
     
     #print X_train, Y_train
     

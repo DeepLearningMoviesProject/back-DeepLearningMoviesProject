@@ -14,9 +14,6 @@ import numpy as np
 from string import punctuation
 
 
-
-
-
 def preprocess(idMovies):
     """
         Parameter : 
@@ -26,7 +23,7 @@ def preprocess(idMovies):
             by Glove. One line by movie.
     """
     
-    print "Loading GloVe dico"
+    print "Loading data from TMDB"
     dicoGlove = loadGloveDicFromFile(GLOVE_DICT_FILE)
     movies = getMovies(idMovies)
     responses = []
