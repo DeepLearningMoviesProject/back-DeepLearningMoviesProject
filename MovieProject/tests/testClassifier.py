@@ -2,7 +2,7 @@
 """
 Created on Tue Jan 31 16:57:58 2017
 
-@author: elsa
+@author: Elsa Navarro
 """
 
 import numpy as np
@@ -59,10 +59,13 @@ def test():
             G = pickle.load(f)
         with open(lname, 'r') as f:
             labels = pickle.load(f)
+        print 'T done : ', T
+        print 'G done : ', G
+        print 'labels done : ', labels
+            
     
     'Process OK, model ready to be built !'
-    model = buildTestModel(T, G, labels)
-    #model = buildModel(T, G, labels)
+    model, score = buildTestModel(T, G, labels, folds=3)
 
 
 if __name__ == '__main__':

@@ -2,7 +2,7 @@
 """
 Created on Tue Jan 31 16:33:30 2017
 
-@author: elsa
+@author: Elsa Navarro
 """
 
 #from __future__ import print_function
@@ -144,21 +144,20 @@ def buildModel(ids, labels):
         return :
             the model trained on the movies
     '''
-    
     T, G = preprocess(ids)
 
     model = createTrainModel(T, G, labels, T, G, labels)
+    return model
 
 
-
-
-def buildTestModel(T, G, labels):
+def buildTestModel(T, G, labels, folds):
     '''
-        Builds the model that matches the movies (ids) and the like/dislike
+        Builds the model that matches the matrix T and G and the like/dislike
         Tests it with k-cross validation
+        T and G matrix must have been preprocessed correctly
         
         Parameters : 
-            ids : the ids of the movies we want to build the model on
+            T, G : the characteristics of the movies we want to build the model on
             labels : tells whether the movie is liked or not (binary)           
             
         return :
@@ -167,8 +166,9 @@ def buildTestModel(T, G, labels):
     
    # T, G = preprocess(ids)
     cvscores = []
+    model = None # Clearing the NN.
 
-    n_folds = 2
+    n_folds = folds
     skf = StratifiedKFold(labels, n_folds=n_folds, shuffle=True)
 
     for i, (train, test) in enumerate(skf):
@@ -180,4 +180,6 @@ def buildTestModel(T, G, labels):
         model, scores = createTrainTestModel(T[indices], G[indices], labels[indices], T[tIndice], G[tIndice], labels[tIndice])
         cvscores.append(scores[1] * 100)
 
+    mean_score = np.mean(cvscores)
     print("%.2f%% (+/- %.2f%%)" % (np.mean(cvscores), np.std(cvscores)))
+    return model, mean_score
