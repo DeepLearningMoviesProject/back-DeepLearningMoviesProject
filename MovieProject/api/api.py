@@ -7,7 +7,7 @@ Created on Thu Jan 26 14:16:32 2017
 """
 from flask import Flask, jsonify, request, abort, json
 #from testTMDB import searchData, trainData
-from MovieProject.learning import buildModel
+from MovieProject.learning import buildModel, buildTestModel
 import numpy as np
 
 app = Flask(__name__)
@@ -31,7 +31,8 @@ def trainModel():
     
     print "Movies loaded"
     
-    model = buildModel(ids, Y_train)    
+    #model = buildModel(ids, Y_train)
+    model = buildTestModel(ids, Y_train)
     
     #print X_train, Y_train
     
