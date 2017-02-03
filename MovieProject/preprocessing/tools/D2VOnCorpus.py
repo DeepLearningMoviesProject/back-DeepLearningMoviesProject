@@ -77,7 +77,7 @@ class LabeledLineSentence(object):
 """
 Build the model and store it
 """
-def buildModel(sources, modelPath) :
+def _buildModel(sources, modelPath) :
     
     sentences = LabeledLineSentence(sources)
     
@@ -102,6 +102,18 @@ def buildModel(sources, modelPath) :
     model.save(modelPath) # storing the model to mmap-able files
 
     
+def loadD2VModel(filename):
+    """
+        Load the Doc2Vec model from filename
+        
+        Parameter:
+            filename -> String
+        
+        return:
+            Doc2Vec model object
+    """
+    
+    return Doc2Vec.load(filename)
     
     
 if __name__ == "__main__":    
@@ -112,7 +124,7 @@ if __name__ == "__main__":
     
     modelPath = '../../resources/abstracts20EpochSize100.d2v'
     
-    buildModel(sources, modelPath)
+    _buildModel(sources, modelPath)
     
 
             

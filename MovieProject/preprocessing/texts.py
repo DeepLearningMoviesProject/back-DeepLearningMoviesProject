@@ -36,3 +36,18 @@ def preProcessingAbstracts(abstract):
     #Remove all punctuation
     abstract = "".join(c for c in abstract if c not in list_punctuation)
     return abstract
+
+
+def textToVect(text, model):
+    """
+        Get descriptors of text thanks to the given model
+        
+        Parameters:
+            text -> String
+            model -> the Doc2Vec model
+            
+        return:
+            ndarray. Descriptors of the text passed in parameters
+    """
+
+    return model.infer_vector(preProcessingAbstracts(text))

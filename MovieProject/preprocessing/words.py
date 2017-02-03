@@ -20,7 +20,7 @@ def wordsToGlove(words, gloveDic):
             gloveDic -> GloVe dictionary (Dict Object)
             
         return:
-            ndarray of GloVe descriptors of each word
+            (ndarray, int). Tuple of GloVe descriptors of each word and size of descriptors
     """
     gloveWords = []
     for w in words:
@@ -28,24 +28,21 @@ def wordsToGlove(words, gloveDic):
         if wg is not None:
             gloveWords.append(wg)
             
-    return np.asarray(gloveWords)
+    return np.asarray(gloveWords), gloveDic[gloveDic.keys()[0]].shape[0]
 
 
-def meanWords(gWords):
+def meanWords(gWords, size):
     """
         Calculates the mean vector for the glove words gWords
         
         Parameters:
             gWords -> ndarray of GloVe descriptors
+            size -> size of word descriptors
             
         return:
             ndarray of dimensions (nb descriptors, 1)
     """
     if gWords.shape[0] == 0:
-        i = 0
-        while (i<50):
-            i += 1
-            gWords = np.append(gWords,0.0)
-        return gWords
+        return np.zeros(size)
     else:
         return sum(gWords) / gWords.shape[0]
