@@ -7,7 +7,8 @@ Created on Tue Jan 31 23:32:06 2017
 
 from MovieProject.preprocessing.preprocessing import *
 
-
+import numpy as np
+import pickle 
 
 def main():
     """
@@ -20,8 +21,13 @@ def main():
         idArray.append(i)
         i += 1
     result = preprocess(idArray)
-    
-    print result
+    with open('test.data', 'w') as f:
+        pickle.dump(result, f)
+
+
+    with open('test.data', 'r') as f:
+        new_data = pickle.load(f)
+    print new_data
 
     
         
