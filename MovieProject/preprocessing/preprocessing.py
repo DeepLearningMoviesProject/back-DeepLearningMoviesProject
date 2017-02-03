@@ -106,11 +106,11 @@ def overviewProcessing(responses, dicoGlove):
         words = []
             
         for w in overview.split():
-            words += w.lower().encode('UTF-8')
+            words.append(w.lower().encode('UTF-8'))
      
         gArray, wSize = wordsToGlove(words, dicoGlove)
         
-        meanMatrixOverview[i] = meanWords(gArray, gArray.shape[0])
+        meanMatrixOverview[i] = meanWords(gArray, wSize)
 
     return meanMatrixOverview
     
@@ -128,6 +128,8 @@ def keywordsProcessing(movies, dicoGlove):
     infoUsers = len(movies)/100.0*10
     p = 0
     cpt = 55
+    
+    nError = 0
     for i in range(len(movies)):
         movie = movies[i]
         
@@ -138,13 +140,14 @@ def keywordsProcessing(movies, dicoGlove):
             
             meanMatrixKeywords[i] = meanWords(gArray, wSize)
         except:
-             pass
+            nError += 1
         p += 1
         if(p > infoUsers):
            print str(cpt)+"% requests loaded..."
            cpt += 5
            p = 0
-    return meanMatrixKeywords
+    
+    return meanMatrixKeywords[:-nError]
 
 def titlesProcessing(responses, dicoGlove):
     """
