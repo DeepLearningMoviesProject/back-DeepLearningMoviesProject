@@ -31,12 +31,7 @@ def trainModel():
     
     print "Movies loaded"
     
-    #model = buildModel(ids, Y_train)
-    model = buildTestModel(ids, Y_train)
-    
-    #print X_train, Y_train
-    
-    #trainData(X_train, Y_train)
+    model = buildModel(ids, Y_train)
     
     return jsonify({'result': "ok"})
 

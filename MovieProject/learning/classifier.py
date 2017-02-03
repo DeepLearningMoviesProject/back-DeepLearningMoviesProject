@@ -16,57 +16,62 @@ from sklearn.cross_validation import StratifiedKFold
 
 def createModel(textLen, genresLen):
     
-    text_input_dim = 1000
-    text_output_dim = 2
-    genres_output_dim = 5
+    totalLen = textLen + genresLen
+
+    textInputDim = 1000
+    textOutputDim = 64
+    genresOutputDim = genresLen
     
-    text_branch = Sequential()
-    text_branch.add(Embedding(text_input_dim, text_output_dim, input_length=textLen))
-    text_branch.add(Flatten())
+    textBranch = Sequential()
+    textBranch.add(Embedding(textInputDim, textOutputDim, input_length=textLen))
+    textBranch.add(Flatten())
     
-    genres_branch = Sequential()
-    genres_branch.add(Dense(genres_output_dim, input_shape = (genresLen,), init='normal', activation='relu'))
-    genres_branch.add(BatchNormalization())
+    genresBranch = Sequential()
+    genresBranch.add(Dense(genresOutputDim, input_shape = (genresLen,), init='normal', activation='relu'))
+    genresBranch.add(BatchNormalization())
     
-#    actors_branch = Sequential()
-#    actors_branch.add(Dense(10, input_shape =  (3,) , activation = 'relu'))
-#    actors_branch.add(BatchNormalization())
+#    actorsBranch = Sequential()
+#    actorsBranch.add(Dense(10, input_shape =  (3,) , activation = 'relu'))
+#    actorsBranch.add(BatchNormalization())
     
-#    real_branch = Sequential()
-#    real_branch.add(Dense(10, input_shape =  (4,) , activation = 'relu'))
-#    real_branch.add(BatchNormalization())
+#    realBranch = Sequential()
+#    realBranch.add(Dense(10, input_shape =  (4,) , activation = 'relu'))
+#    realBranch.add(BatchNormalization())
     
     #We merge in cascade
     
-#    merge1_branch = Sequential()
-#    merge1_branch.add(Merge([genres_branch, actors_branch], mode = 'concat'))
-#    merge1_branch.add(Dense(1,  activation = 'sigmoid'))
+#    merge1Branch = Sequential()
+#    merge1Branch.add(Merge([genresBranch, actorsBranch], mode = 'concat'))
+#    merge1Branch.add(Dense(1,  activation = 'sigmoid'))
     
-#    merge2_branch = Sequential()
-#    merge2_branch.add(Merge([real_branch, merge1_branch], mode = 'concat'))
-#    merge2_branch.add(Dense(1,  activation = 'sigmoid'))  
+#    merge2Branch = Sequential()
+#    merge2Branch.add(Merge([realBranch, merge1Branch], mode = 'concat'))
+#    merge2Branch.add(Dense(1,  activation = 'sigmoid'))  
 
-    final_branch = Sequential()
-    final_branch.add(Merge([text_branch, genres_branch], mode = 'concat'))
+    finalBranch = Sequential()
+    finalBranch.add(Merge([textBranch, genresBranch], mode = 'concat'))
     
     #Here are all of our layers, the preprocessing is over
-    final_branch.add(Dense(150,  activation = 'relu'))
-    final_branch.add(Dropout(0.2))
-    final_branch.add(Dense(130,  activation = 'relu'))
-    final_branch.add(Dense(110,  activation = 'relu'))
-    final_branch.add(Dense(100,  activation = 'relu'))
-    final_branch.add(Dense(75,  activation = 'relu'))
-    final_branch.add(Dense(50,  activation = 'relu'))
-    final_branch.add(Dense(25,  activation = 'relu'))
-    final_branch.add(Dense(10, activation='relu'))
-    final_branch.add(Dense(3, activation='relu'))
-    final_branch.add(Dropout(0.2))
-    final_branch.add(Dense(1,  activation = 'sigmoid'))
+    finalBranch.add(Dense(totalLen, activation = 'relu'))
+    finalBranch.add(Dropout(0.2))
+    tempLen = totalLen/2    #85 si glove    #160 si d2v
+    finalBranch.add(Dense(tempLen, activation = 'relu'))
+    tempLen = tempLen/2     #42 si glove    #80 si d2v
+    finalBranch.add(Dense(tempLen, activation = 'relu'))
+    tempLen = tempLen/2     #21 si glove    #40 si d2v
+    finalBranch.add(Dense(tempLen, activation = 'relu'))
+    tempLen = tempLen/2     #10 si glove    #20 si d2v
+    finalBranch.add(Dense(tempLen, activation='relu'))
+    tempLen = tempLen/2     #5 si glove    #10 si d2v
+    finalBranch.add(Dense(tempLen, activation='relu'))
+    tempLen = tempLen/2     #2 si glove    #5 si d2v
+    finalBranch.add(Dense(tempLen, activation='relu'))
+    finalBranch.add(Dense(1,  activation = 'sigmoid'))
     
     sgd = SGD(lr = 0.1, momentum = 0.9, decay = 0, nesterov = False)
-    final_branch.compile(loss = 'binary_crossentropy', optimizer = sgd, metrics = ['accuracy'])
+    finalBranch.compile(loss = 'binary_crossentropy', optimizer = sgd, metrics = ['accuracy'])
 
-    return final_branch
+    return finalBranch
 
 def createTrainTestModel(textTrain, genresTrain, labelsTrain, textTest, genresTest, labelsTest):
     """
@@ -91,7 +96,7 @@ def createTrainTestModel(textTrain, genresTrain, labelsTrain, textTest, genresTe
 
     #Train model
     model.fit([textTrain, genresTrain], labelsTrain, batch_size = batch, nb_epoch = epoch, verbose = 1)
-#    final_branch.fit([textEntries, genresEntries, actorsEntries, realEntries], classEntries, batch_size = 2000, nb_epoch = 100, verbose = 1)
+#    finalBranch.fit([textEntries, genresEntries, actorsEntries, realEntries], classEntries, batch_size = 2000, nb_epoch = 100, verbose = 1)
 
     # evaluate the model
     scores = model.evaluate([textTest, genresTest],labelsTest, verbose=0)
@@ -147,7 +152,7 @@ def buildModel(ids, labels):
 
 
 
-def buildTestModel(ids, labels):
+def buildTestModel(T, G, labels):
     '''
         Builds the model that matches the movies (ids) and the like/dislike
         Tests it with k-cross validation
@@ -160,7 +165,7 @@ def buildTestModel(ids, labels):
             the model trained on the movies
     '''
     
-    T, G = preprocess(ids)
+   # T, G = preprocess(ids)
     cvscores = []
 
     n_folds = 2

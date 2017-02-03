@@ -6,64 +6,64 @@ Created on Tue Jan 31 16:57:58 2017
 """
 
 import numpy as np
-from MovieProject.learning import classifier
+import pickle
+from MovieProject.learning import buildModel, buildTestModel
+from MovieProject.preprocessing import preprocess
+from flask import json
+import os.path
 
 #Test function
 def test():
-        
-    #X1: simulation realisateurs
-    X1_train = np.empty((2,2))
-    #X2: simulation acteurs
-    X2_train = np.empty((2,3))
-    #X3: simulation quelquonque
-    X3_train = np.empty((2,4))
-    #X: simulation vecteur glove
-    X_train = np.empty((2,5))
-    #Y : Labels
-    nbY = 1
-    Y_train = np.empty((2,nbY ))
+    path = '../resources/evaluations/'
+    filename = 'moviesEvaluated-16'
+    tname = path + filename + '-Tsave.data'
+    gname = path + filename + '-Gsave.data'
+    lname = path + filename + '-LABELSsave.data'
+
+    preprocessingChanged = False
+    dontPreprocess = (not preprocessingChanged) and os.path.isfile(tname) and os.path.isfile(gname) and os.path.isfile(lname)
+    T = np.array([])
+    G = np.array([])
+    labels = np.array([])
     
-    i = 0
-    y = 0
-    while (i<2):
-        y = 0
-        while (y<nbY):
-            Y_train[i][y] = 0
-            y += 1
-        i += 1
+
     
-    X1_train[0][0] = 3
-    X1_train[0][1] = 4
-    X1_train[1][0] = 7 
-    X1_train[1][1] = 8
+    #if data has not been preprocessed 
+    if(not dontPreprocess):
+        print 'In process ...'
+        #load data from json
+        jname = path + filename + '.json'
+        with open(jname) as data_file:    
+            data = json.load(data_file)
+
+        #Get ids and labels of data
+        ids = [int(key) for key in data]
+        labels = np.array([data[key] for key in data])
+
+        #preprocess data
+        T, G = preprocess(ids)
+
+        #save preprocessed data (T & G)
+        with open(tname, 'w') as f:
+            pickle.dump(T, f)
+        with open(gname, 'w') as f:
+            pickle.dump(G, f)
+        with open(lname, 'w') as f:
+            pickle.dump(labels, f)
+    else:
+        print 'Load process ...'
+        #load preprocessed data (T & G)
+        with open(tname, 'r') as f:
+            T = pickle.load(f)
+        with open(gname, 'r') as f:
+            G = pickle.load(f)
+        with open(lname, 'r') as f:
+            labels = pickle.load(f)
     
-    X2_train[0][0] = 322
-    X2_train[0][1] = 46
-    X2_train[0][2] = 72
-    X2_train[1][1] = 889
-    X2_train[1][2] = 45
-    X2_train[1][0] = 72
-    
-    X3_train[0][0] = 322
-    X3_train[0][1] = 46
-    X3_train[0][2] = 72
-    X3_train[1][1] = 889
-    X3_train[1][2] = 45
-    X3_train[1][0] = 72
-    X3_train[0][3] = 322
-    X3_train[1][3] = 46
-    
-    X_train[0][0] = 322
-    X_train[0][1] = 46
-    X_train[0][2] = 72
-    X_train[1][1] = 889
-    X_train[1][2] = 45
-    X_train[1][0] = 72
-    X_train[0][3] = 322
-    X_train[1][3] = 46
-    X_train[0][4] = 322
-    X_train[1][4] = 46
-    
-    model = classifier.createModel(X_train, X1_train, Y_train)
-    
-test()
+    'Process OK, model ready to be built !'
+    model = buildTestModel(T, G, labels)
+    #model = buildModel(T, G, labels)
+
+
+if __name__ == '__main__':
+    test()
