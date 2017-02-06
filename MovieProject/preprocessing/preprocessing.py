@@ -146,8 +146,8 @@ def keywordsProcessing(movies, dicoGlove):
            print str(cpt)+"% requests loaded..."
            cpt += 5
            p = 0
-    
-    return meanMatrixKeywords[:-nError]
+           
+    return meanMatrixKeywords if (nError == 0) else meanMatrixKeywords[:-nError]
 
 def titlesProcessing(responses, dicoGlove):
     """
