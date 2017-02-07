@@ -31,7 +31,7 @@ def testMovies(filename):
     
     #if data has not been preprocessed 
     if(not dontPreprocess):
-        print "File % in process ...", filename
+        print "File %s in process ..." %(filename)
         #load data from json
         jname = path + filename + '.json'
         with open(jname) as data_file:    

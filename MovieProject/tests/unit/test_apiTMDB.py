@@ -55,3 +55,26 @@ class TextTest(unittest.TestCase):
         self.assertTrue("harbor" in keywords)
 
     # def test_textToVect(self):
+        
+    def test_getDirectors(self):
+        """ Teste le fonctionnement de la fonction 'apiTMDB.getDirectors' """
+        
+        movie = getMovie(11)
+        
+        directors = ["George Lucas"]
+        directorsTest = getDirectors(movie.credits())
+        
+        self.assertEqual(len(directors), len(directorsTest))
+        self.assertEqual(directorsTest[0], directors[0])
+        
+    def test_getActors(self):
+        """ Teste le fonctionnement de la fonction 'apiTMDB.getActors' """
+        
+        movie = getMovie(11)
+        
+        actors = ["Mark Hamill", "Harrison Ford", "Carrie Fisher", "Peter Cushing"]
+        actorsTest = getActors(movie.credits())
+        
+        self.assertEqual(len(actors), len(actorsTest))
+        for i in range(len(actors)):
+            self.assertEqual(actors[i], actors[i])

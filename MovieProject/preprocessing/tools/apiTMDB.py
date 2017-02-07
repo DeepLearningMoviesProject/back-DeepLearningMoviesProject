@@ -26,6 +26,19 @@ def getMovies(idMovies):
         movies.append(getMovie(idMovie))
     return movies
 
+def getCredits(movies):
+    """
+        Retrieve credits from a list of movies
+        
+        Parameter:
+            movies -> list of TMDB Movie object
+        return:
+            array containing movie's credits
+        
+    """
+    
+    return [ movie.credits() for movie in movies ]
+
 
 def getKeywords(tmdbKeywords={}):
     """
@@ -96,6 +109,35 @@ def getTmdbGenres():
     return np.load(GENRES_FILE)[0]
 
     
+def getDirectors(movieCredit):
+    """
+        Retrieve the movie's Director
+        
+        Parameter:
+            list of credits from TMDB movie object
+            
+        return:
+            String  array representing the movie's directors
+    """
+
+    
+    return [ people["name"] for people in movieCredit["crew"] if people["job"].lower() == "director" ] 
+    
+def getActors(movieCredit):
+    """
+        Retrieve the movie's Actors
+        
+        Parameter:
+            list of credits from TMDB movie object
+            
+        return:
+            String array representing the 4 first movie's actors
+    """
+
+    actors = movieCredit["cast"]
+    nbActors = 4 if len(actors) >= 4 else len(actors)
+    
+    return [actor["name"] for actor in actors [:nbActors]]
 
 
 #if __name__ == "__main__":

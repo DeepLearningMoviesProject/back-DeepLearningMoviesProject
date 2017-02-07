@@ -6,13 +6,20 @@ Created on Wed Feb 01 17:09:54 2017
 """
 
 
-from MovieProject.preprocessing.tools import getMovies, getKeywords, loadGloveDicFromFile, getGenres, getTmdbGenres, loadD2VModel
+from MovieProject.preprocessing.tools import (getMovies, getKeywords, getDirectors, getActors, getCredits,
+                                              loadGloveDicFromFile, getGenres, getTmdbGenres, loadD2VModel)
 from MovieProject.resources import GLOVE_DICT_FILE, D2V_FILE
 from words import meanWords, wordsToGlove
 from texts import textToVect
 
 import numpy as np
 from string import punctuation
+from enum import Enum
+
+
+class People(Enum):
+    ACTOR = 1
+    DIRECTOR = 2
 
 
 def preprocess(idMovies):
@@ -27,8 +34,11 @@ def preprocess(idMovies):
     print "Loading data from TMDB"
     dicoGlove = loadGloveDicFromFile(GLOVE_DICT_FILE)
     modelD2V = loadD2VModel(D2V_FILE)
+    
     movies = getMovies(idMovies)
+    moviesCredits = getCredits(movies)
     responses = []
+    
     infoUsers = len(movies)/100.0*10
     i = 0
     cpt = 5
@@ -60,6 +70,13 @@ def preprocess(idMovies):
     
     print "Processing genres..."
     genres = genresProcessing(responses)
+    
+    print "Processing directors..."
+    directors = peopleProcessing(moviesCredits, dicoGlove, People.DIRECTOR)
+    
+    print "Processing actors..."
+    actors = peopleProcessing(moviesCredits, dicoGlove, People.ACTOR)
+    
     return finalMatrix, genres
 
 
@@ -223,3 +240,36 @@ def genresProcessing(responses):
             
     return genresArray
 
+
+def peopleProcessing(moviesCredits, dicoGlove, kindOfPeople):
+    """
+        Parameter:
+            moviesCredits -> array of movie's moviesCredits you want to process people with
+                      the Glove dictionnary (dicoGlove)
+            dicoGlove -> GloVe dictionary
+            kindOfPeople -> People enum type, indicating is Directors or Actors 
+        Return:
+            ndarray. Matrix of people values calculated by Glove. One line by movie.
+    """
+    
+    if not isinstance(kindOfPeople, People):
+        raise ValueError("kindOfPeople must be an instance of People enum class")
+        
+    sizeVector = dicoGlove[dicoGlove.keys()[0]].shape[0]
+    meanMatrixPeople = np.empty([len(moviesCredits), sizeVector]) 
+    names = []
+    
+    for i in range(len(moviesCredits)):
+        credit = moviesCredits[i]
+        
+        if kindOfPeople is People.DIRECTOR: names = getDirectors(credit)
+        elif kindOfPeople is People.ACTOR: names = getActors(credit)
+        
+        words = []
+        for name in names:
+            words += name.lower().encode('UTF-8').split()
+        
+        gArray, wSize = wordsToGlove(words, dicoGlove)        
+        meanMatrixPeople[i] = meanWords(gArray, wSize)
+    
+    return meanMatrixPeople
