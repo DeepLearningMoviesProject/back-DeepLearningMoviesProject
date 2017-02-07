@@ -66,7 +66,7 @@ def testMovies(filename):
             
     
     'Process OK, model ready to be built !'
-    model, score = buildTestModel(T, G, labels, folds=3)
+    model, score = buildTestModel(T, G, labels, folds=5)
     return score
 
 
@@ -88,4 +88,4 @@ def testClassifier():
 if __name__ == '__main__':
    # testMovies('moviesEvaluated-16')
    score = testClassifier()
-   print "The classifier has an average accuracy of %.", score
+   print "The classifier has an average accuracy of ", score

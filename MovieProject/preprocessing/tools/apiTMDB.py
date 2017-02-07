@@ -16,7 +16,7 @@ from MovieProject.resources import GENRES_FILE
 tmdb.API_KEY = 'ff3f07bf3577a496a2f813488eb29980'
 
     
-def getMovies (idMovies):
+def getMovies(idMovies):
     """
         return an array of movies corresponding to the idMovies given as a parameter 
         of the function

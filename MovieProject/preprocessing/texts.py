@@ -10,9 +10,16 @@ Created on Wed Feb  1 13:32:46 2017
 list_punctuation = [",",".","!","?","[","]","(",")","{","}"]
 
 """
-Remove specific accents on string
+
 """
 def withoutAccents(ch, encod='utf-8'):
+    """
+        Remove specific accents on string
+        
+        Parameters : the string to change, and the encod of this chain
+        
+        returns : the chain in the correct format, with all the accents removed
+    """    
     alpha1 = u"àâäåçéèêëîïôöùûüÿğ"
     alpha2 = u"aaaaceeeeiioouuuyg"
     conv = False
@@ -25,15 +32,19 @@ def withoutAccents(ch, encod='utf-8'):
         x = x.encode(encod)
     return x
   
-"""
-Pre-processing of abstracts
-"""    
 def preProcessingAbstracts(abstract):
+    """
+        Pre-processing of abstracts
+        
+        Parameters : The abstract with no modifications
+
+        returns : the abstract ready to be preprocessed, with the punctuation removed (except for ' and -), in lower case and without accents
+    """    
     #Convert to lower case
     abstract = abstract.lower()
     # Remove specific accents
     abstract = withoutAccents(abstract)
-    #Remove all punctuation
+    #Remove all punctuation of list_punctuation
     abstract = "".join(c for c in abstract if c not in list_punctuation)
     return abstract
 
