@@ -48,8 +48,8 @@ def preprocess(idMovies):
     meanKeywords = keywordsProcessing(movies, dicoGlove)
     print "100% requests loaded and keywords preprocessed ! "
     print "Processing Overview..."
-    meanOverviews = overviewProcessing(responses, dicoGlove)
-#    meanOverviews = overviewProcessingD2V(responses, modelD2V)
+#    meanOverviews = overviewProcessing(responses, dicoGlove)
+    meanOverviews = overviewProcessingD2V(responses, modelD2V)
     
     print "Processing titles..."
     meanTitles = titlesProcessing(responses, dicoGlove)

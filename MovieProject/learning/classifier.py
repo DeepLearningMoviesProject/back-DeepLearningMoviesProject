@@ -14,6 +14,9 @@ from keras.optimizers import SGD
 from MovieProject.preprocessing import preprocess
 from sklearn.cross_validation import StratifiedKFold
 
+epoch = 1000
+batch = 500
+
 def createModel(textLen, genresLen):
     
     totalLen = textLen + genresLen
@@ -91,9 +94,6 @@ def createTrainTestModel(textTrain, genresTrain, labelsTrain, textTest, genresTe
     #Create the model
     model = createModel(len(textTrain[0]), len(genresTrain[0]))
 
-    epoch = 5000
-    batch = 500
-
     #Train model
     model.fit([textTrain, genresTrain], labelsTrain, batch_size = batch, nb_epoch = epoch, verbose = 1)
 #    finalBranch.fit([textEntries, genresEntries, actorsEntries, realEntries], classEntries, batch_size = 2000, nb_epoch = 100, verbose = 1)
@@ -122,9 +122,6 @@ def createTrainModel(textTrain, genresTrain, labelsTrain, textTest, genresTest, 
 
     #Create the model
     model = createModel(len(textTrain[0]), len(genresTrain[0]))
-
-    epoch = 5000
-    batch = 500
 
     #Train model
     model.fit([textTrain, genresTrain], labelsTrain, validation_data=([textTest, genresTest],labelsTest), batch_size = batch, nb_epoch = epoch, verbose = 1)

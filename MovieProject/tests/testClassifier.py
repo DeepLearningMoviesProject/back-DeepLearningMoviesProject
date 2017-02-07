@@ -7,30 +7,31 @@ Created on Tue Jan 31 16:57:58 2017
 
 import numpy as np
 import pickle
+import os
 from MovieProject.learning import buildModel, buildTestModel
 from MovieProject.preprocessing import preprocess
 from flask import json
-import os.path
+from os.path import isfile
+
+path = '../resources/evaluations/'
 
 #Test function
-def test():
-    path = '../resources/evaluations/'
-    filename = 'moviesEvaluated-16'
+def testMovies(filename):
+    #filename = 'moviesEvaluated-16'
     tname = path + filename + '-Tsave.data'
     gname = path + filename + '-Gsave.data'
     lname = path + filename + '-LABELSsave.data'
 
-    preprocessingChanged = False
-    dontPreprocess = (not preprocessingChanged) and os.path.isfile(tname) and os.path.isfile(gname) and os.path.isfile(lname)
+    preprocessingChanged = True #Set to true if the processing has changed
+    dontPreprocess = (not preprocessingChanged) and isfile(tname) and isfile(gname) and isfile(lname)
+    
     T = np.array([])
     G = np.array([])
     labels = np.array([])
     
-
-    
     #if data has not been preprocessed 
     if(not dontPreprocess):
-        print 'In process ...'
+        print "File % in process ...", filename
         #load data from json
         jname = path + filename + '.json'
         with open(jname) as data_file:    
@@ -51,7 +52,7 @@ def test():
         with open(lname, 'w') as f:
             pickle.dump(labels, f)
     else:
-        print 'Load process ...'
+        print "File % load process ...", filename
         #load preprocessed data (T & G)
         with open(tname, 'r') as f:
             T = pickle.load(f)
@@ -66,7 +67,25 @@ def test():
     
     'Process OK, model ready to be built !'
     model, score = buildTestModel(T, G, labels, folds=3)
+    return score
+
+
+def testClassifier():
+
+    meanScore = 0
+    totalScores = 0
+
+    #Get all files from PATH, and get the score of the classifier on these files
+    for file in os.listdir(path):
+        if file.endswith(".json"):
+            meanScore += testMovies(file.replace(".json", ""))
+            totalScores += 1
+    #Compute the mean score for the classifier
+    meanScore /= totalScores
+    return meanScore
 
 
 if __name__ == '__main__':
-    test()
+   # testMovies('moviesEvaluated-16')
+   score = testClassifier()
+   print "The classifier has an average accuracy of %.", score
