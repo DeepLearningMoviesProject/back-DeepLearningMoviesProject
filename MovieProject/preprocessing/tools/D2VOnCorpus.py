@@ -28,9 +28,9 @@ import numpy
 class LabeledLineSentence(object):
     
     def __init__(self,sources):
-    """
-    Constructor of LabeledLineSentence
-    """
+        """
+            Constructor of LabeledLineSentence
+        """
         # take a dictionary of many text file as parameter (insteed of a single text file. 
         # the dictionary defines the files to read and the label prefixes sentences from that document should take on
         self.sources = sources
@@ -43,9 +43,9 @@ class LabeledLineSentence(object):
                 raise Exception('Error encountered : make sure that key(prefix) are unique for each text file.')
 
     def __iter__(self):
-    """
-    Iterator of LabeledLineSentence
-    """
+        """
+            Iterator of LabeledLineSentence
+        """
         # each document should be on one line, separated by new lines
         for source, prefix in self.sources.items():
             with utils.smart_open(source) as fin:
@@ -53,13 +53,13 @@ class LabeledLineSentence(object):
                     yield LabeledSentence(utils.to_unicode(line).split(), [prefix + '_%s' % item_no])
 
     def to_array(self): 
-    """
-    Create an array of LabeledLineSentence : the method "build_vocab(self)" 
-    takes an array of LabeledLineSentence
-    
-    Return : 
-        an array of LabeledLineSentence
-    """
+        """
+            Create an array of LabeledLineSentence : the method "build_vocab(self)" 
+            takes an array of LabeledLineSentence
+            
+            Return : 
+                an array of LabeledLineSentence
+        """
         self.sentences = []
         for source, prefix in self.sources.items():
             with utils.smart_open(source) as txtFile:
@@ -68,14 +68,13 @@ class LabeledLineSentence(object):
         return self.sentences
 
     def sentences_perm(self):
-    """ 
-    Randomize the sequence of sentences : the model is better trained if in each 
-    training epoch, the sequence of sentences fed to the model is randomized
-        
-    Return : 
-        a random suffle of sequence into a numpy array
-        
-    """
+        """ 
+            Randomize the sequence of sentences : the model is better trained if in each 
+            training epoch, the sequence of sentences fed to the model is randomized
+                
+            Return : 
+                a random suffle of sequence into a numpy array
+        """
         numpy.random.shuffle(self.sentences)
         return self.sentences
 
@@ -83,13 +82,13 @@ class LabeledLineSentence(object):
 
 
 def _buildModel(sources, modelPath) :
-"""
-Build the model and store it
-
-Parameters :
-    sources : dictionnary of sources with files path and labels associated at each file
-    modelPath : path to store the model built
-"""
+    """
+        Build the model and store it
+        
+        Parameters :
+            sources : dictionnary of sources with files path and labels associated at each file
+            modelPath : path to store the model built
+    """
     
     sentences = LabeledLineSentence(sources)
     
@@ -116,15 +115,15 @@ Parameters :
     
 
 def loadD2VModel(modelPath):
-"""
-Load a preexisting Doc2Vec model
-    
-Parameter:
-    modelPath : model file path to load
-    
-Return:
-    Doc2Vec model object
-"""
+    """
+        Load a preexisting Doc2Vec model
+            
+        Parameter:
+            modelPath : model file path to load
+            
+        Return:
+            Doc2Vec model object
+    """
     return Doc2Vec.load(modelPath)
     
     
