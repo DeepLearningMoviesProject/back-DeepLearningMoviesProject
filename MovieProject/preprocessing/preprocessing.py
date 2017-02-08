@@ -59,36 +59,43 @@ def preprocess(idMovies):
             print "Error, movie " + str (movie) + " NOT FOUND"
             
         cpt += 1
-        if(cpt > len(movies)/20.):
+        if(cpt > len(movies)/100.):
             print "%.0f%% requests loaded..." %(100*i/(1.0*len(movies)))
             cpt = 0
 
             
-    print "50% requests loaded..."
+    print "100% requests loaded..."
+    print "Processing Keywords..."
     meanKeywords = keywordsProcessing(keywords, dicoGlove)
-    print "100% requests loaded and keywords preprocessed ! "
+    print "Keywords preprocessed !"
     
     print "Processing Overview..."
    # meanOverviews = overviewProcessing(infos, dicoGlove)
     meanOverviews = overviewProcessingD2V(infos, modelD2V)
-    
+    print "Overviews preprocessed !"
+
     print "Processing titles..."
     meanTitles = titlesProcessing(infos, dicoGlove)
-    
+    print "Titles preprocessed !"
+
     print "Processing rating..."
     meanRating = ratingProcessing(infos)
-    
-    finalMatrix = np.hstack((np.hstack((np.hstack((meanKeywords,meanOverviews)),meanTitles)),meanRating))
+    print "Rating preprocessed !"  
     
     print "Processing genres..."
     genres = genresProcessing(infos)
-    
+    print "Genres preprocessed !"  
+        
     print "Processing directors..."
     directors = peopleProcessing(credits, dicoGlove, People.DIRECTOR)
-    
+    print "Directors preprocessed !"  
+        
     print "Processing actors..."
     actors = peopleProcessing(credits, dicoGlove, People.ACTOR)
-    
+    print "Actors preprocessed !"  
+        
+    finalMatrix = np.hstack((np.hstack((np.hstack((meanKeywords,meanOverviews)),meanTitles)),meanRating))
+
     return finalMatrix, genres
 
 
