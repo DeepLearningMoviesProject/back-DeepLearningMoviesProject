@@ -93,6 +93,85 @@ def preprocess(idMovies):
 
 
 
+def preprocessMatrix(idMovies, mTitles=False, mKeywords=False, mOverviews=False, mRating=False, mGenres=False, mActors=False, mDirectors=False):
+    """
+        
+        Parameter:
+            idMovies -> array of movie's id from tmdb
+            mTitles, mKeywords, mOverviews, mRating, mGenres, mActors, mDirectors -> boolean (default: False) indicates which matrix to process
+            
+        return:
+            dictionary of label:matrix, where label is name of matrix processed
+    """
+
+
+    matrix = {}
+    
+    if mKeywords or mActors or mDirectors or mTitles:
+        dicoGlove = loadGloveDicFromFile(GLOVE_DICT_FILE)
+    
+    if mOverviews:
+        modelD2V = loadD2VModel(D2V_FILE)
+    
+    movies = getMovies(idMovies)    
+    
+    infos = []
+    keywords = []
+    credits = []
+
+    print "Loading data from TMDB"
+    cpt = 0
+    for i in range(len(movies)):
+        movie = movies[i]
+        
+        try:
+            # If those request failed, doesn't append results to arrays
+            if mOverviews or mTitles or mRating or mGenres: info = movie.info()
+            if mKeywords: keyword = movie.keywords()
+            if mActors or mDirectors: credit = movie.credits()
+            
+            if mOverviews or mTitles or mRating or mGenres:infos.append(info)
+            if mKeywords: keywords.append(keyword)
+            if mActors or mDirectors: credits.append(credit)
+        except:
+            print "Error, movie " + str (movie) + " NOT FOUND"
+            
+        cpt += 1
+        if(cpt > len(movies)/20.):
+            print "%.0f%% requests loaded..." %(100*i/(1.0*len(movies)))
+            cpt = 0
+
+    if mKeywords:
+        print "Processing Keywords"
+        matrix["keywords"] = keywordsProcessing(keywords, dicoGlove)
+    
+    if mOverviews:
+        print "Processing Overview..."
+        matrix["overview"] = overviewProcessingD2V(infos, modelD2V)
+    
+    if mTitles:
+        print "Processing titles..."
+        matrix["titles"] = titlesProcessing(infos, dicoGlove)
+    
+    if mRating:
+        print "Processing rating..."
+        matrix["rating"] = ratingProcessing(infos)
+        
+    if mGenres:
+        print "Processing genres..."
+        matrix["genres"] = genresProcessing(infos)
+    
+    if mDirectors:
+        print "Processing directors..."
+        matrix["directors"] = peopleProcessing(credits, dicoGlove, People.DIRECTOR)
+    
+    if mActors:
+        print "Processing actors..."
+        matrix["actors"] = peopleProcessing(credits, dicoGlove, People.ACTOR)
+    
+    return matrix
+    
+
 def overviewProcessingD2V(infos, model):
     """
         Parameter : 
