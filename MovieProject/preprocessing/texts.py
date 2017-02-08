@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Pre-processing of texts
+Allows to preprocess texts
 
 Created on Wed Feb  1 13:32:46 2017
 @author: coralie
@@ -9,19 +9,20 @@ Created on Wed Feb  1 13:32:46 2017
 
 list_punctuation = [",",".","!","?","[","]","(",")","{","}"]
 
-"""
 
-"""
 def withoutAccents(ch, encod='utf-8'):
     """
         Remove specific accents on string
         
-        Parameters : the string to change, and the encod of this chain
+        Parameters : 
+            ch : the string to change
+            encod : the encod of this chain (utf-8 by default)
         
-        returns : the chain in the correct format, with all the accents removed
+        returns : 
+            the chain in the correct format, with all the accents removed
     """    
-    alpha1 = u"àâäåçéèêëîïôöùûüÿğ"
-    alpha2 = u"aaaaceeeeiioouuuyg"
+    alpha1 = u"àâäåçéèêëîïôöùûüÿğñ"
+    alpha2 = u"aaaaceeeeiioouuuygn"
     conv = False
     if not isinstance(ch, unicode):
         ch = unicode(ch, encod,'replace')
@@ -32,13 +33,15 @@ def withoutAccents(ch, encod='utf-8'):
         x = x.encode(encod)
     return x
   
+    
 def preProcessingAbstracts(abstract):
     """
         Pre-processing of abstracts
         
         Parameters : The abstract with no modifications
 
-        returns : the abstract ready to be preprocessed, with the punctuation removed (except for ' and -), in lower case and without accents
+        returns : 
+            the abstract ready to be preprocessed, with the punctuation removed (except for ' and -), in lower case and without accents
     """    
     #Convert to lower case
     abstract = abstract.lower()
@@ -49,6 +52,7 @@ def preProcessingAbstracts(abstract):
     return abstract
 
 
+    
 def textToVect(text, model):
     """
         Get descriptors of text thanks to the given model

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 
--- Script allowed to train the Doc2Vec model on data base --
+-- Allows to train the Doc2Vec model on the corpus created --
 
 To train it, we use documents, each one taking up one entire line. So, each document should be on one line, separated by new lines.
 
@@ -81,7 +81,7 @@ class LabeledLineSentence(object):
         
 
 
-def _buildModel(sources, modelPath) :
+def _buildModel(sources, modelPath, epochs) :
     """
         Build the model and store it
         
@@ -90,6 +90,7 @@ def _buildModel(sources, modelPath) :
             modelPath : path to store the model built
     """
     
+    print "Preprocessing data ..."
     sentences = LabeledLineSentence(sources)
     
     # min_count: ignore all words with total frequency lower than this. We have to set this to 1, since the sentence labels only appear once.
@@ -100,11 +101,13 @@ def _buildModel(sources, modelPath) :
     # DBOW mode (dm=0) is faster and creates better vectors for many purposes/datasets ?!? <- Bad idea !
     model = Doc2Vec(min_count=1, window=10, size=100, sample=1e-4, negative=5, workers=7, alpha=0.025, min_alpha=0.025)
     
+    print "Building vocabulary ..."
     model.build_vocab(sentences.to_array())
     
+    print "Training ..."
     i=0
-    for epoch in range(20):
-        print(i)
+    for epoch in range(epochs):
+        print '%d/%d ...' % (i,epochs)
         model.train(sentences.sentences_perm())
         model.alpha -= 0.002  # decrease the learning rate
         model.min_alpha = model.alpha  # fix the learning rate, no decay
@@ -131,14 +134,14 @@ def loadD2VModel(modelPath):
 if __name__ == "__main__":    
     
     # To train on sentiments database
-    #sources = {'../../resources/test_twitter_neg.txt':'TEST_NEG', '../../resources/test_twitter_pos.txt':'TEST_POS', '../../resources/train_twitter_neg.txt':'TRAIN_NEG', '../../resources/train_twitter_pos.txt':'TRAIN_POS'}
-    
+    #sources = {'../../resources/train_twitter_neg_processed.txt':'TRAIN_NEG', '../../resources/train_twitter_pos_processed.txt':'TRAIN_POS','../../resources/test_twitter_neg_processed.txt':'TEST_NEG', '../../resources/test_twitter_pos_processed.txt':'TEST_POS'}
+    #modelPath = '../../resources/sentiments10EpochSize100.d2v'
+
     # To train on abstracts database
     sources = {'../../resources/train_overviews_treated.txt':'TRAIN_ABSTRACTS'}
+    modelPath = '../../resources/abstracts20EpochSize100.d2v'
     
-    modelPath = '../../resources/sentiments20EpochSize100.d2v'
-    
-    _buildModel(sources, modelPath)
+    _buildModel(sources, modelPath, 10)
     
 
             

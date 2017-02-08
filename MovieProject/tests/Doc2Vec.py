@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Test trained Doc2Vec model
+Test Doc2Vec model trained on dataset
 
 Created on Tue Jan 31 14:27:16 2017
 @author: coralie
@@ -12,7 +12,6 @@ from gensim.models import Doc2Vec
 # To pre-process abtract
 from MovieProject.preprocessing import texts
 
-modelPath = '../resources/abstracts20EpochSize100.d2v'
 
 # Infer vector of unknow abstracts thanks to Doc2Vec Model    
 def inferVector(abstract, modelPath) :
@@ -22,7 +21,26 @@ def inferVector(abstract, modelPath) :
     
 if __name__ == "__main__":  
         
-    # Just some tests
+    """
+    # Just some tests on model trained on tweets
+
+    modelPath = '../resources/sentiments10EpochSize100.d2v'
+    
+    model_loaded = Doc2Vec.load(modelPath)
+    print model_loaded.most_similar("great")
+    print "\n"
+    print model_loaded.most_similar("disgusting")
+    print "\n"
+    print model_loaded.most_similar("fantastic")
+    print "\n"
+    """
+    
+    """
+    # Just some tests on model trained on abstracts
+    
+    #modelPath = '../resources/abstracts20EpochSize100.d2v'
+    
+    model_loaded = Doc2Vec.load(modelPath)
     print model_loaded.most_similar("vampire")
     print "\n"
     print model_loaded.most_similar("zombie")
@@ -35,7 +53,8 @@ if __name__ == "__main__":
     print "\n"
     print model_loaded.most_similar("peoples")
     #print model_loaded['girl']
-
+    """
+    
     # How use the Doc2Vec model ?
     
     # 1) Load model pre-trained
