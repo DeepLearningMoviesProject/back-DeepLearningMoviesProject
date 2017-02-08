@@ -2,7 +2,7 @@
 """
 Created on Tue Jan 31 16:33:30 2017
 
-@author: Elsa Navarro
+@author: elsa
 """
 
 #from __future__ import print_function
@@ -14,7 +14,7 @@ from keras.optimizers import SGD
 from MovieProject.preprocessing import preprocess
 from sklearn.cross_validation import StratifiedKFold
 
-epoch = 1000
+epoch = 200
 batch = 500
 
 def createModel(textLen, genresLen):
@@ -55,20 +55,20 @@ def createModel(textLen, genresLen):
     finalBranch.add(Merge([textBranch, genresBranch], mode = 'concat'))
     
     #Here are all of our layers, the preprocessing is over
-    finalBranch.add(Dense(totalLen, activation = 'relu'))
+#    finalBranch.add(Dense(totalLen, activation = 'relu'))
     finalBranch.add(Dropout(0.2))
-    tempLen = totalLen/2    #85 si glove    #160 si d2v
-    finalBranch.add(Dense(tempLen, activation = 'relu'))
-    tempLen = tempLen/2     #42 si glove    #80 si d2v
-    finalBranch.add(Dense(tempLen, activation = 'relu'))
-    tempLen = tempLen/2     #21 si glove    #40 si d2v
-    finalBranch.add(Dense(tempLen, activation = 'relu'))
-    tempLen = tempLen/2     #10 si glove    #20 si d2v
-    finalBranch.add(Dense(tempLen, activation='relu'))
-    tempLen = tempLen/2     #5 si glove    #10 si d2v
-    finalBranch.add(Dense(tempLen, activation='relu'))
-    tempLen = tempLen/2     #2 si glove    #5 si d2v
-    finalBranch.add(Dense(tempLen, activation='relu'))
+#    tempLen = totalLen/2    #85 si glove    #110 si d2v
+#    finalBranch.add(Dense(tempLen, activation = 'relu'))
+#    tempLen = tempLen/2     #42 si glove    #55 si d2v
+#    finalBranch.add(Dense(tempLen, activation = 'relu'))
+#    tempLen = tempLen/2     #21 si glove    #26 si d2v
+#    finalBranch.add(Dense(tempLen, activation = 'relu'))
+#    tempLen = tempLen/2     #10 si glove    #13 si d2v
+#    finalBranch.add(Dense(tempLen, activation='relu'))
+#    tempLen = tempLen/2     #5 si glove    #6 si d2v
+#    finalBranch.add(Dense(tempLen, activation='relu'))
+#    tempLen = tempLen/2     #2 si glove    #3 si d2v
+#    finalBranch.add(Dense(tempLen, activation='relu'))
     finalBranch.add(Dense(1,  activation = 'sigmoid'))
     
     sgd = SGD(lr = 0.1, momentum = 0.9, decay = 0, nesterov = False)
@@ -105,7 +105,7 @@ def createTrainTestModel(textTrain, genresTrain, labelsTrain, textTest, genresTe
     return model, scores
 
 
-def createTrainModel(textTrain, genresTrain, labelsTrain, textTest, genresTest, labelsTest):
+def createTrainModel(textTrain, genresTrain, labelsTrain):
     """
         Creates, fits and returns the specific model fitting the entries
         
@@ -124,13 +124,13 @@ def createTrainModel(textTrain, genresTrain, labelsTrain, textTest, genresTest, 
     model = createModel(len(textTrain[0]), len(genresTrain[0]))
 
     #Train model
-    model.fit([textTrain, genresTrain], labelsTrain, validation_data=([textTest, genresTest],labelsTest), batch_size = batch, nb_epoch = epoch, verbose = 1)
+    model.fit([textTrain, genresTrain], labelsTrain, batch_size = batch, nb_epoch = epoch, verbose = 1)
 #    model.fit([textEntries, genresEntries, actorsEntries, realEntries], classEntries, batch_size = 2000, nb_epoch = 100, verbose = 1)
 
     return model
 
 
-def buildModel(ids, labels):
+def buildModel(T, G, labels):
     '''
         Builds the model that matches the movies (ids) and the like/dislike
         
@@ -141,9 +141,9 @@ def buildModel(ids, labels):
         return :
             the model trained on the movies
     '''
-    T, G = preprocess(ids)
+    #T, G = preprocess(ids)
 
-    model = createTrainModel(T, G, labels, T, G, labels)
+    model = createTrainModel(T, G, labels)
     return model
 
 
@@ -161,7 +161,6 @@ def buildTestModel(T, G, labels, folds):
             the model trained on the movies
     '''
     
-   # T, G = preprocess(ids)
     cvscores = []
     model = None # Clearing the NN.
 
@@ -170,7 +169,7 @@ def buildTestModel(T, G, labels, folds):
 
     for i, (train, test) in enumerate(skf):
         print "Running Fold", i+1, "/", n_folds
-        print " train, test : ", train, " ", test
+        # print " train, test : ", train, " ", test
         indices = np.array(train)
         tIndice = np.array(test)
         model = None # Clearing the NN.

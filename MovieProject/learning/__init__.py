@@ -7,6 +7,7 @@ Created on Mon Jan 30 11:09:56 2017
 """
 
 from .classifier import *
+from .prediction import *
  
 __all__ = [s for s in dir() if not s.startswith('_')]
 

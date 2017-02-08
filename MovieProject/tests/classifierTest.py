@@ -16,19 +16,22 @@ from os.path import isfile
 path = '../resources/evaluations/'
 
 #Test function
-def testMovies(filename):
+def preprocessMovie(filename):
     #filename = 'moviesEvaluated-16'
     tname = path + filename + '-Tsave.data'
     gname = path + filename + '-Gsave.data'
     lname = path + filename + '-LABELSsave.data'
 
-    preprocessingChanged = True #Set to true if the processing has changed
+    preprocessingChanged = False #Set to true if the processing has changed
     dontPreprocess = (not preprocessingChanged) and isfile(tname) and isfile(gname) and isfile(lname)
     
     T = np.array([])
     G = np.array([])
     labels = np.array([])
     
+    if(preprocessingChanged):
+        print "Preprocessing has changed !"
+
     #if data has not been preprocessed 
     if(not dontPreprocess):
         print "File %s in process ..." %(filename)
@@ -60,14 +63,14 @@ def testMovies(filename):
             G = pickle.load(f)
         with open(lname, 'r') as f:
             labels = pickle.load(f)
-        print 'T done : ', T
-        print 'G done : ', G
-        print 'labels done : ', labels
-            
-    
+        
     'Process OK, model ready to be built !'
+    return T, G, labels
+    
+def testMovie(filename):
+    T, G, labels = preprocessMovie(filename)
     model, score = buildTestModel(T, G, labels, folds=5)
-    return score
+    return model, score
 
 
 def testClassifier():
@@ -78,7 +81,8 @@ def testClassifier():
     #Get all files from PATH, and get the score of the classifier on these files
     for file in os.listdir(path):
         if file.endswith(".json"):
-            meanScore += testMovies(file.replace(".json", ""))
+            model, score = testMovie(file.replace(".json", ""))
+            meanScore += score
             totalScores += 1
     #Compute the mean score for the classifier
     meanScore /= totalScores

@@ -69,7 +69,7 @@ def preprocess(idMovies):
     print "100% requests loaded and keywords preprocessed ! "
     
     print "Processing Overview..."
-#    meanOverviews = overviewProcessing(infos, dicoGlove)
+   # meanOverviews = overviewProcessing(infos, dicoGlove)
     meanOverviews = overviewProcessingD2V(infos, modelD2V)
     
     print "Processing titles..."
@@ -77,6 +77,11 @@ def preprocess(idMovies):
     
     print "Processing rating..."
     meanRating = ratingProcessing(infos)
+    
+    print meanKeywords.shape
+    print meanOverviews.shape
+    print meanRating.shape
+    print meanTitles.shape
     
     finalMatrix = np.hstack((np.hstack((np.hstack((meanKeywords,meanOverviews)),meanTitles)),meanRating))
     
