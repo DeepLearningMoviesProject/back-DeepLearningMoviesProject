@@ -35,56 +35,68 @@ def preprocess(idMovies):
     dicoGlove = loadGloveDicFromFile(GLOVE_DICT_FILE)
     modelD2V = loadD2VModel(D2V_FILE)
     
-    movies = getMovies(idMovies)
-    moviesCredits = getCredits(movies)
-    responses = []
+    movies = getMovies(idMovies)    
     
-    infoUsers = len(movies)/100.0*10
-    i = 0
-    cpt = 5
+    infos = []
+    keywords = []
+    credits = []
     
-    for movie in movies:
+    
+    cpt = 0
+    for i in range(len(movies)):
+        movie = movies[i]
+        
         try:
-            r = movie.info()
-            responses.append(r)
+            # If those request failed, doesn't append results to arrays
+            info = movie.info()
+            keyword = movie.keywords()
+            credit = movie.credits()
+            
+            infos.append(info)
+            keywords.append(keyword)
+            credits.append(credit)
         except:
             print "Error, movie " + str (movie) + " NOT FOUND"
-        i += 1
-        if(i > infoUsers):
-            print str(cpt)+"% requests loaded..."
-            cpt += 5
-            i = 0
+            
+        cpt += 1
+        if(cpt > len(movies)/20.):
+            print "%.0f%% requests loaded..." %(100*i/(1.0*len(movies)))
+            cpt = 0
+
+            
     print "50% requests loaded..."
-    meanKeywords = keywordsProcessing(movies, dicoGlove)
+    meanKeywords = keywordsProcessing(keywords, dicoGlove)
     print "100% requests loaded and keywords preprocessed ! "
+    
     print "Processing Overview..."
-#    meanOverviews = overviewProcessing(responses, dicoGlove)
-    meanOverviews = overviewProcessingD2V(responses, modelD2V)
+#    meanOverviews = overviewProcessing(infos, dicoGlove)
+    meanOverviews = overviewProcessingD2V(infos, modelD2V)
     
     print "Processing titles..."
-    meanTitles = titlesProcessing(responses, dicoGlove)
+    meanTitles = titlesProcessing(infos, dicoGlove)
+    
     print "Processing rating..."
-    meanRating = ratingProcessing(responses)
+    meanRating = ratingProcessing(infos)
     
     finalMatrix = np.hstack((np.hstack((np.hstack((meanKeywords,meanOverviews)),meanTitles)),meanRating))
     
     print "Processing genres..."
-    genres = genresProcessing(responses)
+    genres = genresProcessing(infos)
     
     print "Processing directors..."
-    directors = peopleProcessing(moviesCredits, dicoGlove, People.DIRECTOR)
+    directors = peopleProcessing(credits, dicoGlove, People.DIRECTOR)
     
     print "Processing actors..."
-    actors = peopleProcessing(moviesCredits, dicoGlove, People.ACTOR)
+    actors = peopleProcessing(credits, dicoGlove, People.ACTOR)
     
     return finalMatrix, genres
 
 
 
-def overviewProcessingD2V(responses, model):
+def overviewProcessingD2V(infos, model):
     """
         Parameter : 
-            Responses array of movies you want to get overviews with
+            infos array of movies you want to get overviews with
             the Doc2Vec model
         Return : 
             ndarray. Matrix of Overviews values calculated by Glove. One line by movie.
@@ -92,9 +104,9 @@ def overviewProcessingD2V(responses, model):
     
     meanMatrixOverview = []    
     i = 0
-    for response in responses:        
+    for info in infos:        
         
-        overview = "".join(c for c in response["overview"] if c not in punctuation)       
+        overview = "".join(c for c in info["overview"] if c not in punctuation)       
         
         if i == 0:
             i = 1
@@ -104,22 +116,22 @@ def overviewProcessingD2V(responses, model):
 
     return meanMatrixOverview
     
-def overviewProcessing(responses, dicoGlove):
+def overviewProcessing(infos, dicoGlove):
     """
         Parameter : 
-            Responses array of movies you want to get overviews with
+            infos array of movies you want to get overviews with
             the Glove dictionnary (dicoGlove)
         Return : 
             ndarray. Matrix of Overviews values calculated by Glove. One line by movie.
     """
     
     sizeVector = dicoGlove[dicoGlove.keys()[0]].shape[0]
-    meanMatrixOverview = np.empty([len(responses), sizeVector])  
+    meanMatrixOverview = np.empty([len(infos), sizeVector])  
     
-    for i in range(len(responses)):
-        response = responses[i]        
+    for i in range(len(infos)):
+        info = infos[i]        
         
-        overview = "".join(c for c in response["overview"] if c not in punctuation)       
+        overview = "".join(c for c in info["overview"] if c not in punctuation)       
         words = []
             
         for w in overview.split():
@@ -131,57 +143,43 @@ def overviewProcessing(responses, dicoGlove):
 
     return meanMatrixOverview
     
-def keywordsProcessing(movies, dicoGlove):
+def keywordsProcessing(moviesKeywords, dicoGlove):
     """
-        Parameter : movies array of movies you want to process keywords with
+        Parameter : keywords array of movies you want to process keywords with
                     the Glove dictionnary (dicoGlove)
         Return : Matrix of keywords values calculated by Glove. One line by movie.
     """
     
     sizeVector = dicoGlove[dicoGlove.keys()[0]].shape[0]
-    meanMatrixKeywords = np.empty([len(movies), sizeVector]) 
+    meanMatrixKeywords = np.empty([len(moviesKeywords), sizeVector]) 
     
-    i = 0 
-    infoUsers = len(movies)/100.0*10
-    p = 0
-    cpt = 55
-    
-    nError = 0
-    for i in range(len(movies)):
-        movie = movies[i]
-        
-        try:
-            response = movie.keywords()
-            keywords = getKeywords(response)
-            gArray, wSize = wordsToGlove(keywords, dicoGlove)
-            
-            meanMatrixKeywords[i] = meanWords(gArray, wSize)
-        except:
-            nError += 1
-        p += 1
-        if(p > infoUsers):
-           print str(cpt)+"% requests loaded..."
-           cpt += 5
-           p = 0
-           
-    return meanMatrixKeywords if (nError == 0) else meanMatrixKeywords[:-nError]
+    for i in range(len(moviesKeywords)):
+        keyword = moviesKeywords[i]
 
-def titlesProcessing(responses, dicoGlove):
+        keywords = getKeywords(keyword)
+        gArray, wSize = wordsToGlove(keywords, dicoGlove)
+        
+        meanMatrixKeywords[i] = meanWords(gArray, wSize)
+           
+    return meanMatrixKeywords
+
+
+def titlesProcessing(infos, dicoGlove):
     """
         Parameter : 
-            Responses array of movies you want to process titles with
+            infos array of movies you want to process titles with
             the Glove dictionnary (dicoGlove)
         Return : 
             ndarray. Matrix of titles values calculated by Glove. One line by movie.
     """
     
     sizeVector = dicoGlove[dicoGlove.keys()[0]].shape[0]
-    meanMatrixTitles = np.empty([len(responses), sizeVector]) 
+    meanMatrixTitles = np.empty([len(infos), sizeVector]) 
     
-    for i in range(len(responses)):        
-        response = responses[i]
+    for i in range(len(infos)):        
+        info = infos[i]
         
-        overview = "".join(c for c in response["title"] if c not in punctuation)
+        overview = "".join(c for c in info["title"] if c not in punctuation)
         overview = overview.split()
         words = []
             
@@ -194,27 +192,27 @@ def titlesProcessing(responses, dicoGlove):
 
     return meanMatrixTitles
 
-def ratingProcessing(responses):
+def ratingProcessing(infos):
     """
         Parameter : 
-            Responses array of movies you want to process rating with
+            infos array of movies you want to process rating with
             the Glove dictionnary (dicoGlove)
         Return : 
             ndarray. Matrix of rating values calculated by Glove. One line by movie.
     """
     
-    meanMatrixRating = np.empty([len(responses), 1])
-    for i in range(len(responses)):  
-        meanMatrixRating[i] = responses[i]["vote_average"]/10.0
+    meanMatrixRating = np.empty([len(infos), 1])
+    for i in range(len(infos)):  
+        meanMatrixRating[i] = infos[i]["vote_average"]/10.0
 
     return meanMatrixRating
 
 
 
-def genresProcessing(responses):
+def genresProcessing(infos):
     """
         Parameter:
-            Responses array of movies you want to process rating with
+            infos array of movies you want to process rating with
             the Glove dictionnary (dicoGlove)
         Return:
             ndarray. Matrix of genres where each value is 1 if genre is present, 0 otherwise
@@ -223,18 +221,18 @@ def genresProcessing(responses):
     
     TMDB_GENRES = getTmdbGenres()
     
-    genresArray = np.empty([len(responses), len(TMDB_GENRES.keys())])
+    genresArray = np.empty([len(infos), len(TMDB_GENRES.keys())])
 
-    for i in range(len(responses)):
-        response = responses[i]
+    for i in range(len(infos)):
+        info = infos[i]
   
         genresVect = np.zeros(len(TMDB_GENRES.keys()))
 
-        for genre in getGenres(response["genres"]):
+        for genre in getGenres(info["genres"]):
             try:
                 genresVect[TMDB_GENRES[genre]] = 1
             except:
-                print "Unknown genre for %s -> %s" %(response["title"], genre)
+                print "Unknown genre for %s -> %s" %(info["title"], genre)
 
         genresArray[i] = genresVect        
             
