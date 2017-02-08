@@ -78,11 +78,6 @@ def preprocess(idMovies):
     print "Processing rating..."
     meanRating = ratingProcessing(infos)
     
-    print meanKeywords.shape
-    print meanOverviews.shape
-    print meanRating.shape
-    print meanTitles.shape
-    
     finalMatrix = np.hstack((np.hstack((np.hstack((meanKeywords,meanOverviews)),meanTitles)),meanRating))
     
     print "Processing genres..."
