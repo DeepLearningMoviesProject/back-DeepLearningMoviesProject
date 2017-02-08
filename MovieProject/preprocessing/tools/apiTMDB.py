@@ -79,21 +79,6 @@ def getMovie(id):
     
     return tmdb.Movies(id)
 
-def getNextExistingMovie(id):
-    incr = id
-    stop = False
-    m = None
-
-    while (not stop):
-        try:
-            m = getMovie(incr)  #Get the movie
-            inf = m.info()      #Try to access the data of the movie
-            stop = True         #Stop iterating if we suceeded
-        except: 
-            incr += 1           #Try with the next one if not
-    return m
-
-
 def saveTmdbGenres():
     """
         Download genres from TMDB and save it into binary file
