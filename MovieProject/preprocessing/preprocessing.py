@@ -7,7 +7,7 @@ Created on Wed Feb 01 17:09:54 2017
 
 
 from MovieProject.preprocessing.tools import (getMovies, getKeywords, getDirectors, getActors, getCredits,
-                                              loadGloveDicFromFile, getGenres, getTmdbGenres, loadD2VModel)
+                                              loadGloveDicFromFile, getGenres, getTmdbGenres, loadD2VModel, SIZE_VECTOR)
 from MovieProject.resources import GLOVE_DICT_FILE, D2V_FILE
 from words import meanWords, wordsToGlove
 from texts import textToVect
@@ -102,17 +102,14 @@ def overviewProcessingD2V(infos, model):
             ndarray. Matrix of Overviews values calculated by Glove. One line by movie.
     """
     
-    meanMatrixOverview = []    
-    i = 0
-    for info in infos:        
+    meanMatrixOverview = np.empty([len(infos), SIZE_VECTOR])  
+    
+    for i in range(len(infos)):
+        info = infos[i]        
         
         overview = "".join(c for c in info["overview"] if c not in punctuation)       
         
-        if i == 0:
-            i = 1
-            meanMatrixOverview = textToVect(overview, model)
-        else:
-            meanMatrixOverview = np.vstack([meanMatrixOverview,textToVect(overview, model)])
+        meanMatrixOverview[i] = textToVect(overview, model)
 
     return meanMatrixOverview
     

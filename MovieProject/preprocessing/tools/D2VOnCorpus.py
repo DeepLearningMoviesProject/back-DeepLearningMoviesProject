@@ -24,6 +24,8 @@ from gensim.models import Doc2Vec
 import numpy
 
 
+SIZE_VECTOR = 100
+
 
 class LabeledLineSentence(object):
     
@@ -99,7 +101,7 @@ def _buildModel(sources, modelPath, epochs) :
     # sample: threshold for configuring which higher-frequency words are randomly downsampled
     # workers: use this many worker threads to train the model
     # DBOW mode (dm=0) is faster and creates better vectors for many purposes/datasets ?!? <- Bad idea !
-    model = Doc2Vec(min_count=1, window=10, size=100, sample=1e-4, negative=5, workers=7, alpha=0.025, min_alpha=0.025)
+    model = Doc2Vec(min_count=1, window=10, size=SIZE_VECTOR, sample=1e-4, negative=5, workers=7, alpha=0.025, min_alpha=0.025)
     
     print "Building vocabulary ..."
     model.build_vocab(sentences.to_array())
