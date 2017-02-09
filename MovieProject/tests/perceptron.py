@@ -15,12 +15,19 @@ import pickle
 
 path = '../resources/evaluations/'
 
-filename = 'moviesEvaluated-16'
-
     
-#Test function
-def findIds(filename):
 
+def findIds(filename):
+    """
+    Allows to find datas thanks to movies ids, preprocesses theses datas and stores them in differents files.
+    If the files already exist, we just loads them.
+    
+    Parameters :
+        filename : name of the file contained all ids and label associated of a user preferences
+    
+    Return :
+        a liste of all matrix of parameters > titles, keywords, overviews, rates, genres, artistes, directors, labels
+    """
     tname = path + filename + '-Tsave.data'
     kname = path + filename + '-Ksave.data'
     oname = path + filename + '-Osave.data'
@@ -79,7 +86,7 @@ def findIds(filename):
             
     else:
         print "File % load process ...", filename
-        #load preprocessed data (T & G)
+        #load preprocessed data
         with open(tname, 'r') as f:
             T = pickle.load(f)
         with open(kname, 'r') as f:
@@ -97,13 +104,83 @@ def findIds(filename):
         with open(lname, 'r') as f:
             labels = pickle.load(f)
             
-    return (T,K,O,R,G,A,D,labels)
+    return {"T":T, "K":K, "O":O, "R":R, "G":G, "A":A, "D":D, "Label":labels}
 
             
     
 if __name__ == "__main__": 
 
-    filename = 'moviesEvaluated-16'
-    T, labels = findIds(filename)
-    print "training perceptron on title"
-    trainingPerceptron(T, labels)
+    filename = 'moviesEvaluatedCoralie'
+    #filename = 'moviesEvaluated-16'
+    result = findIds(filename)
+    T = result["T"]
+    K = result["K"]
+    O = result["O"]
+    R = result["R"]
+    G = result["G"]
+    A = result["A"]
+    D = result["D"]
+
+    print "TITLES : "
+    perceptron.evaluatePerceptron(result["T"], result["Label"])
+    print "KEYWORDS : "
+    perceptron.evaluatePerceptron(result["K"], result["Label"])
+    print "OVERVIEWS : "
+    perceptron.evaluatePerceptron(result["O"], result["Label"])
+    print "RATES : "
+    perceptron.evaluatePerceptron(result["R"], result["Label"])    
+    print "GENRES : "
+    perceptron.evaluatePerceptron(result["G"], result["Label"])   
+    print "ARTISTS : "
+    perceptron.evaluatePerceptron(result["A"], result["Label"]) 
+    print "DIRECTORS : "
+    perceptron.evaluatePerceptron(result["D"], result["Label"])
+    
+    RG = np.hstack((G,R))
+    print "\n"
+    print "RATES / TITLE"
+    perceptron.evaluatePerceptron(np.hstack((R,T)), result["Label"])
+    print "RATES / KEYWORDS"
+    perceptron.evaluatePerceptron(np.hstack((R,K)), result["Label"])
+    print "RATES / OVERVIEWS"
+    perceptron.evaluatePerceptron(np.hstack((R,O)), result["Label"])
+    print "RATES / GENRES"
+    perceptron.evaluatePerceptron(np.hstack((R,G)), result["Label"])
+    print "RATES / ARTISTS"
+    perceptron.evaluatePerceptron(np.hstack((R,A)), result["Label"])
+    print "RATES / DIRECTORS"
+    perceptron.evaluatePerceptron(np.hstack((R,D)), result["Label"])
+
+    RGT = np.hstack((RG,T))
+    print "\n"
+    print "RATES / GENRES / TITLES / KEYWORDS"
+    perceptron.evaluatePerceptron(np.hstack((RGT,K)), result["Label"])
+    print "RATES / GENRES / TITLES / OVERVIEWS"
+    perceptron.evaluatePerceptron(np.hstack((RGT,O)), result["Label"])
+    print "RATES / GENRES / TITLES / ARTISTES"
+    perceptron.evaluatePerceptron(np.hstack((RGT,A)), result["Label"])
+    print "RATES / GENRES / TITLES / DIRECTORS"
+    perceptron.evaluatePerceptron(np.hstack((RGT,D)), result["Label"])
+
+    RGTA = np.hstack((RGT,A))
+    print "\n"
+    print "RATES / GENRES / TITLES / ARTISTES / KEYWORDS"
+    perceptron.evaluatePerceptron(np.hstack((RGTA,K)), result["Label"])
+    print "RATES / GENRES / TITLES / ARTISTES / OVERVIEWS"
+    perceptron.evaluatePerceptron(np.hstack((RGTA,O)), result["Label"])
+    print "RATES / GENRES / TITLES / ARTISTES / DIRECTORS"
+    perceptron.evaluatePerceptron(np.hstack((RGTA,D)), result["Label"])
+    
+    RGTAD = np.hstack((RGTA,D))
+    print "\n"
+    print "RATES / GENRES / TITLES / ARTISTES / DIRECTORS / KEYWORDS"
+    perceptron.evaluatePerceptron(np.hstack((RGTAD,K)), result["Label"])
+    print "RATES / GENRES / TITLES / ARTISTES / DIRECTORS / OVERVIEWS"
+    perceptron.evaluatePerceptron(np.hstack((RGTAD,O)), result["Label"])
+    
+    RGTADO = np.hstack((RGTAD,O))
+    print "\n"
+    print "RATES / GENRES / TITLES / ARTISTES / DIRECTORS / OVERVIEWS / KEYWORDS"
+    perceptron.evaluatePerceptron(np.hstack((RGTADO,K)), result["Label"])
+    
+    

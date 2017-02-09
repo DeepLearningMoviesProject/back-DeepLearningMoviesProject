@@ -6,9 +6,7 @@ Perceptron Algorithm
 Perceptron is a classification algorithm for problems with two classes (0 and 1) where a linear equation (like or hyperplane) can be used to separate the two classes.
 
 It receives input signals from examples of training data that we weight and combined in a linear equation called the activation.
--> activation = sum(weight_i * x_i) + bias 
 The activation is then transformed into an output value or prediction using a transfer function, such as the step transfer function.
--> prediction = 1.0 if activation >= 0.0 else 0.0 
 
 It is closely related to linear regression and logistic regression that make predictions in a similar way (e.g. a weighted sum of inputs).
 
@@ -23,24 +21,51 @@ import numpy as np
 from sklearn.linear_model import perceptron
 from MovieProject.learning import crossValidationSplit
 
-    
-def trainingPerceptron(datas, labels) : 
+
+def evaluatePerceptron(datas, labels, nb=50) : 
     """
-    Training perceptron
+    Evaluates training with perceptron. This perceptron is initialize thank's to a random state,
+    so the result changes at each iteration with a different random state. Because of that, 
+    we need to take the mean of all results to evaluate the accuracy.
     
     Parameters : 
-        datas : 
-        labels :      
+        nb : the number of train (random state changes at each iteration)
+        datas : numpy array of datas to train the model
+        labels : numpy array of labels associated
+    
+    Return :
+        A tuple of the mean accuracy on training and the mean accuracy on testing
     """
     result = crossValidationSplit.crossValidationSplit(datas,labels)
     xTrain, yTrain = result["train"]
     xTest, yTest = result["test"]
     
-    model = perceptron.Perceptron(n_iter=100, verbose=0, random_state=None, fit_intercept=True, eta0=0.002)
-    model.fit(xTrain,yTrain)
+    accuracyTrain = 0.
+    minAccuracyTrain = 100
+    maxAccuracyTrain = 0.
+    accuracyTest = 0.
+    minAccuracyTest = 100.
+    maxAccuracyTest = 0.
     
-    print "Accuracy   " + str(model.score(xTrain, yTrain)*100) + "%"
-    print "Prediction " + str(model.predict(xTest))
+    for i in range(nb) :
+        model = perceptron.Perceptron(n_iter=100, verbose=0, random_state=i, fit_intercept=True, eta0=0.002)
+        model.fit(xTrain,yTrain)
+        accTrain = model.score(xTrain, yTrain)
+        accuracyTrain += (accTrain*100)
+        minAccuracyTrain = accTrain < minAccuracyTrain and accTrain or minAccuracyTrain
+        maxAccuracyTrain = accTrain > maxAccuracyTrain and accTrain or maxAccuracyTrain
+        accTest = model.score(xTest, yTest)
+        accuracyTest += (accTest*100)
+        minAccuracyTest = accTest < minAccuracyTest and accTest or minAccuracyTest
+        maxAccuracyTest = accTest > maxAccuracyTest and accTest or maxAccuracyTest
+    
+    meanAccuracyTrain = accuracyTrain/nb
+    meanAccuracyTest = accuracyTest/nb
+    print "Accuracy on data trained: " + str(meanAccuracyTrain) + "%   [min:" + str(minAccuracyTrain) + " - max:" + str(maxAccuracyTrain) + "]"
+    print "Accuracy on data tested: " + str(meanAccuracyTest) + "%   [min:" + str(minAccuracyTest) + " - max:" + str(maxAccuracyTest) + "]"
+    #print "Prediction : " + str(model.predict(xTest))
+    
+    return (meanAccuracyTrain, meanAccuracyTest)
 
     
     
@@ -48,11 +73,11 @@ def trainingPerceptron(datas, labels) :
 if __name__ == "__main__": 
     
     # Data
-    data = np.array([[1,2,2],[2,1,1],[5,8,9],[10,9,8],[9,8,7],[1,3,2],[5,4,9],[2,2,2],[1,4,1]])
+    data = np.array([[1,2,2],[2,1,2],[5,8,9],[10,9,8],[9,8,7],[1,3,2],[5,4,9],[2,2,2],[1,4,1]])
     
     # Labels
     label = np.array([0,0,1,1,1,0,1,0,0])
     
     # Perceptron model
-    trainingPerceptron(data,label)
+    evaluatePerceptron(data,label)
     
