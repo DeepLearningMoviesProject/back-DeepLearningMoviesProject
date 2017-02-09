@@ -70,10 +70,12 @@ def preprocess(idMovies):
     print "Keywords preprocessed !"
     
     print "Processing Overview..."
-   # meanOverviews = overviewProcessing(infos, dicoGlove)
-    meanOverviews = overviewProcessingD2V(infos, modelD2V)
+    
+    meanOverviews = overviewProcessing(infos, dicoGlove)
+    # meanOverviews = overviewProcessingD2V(infos, modelD2V)
     print "Overviews preprocessed !"
 
+    
     print "Processing titles..."
     meanTitles = titlesProcessing(infos, dicoGlove)
     print "Titles preprocessed !"
@@ -153,8 +155,8 @@ def preprocessMatrix(idMovies, mTitles=False, mKeywords=False, mOverviews=False,
         matrix["keywords"] = keywordsProcessing(keywords, dicoGlove)
     
     if mOverviews:
-        print "Processing Overview..."
-        matrix["overview"] = overviewProcessingD2V(infos, modelD2V)
+        print "Processing Overviews..."
+        matrix["overviews"] = overviewProcessingD2V(infos, modelD2V)
     
     if mTitles:
         print "Processing titles..."
