@@ -103,4 +103,4 @@ def preprocessMovieGeneric(filename):
             labels = pickle.load(f)
         
     'Process OK, model ready to be built !'
-    return prepareDico(matrix), labels
+    return prepareDico(matrix, doTitles=False, doKeywords=False, doOverviews=True, doRating=False, doGenres=True, doActors=True, doDirectors=True), labels
