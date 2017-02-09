@@ -10,7 +10,6 @@ from evaluation import *
 from liblinearutil import *
 
 
-
 def processSVM(matrix):
     """
     
@@ -29,9 +28,23 @@ def processSVM(matrix):
     
     return l
 
+def concatMatrix(*matrixes):
+    
+    if(len(matrixes) == 0):
+        raise ValueError
+        
+    elif(len(matrixes) == 1):
+        return matrixes[0]
+        
+    elif(len(matrixes) == 2):
+        return np.hstack((matrixes[0], matrixes[1]))
+    else:
+        return concatMatrix(np.hstack((matrixes[0], matrixes[1])), *matrixes[2:])
 
-
-dicoMatrix, labels = preprocessMovieGeneric("moviesEvaluatedJulian", True, True, True, True, True, True, True)
+dicoMatrix, labels = preprocessMovieGeneric("moviesEvaluatedJulian", 
+                                            doTitles=True, doRating=True, 
+                                            doOverviews=True, doKeywords=True, 
+                                            doGenres=True, doActors=True, doDirectors=True)
 
 # "dicoMatrix keys(): actors, genres, data, directors"
 
@@ -41,21 +54,18 @@ newDico = {}
 
 for key in dicoMatrix:
     newDico[key] = processSVM(dicoMatrix[key])
-    
 
 
+mat = processSVM(concatMatrix(*[ dicoMatrix[key] for key in dicoMatrix ]))
 
+trainInd = int(0.8*len(mat) )
 
-### Train model
-
-trainInd = int(0.7*len(newDico["data"]) )
-testInd = int( 0.3*len(newDico["data"]) )
-
-y, x = labels[:trainInd], newDico["data"][:trainInd]
+y, x = labels[:trainInd], mat[:trainInd]
 prob  = problem(y, x)
 param = parameter('-s 0 -c 4 -B 1')
 m = train(prob, param)
 
-p_label, p_acc, p_val = predict(labels[testInd:], newDico["data"][testInd:], m, '-b 1')
-ACC, MSE, SCC = evaluations(labels[testInd:], p_label)
+p_label, p_acc, p_val = predict(labels[trainInd:], mat[trainInd:], m, '-b 1')
+ACC, MSE, SCC = evaluations(labels[trainInd:], p_label)
+
 
