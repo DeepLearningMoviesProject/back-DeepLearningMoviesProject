@@ -58,7 +58,7 @@ def createModel(dataLen=0, genresLen=0, actorsLen=0, directorsLen=0):
         raise ValueError('The model can\'t be created if there is no matrix !')
     
     #We merge in cascade
-    finalBranch = mergeBranches(*branches)
+    finalBranch = _mergeBranches(*branches)
     finalBranch.add(Dense(totalLen, activation = 'relu'))
     finalBranch.add(Dropout(0.2, input_shape = (totalLen,)))
     
@@ -75,7 +75,7 @@ def createModel(dataLen=0, genresLen=0, actorsLen=0, directorsLen=0):
 
 def createTrainTestModel(textTrain, genresTrain, labelsTrain, textTest, genresTest, labelsTest):
     """
-        Creates, fits and returns the specific model fitting the entries
+        Deprecated - Creates, fits and returns the specific model fitting the entries
         
         Parameters : 
             textTrain, genresTrain : the data to train on, the first one only needs embedding, the other one(s) needs dense layer before merge
@@ -306,7 +306,7 @@ def buildTestModel(dico, labels, folds):
     return model, mean_score
 
 
-def mergeBranches(*listBranch):
+def _mergeBranches(*listBranch):
     
     if(len(listBranch) == 0):
         #TODO : raise an error
@@ -325,9 +325,9 @@ def mergeBranches(*listBranch):
     merge2Branches.add(Merge([listBranch[0], listBranch[1]], mode = 'concat'))
     merge2Branches.add(Dense(1,  activation = 'sigmoid'))
     
-    return mergeBranches(merge2Branches, *listBranch[2:])
+    return _mergeBranches(merge2Branches, *listBranch[2:])
 
         
-#TODO after call of mergeBranches
+#TODO after call of _mergeBranches
 #finalBranch.add(Dense(totalLen, activation = 'relu'))
     

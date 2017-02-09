@@ -7,7 +7,9 @@ Created on Thu Feb  9 14:50 2017
 """
 import numpy as np
 import pickle
-from MovieProject.preprocessing import preprocess, preprocessMatrix, prepareDico
+import os
+from MovieProject.preprocessing import preprocessMatrix, prepareDico
+from MovieProject.learning import buildTestModel
 from flask import json
 from os.path import isfile
 
@@ -97,3 +99,63 @@ def preprocessMovieGeneric(filename, doTitles=False, doRating=False, doOverviews
         
     'Process OK, model ready to be built !'
     return prepareDico(matrix, doTitles, doRating, doOverviews, doKeywords, doGenres, doActors, doDirectors), labels
+
+def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
+    '''
+        Tests the classifiers specified
+        
+        Parameters : booleans that tells the classifiers you want to test
+        
+        returns : the mean scores for the classifiers
+    '''
+
+    if(not (doKeras or doPerceptron or doSVM)):
+        raise ValueError('You must specify at least one classifier to test!!!')
+    
+    meanScoreKeras = 0
+    meanScorePerceptron = 0
+    meanScoreSVM = 0
+    totalScores = 0
+
+    #Get all files from PATH, and get the score of the classifier on these files
+    for file in os.listdir(path):
+        if file.endswith(".json") and ("simple" not in file):
+            dico, labels = preprocessMovieGeneric(file.replace(".json", ""), doTitles=True, doRating=True, doOverviews=True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True)
+            scoreKeras = 0
+            scorePerceptron = 0
+            scoreSVM = 0
+            if(doKeras):
+                _, scoreKeras = buildTestModel(dico, labels, folds=5)
+            if(doPerceptron):
+                pass
+                #TODO : call perceptron function TMTC
+            if(doSVM):
+                pass
+                #TODO : call SVM function TMTC
+            meanScoreKeras += scoreKeras
+            meanScorePerceptron += scorePerceptron
+            meanScoreSVM += scoreSVM
+            totalScores += 1
+    #Compute the mean score for the classifier
+    meanScoreKeras /= totalScores
+    meanScorePerceptron /= totalScores
+    meanScoreSVM /= totalScores
+    return meanScoreKeras, meanScorePerceptron, meanScoreSVM
+
+
+if __name__ == '__main__':
+    
+    doOne = False
+    score = 0
+    
+    if(doOne):
+        #One movie
+        filename = 'moviesEvaluated-simple'
+        dico, labels = preprocessMovieGeneric(filename, doTitles=True, doOverviews=True, doActors=True)
+        _, score = buildTestModel(dico, labels, folds=2)
+    else:
+        #All movies
+        score, _ , _ = testClassifier(doKeras=True) #Test for keras
+    
+    
+    print "The classifier keras has an average accuracy of ", score

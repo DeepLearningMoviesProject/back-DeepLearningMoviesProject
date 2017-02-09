@@ -10,16 +10,16 @@ import pickle
 import os
 from MovieProject.learning import buildTestModel
 from MovieProject.preprocessing import preprocess
-from MovieProject.tests.evaluation import preprocessMovieGeneric
+from evaluation import preprocessMovieGeneric
 from flask import json
 from os.path import isfile
 
 path = '../../resources/evaluations/'
 
-doTitles=False
-doKeywords=False
+doTitles=True
+doKeywords=True
 doOverviews=True
-doRating=False
+doRating=True
 
 doGenres=True
 doActors=True
@@ -80,78 +80,3 @@ def preprocessMovie(filename):
         
     'Process OK, model ready to be built !'
     return T, G, labels
-    
-    
-def concatData(listMatrix):
-    if(len(listMatrix)==0):
-        return np.array([])
-        
-    if(len(listMatrix)==1):
-        return listMatrix[0]
-    
-    return np.hstack((listMatrix[0], concatData(listMatrix[1:])))
-
-def prepareDico(matrix):
-    dico = {}
-    toConcat = []
-    
-    if(doTitles):
-        toConcat.append(matrix["titles"])
-
-    if(doRating):
-        toConcat.append(matrix["rating"])
-
-    if(doOverviews):
-        toConcat.append(matrix["overviews"])
-
-    if(doKeywords):
-        toConcat.append(matrix["keywords"])
-
-    concatMatrix = concatData(toConcat)
-    
-    if concatMatrix.size:
-        dico["data"] = concatMatrix
-
-
-    if(doGenres):
-        dico["genres"] = matrix["genres"]
-
-    if(doActors):
-        dico["actors"] = matrix["actors"]
-
-    if(doDirectors):
-        dico["directors"] = matrix["directors"]
-    
-    return dico
-    
-
-def testClassifier():
-
-    meanScore = 0
-    totalScores = 0
-
-    #Get all files from PATH, and get the score of the classifier on these files
-    for file in os.listdir(path):
-        if file.endswith(".json"):
-            dico, labels = preprocessMovieGeneric(file.replace(".json", ""))
-            # dico = {
-            #     "data" : T,
-            #     "genres" : G,
-            # }
-            model, score = buildTestModel(dico, labels, folds=5)
-            meanScore += score
-            totalScores += 1
-    #Compute the mean score for the classifier
-    meanScore /= totalScores
-    return meanScore
-
-
-if __name__ == '__main__':
-    #All movies
-    score = testClassifier()
-    #One movie
-#    filename = 'moviesEvaluated-simple'
-#    dico, labels = preprocessMovieGeneric(filename)
-#    model, score = buildTestModel(dico, labels, folds=2)
-    
-    print "The classifier has an average accuracy of ", score

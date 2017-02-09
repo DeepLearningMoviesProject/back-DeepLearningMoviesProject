@@ -22,84 +22,17 @@ class People(Enum):
     DIRECTOR = 2
 
 
-def preprocess(idMovies):
+def preprocess(idMovies, doTitles=False, doRating=False, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False):
     """
         Parameter : 
-            int array of ids of Movies you want to process datas
-        Return : 
-            ndarray. Matrix of KeyWords,Titles,Overview and rating values calculated 
-            by Glove. One line by movie.
+            idMovies : int array of ids of Movies you want to process datas
+            do... : the movies' data you want to extract
+        Return : the dictionnary ready for the classifier
     """
-    
-    print "Loading data from TMDB"
-    dicoGlove = loadGloveDicFromFile(GLOVE_DICT_FILE)
-    modelD2V = loadD2VModel(D2V_FILE)
-    
-    movies = getMovies(idMovies)    
-    
-    infos = []
-    keywords = []
-    credits = []
-    
-    
-    cpt = 0
-    for i in range(len(movies)):
-        movie = movies[i]
-        
-        try:
-            # If those request failed, doesn't append results to arrays
-            info = movie.info()
-            keyword = movie.keywords()
-            credit = movie.credits()
-            
-            infos.append(info)
-            keywords.append(keyword)
-            credits.append(credit)
-        except:
-            print "Error, movie " + str (movie) + " NOT FOUND"
-            
-        cpt += 1
-        if(cpt > len(movies)/100.):
-            print "%.0f%% requests loaded..." %(100*i/(1.0*len(movies)))
-            cpt = 0
 
-            
-    print "100% requests loaded..."
-    print "Processing Keywords..."
-    meanKeywords = keywordsProcessing(keywords, dicoGlove)
-    print "Keywords preprocessed !"
+    mat = preprocessMatrix(idMovies, mTitles=doTitles, mKeywords=doKeywords, mOverviews=doOverviews, mRating=doRating, mGenres=doGenres, mActors=doActors, mDirectors=doDirectors)
     
-    print "Processing Overview..."
-    
-    meanOverviews = overviewProcessing(infos, dicoGlove)
-    # meanOverviews = overviewProcessingD2V(infos, modelD2V)
-    print "Overviews preprocessed !"
-
-    
-    print "Processing titles..."
-    meanTitles = titlesProcessing(infos, dicoGlove)
-    print "Titles preprocessed !"
-
-    print "Processing rating..."
-    meanRating = ratingProcessing(infos)
-    print "Rating preprocessed !"  
-    
-    print "Processing genres..."
-    genres = genresProcessing(infos)
-    print "Genres preprocessed !"  
-        
-    print "Processing directors..."
-    directors = peopleProcessing(credits, dicoGlove, People.DIRECTOR)
-    print "Directors preprocessed !"  
-        
-    print "Processing actors..."
-    actors = peopleProcessing(credits, dicoGlove, People.ACTOR)
-    print "Actors preprocessed !"  
-        
-    finalMatrix = np.hstack((np.hstack((np.hstack((meanKeywords,meanOverviews)),meanTitles)),meanRating))
-
-    return finalMatrix, genres
-
+    return prepareDico(mat, doTitles=doTitles, doRating=doRating, doOverviews=doOverviews, doKeywords=doKeywords, doGenres=doGenres, doActors=doActors, doDirectors=doDirectors)
 
 
 def preprocessMatrix(idMovies, mTitles=False, mKeywords=False, mOverviews=False, mRating=False, mGenres=False, mActors=False, mDirectors=False):
@@ -182,6 +115,12 @@ def preprocessMatrix(idMovies, mTitles=False, mKeywords=False, mOverviews=False,
 
 
 def _concatData(listMatrix):
+    '''
+        Recursive function that concats a list of matrixes
+        The matrix must have the same dimensions
+
+        returns : a unique matrix that contains all the data that were on the list of matrix
+    '''
     if(len(listMatrix)==0):
         return np.array([])
         
@@ -191,9 +130,20 @@ def _concatData(listMatrix):
     return np.hstack((listMatrix[0], _concatData(listMatrix[1:])))
 
 def prepareDico(matrix, doTitles=False, doRating=False, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False):
+    '''
+        Parameters : 
+            matrixes : the matrixes that have been preprocessed
+            do... : the boolean that tells which matrix has been preprocessed and can be set in the dictionnary
+        return : the dictionnary ready for the classifier with the following matrix if required :
+            data : the matrix with the data concatenate correctly (titles, rating, overviews)
+            genres : matrix for the genres
+            actors : matrix for the actors
+            directors : matrix for the directors
+    '''
     dico = {}
     toConcat = []
     
+
     if(doTitles):
         toConcat.append(matrix["titles"])
 

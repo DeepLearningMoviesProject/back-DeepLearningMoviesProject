@@ -31,9 +31,7 @@ def trainModel():
     
     print "Movies loaded"
     
-    #model = buildModel(ids, Y_train)
-    matrix = preprocessMatrix(ids, mTitles=False, mKeywords=True, mOverviews=True, mRating=False, mGenres=True, mActors=False, mDirectors=False)
-    d = prepareDico(matrix, doTitles=False, doKeywords=True, doOverviews=True, doRating=False, doGenres=True, doActors=False, doDirectors=False)
+    d = preprocess(ids, doTitles=False, doRating=False, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False):
     model = buildModel(d, labels, folds=5)
     
     return jsonify({'result': "ok"})
