@@ -20,7 +20,7 @@ Created on Wed Feb  8 10:37:35 2017
 import numpy as np
 from sklearn.linear_model import perceptron
 from MovieProject.learning import crossValidationSplit
-
+from MovieProject.preprocessing.tools import shuffle
 
 def evaluatePerceptron(datas, labels, nb=50) : 
     """
@@ -34,11 +34,14 @@ def evaluatePerceptron(datas, labels, nb=50) :
         labels : numpy array of labels associated
     
     Return :
-        A tuple of the mean accuracy on training and the mean accuracy on testing
+        A dictionary of keys associated with values :
+            "accuracyTrain" : the mean accuracy on training,
+            "accuracyTest" : the mean accuracy on testing,
+            "minAccuracyTrain" : the minimum accuracy on training,
+            "maxAccuracyTrain" : the maximum accuracy on training,
+            "minAccuracyTest" : the minimum accuracy on testing,
+            "maxAccuracyTest" : the maximum accuracy on testing
     """
-    result = crossValidationSplit.crossValidationSplit(datas,labels)
-    xTrain, yTrain = result["train"]
-    xTest, yTest = result["test"]
     
     accuracyTrain = 0.
     minAccuracyTrain = 100
@@ -46,8 +49,16 @@ def evaluatePerceptron(datas, labels, nb=50) :
     accuracyTest = 0.
     minAccuracyTest = 100.
     maxAccuracyTest = 0.
-    
+        
     for i in range(nb) :
+    
+        # shuffle
+        datas,labels = shuffle.shuffleIdLabeled(datas,labels)
+        # split
+        result = crossValidationSplit.crossValidationSplit(datas,labels)
+        xTrain, yTrain = result["train"]
+        xTest, yTest = result["test"]
+        # train & evaluate
         model = perceptron.Perceptron(n_iter=100, verbose=0, random_state=i, fit_intercept=True, eta0=0.002)
         model.fit(xTrain,yTrain)
         accTrain = model.score(xTrain, yTrain)
@@ -58,14 +69,16 @@ def evaluatePerceptron(datas, labels, nb=50) :
         accuracyTest += (accTest*100)
         minAccuracyTest = accTest < minAccuracyTest and accTest or minAccuracyTest
         maxAccuracyTest = accTest > maxAccuracyTest and accTest or maxAccuracyTest
-    
+        
+        #print "Prediction : " + str(model.predict(xTest))
+        
     meanAccuracyTrain = accuracyTrain/nb
     meanAccuracyTest = accuracyTest/nb
     print "Accuracy on data trained: " + str(meanAccuracyTrain) + "%   [min:" + str(minAccuracyTrain) + " - max:" + str(maxAccuracyTrain) + "]"
     print "Accuracy on data tested: " + str(meanAccuracyTest) + "%   [min:" + str(minAccuracyTest) + " - max:" + str(maxAccuracyTest) + "]"
-    #print "Prediction : " + str(model.predict(xTest))
     
-    return (meanAccuracyTrain, meanAccuracyTest)
+    
+    return {"accuracyTrain":meanAccuracyTrain, "accuracyTest":meanAccuracyTest, "minAccuracyTrain":minAccuracyTrain, "maxAccuracyTrain":maxAccuracyTrain, "minAccuracyTest":minAccuracyTest, "maxAccuracyTest":maxAccuracyTest}
 
     
     
@@ -73,10 +86,10 @@ def evaluatePerceptron(datas, labels, nb=50) :
 if __name__ == "__main__": 
     
     # Data
-    data = np.array([[1,2,2],[2,1,2],[5,8,9],[10,9,8],[9,8,7],[1,3,2],[5,4,9],[2,2,2],[1,4,1]])
+    data = np.array([[1,2,2],[2,1,2],[5,8,9],[10,9,8],[9,8,7],[1,3,2],[5,4,9],[2,2,2],[1,4,1],[1,1,1],[2,1,3],[5,10,9],[11,9,8],[9,10,7],[1,3,1],[5,6,9],[2,3,2],[1,4,3]])
     
     # Labels
-    label = np.array([0,0,1,1,1,0,1,0,0])
+    label = np.array([0,0,1,1,1,0,1,0,0,0,0,1,1,1,0,1,0,0])
     
     # Perceptron model
     evaluatePerceptron(data,label)

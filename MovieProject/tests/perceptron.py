@@ -110,8 +110,9 @@ def findIds(filename):
     
 if __name__ == "__main__": 
 
-    filename = 'moviesEvaluatedCoralie'
-    #filename = 'moviesEvaluated-16'
+    #filename = 'moviesEvaluatedCoralie'
+    filename = 'moviesEvaluated-16'
+    #filename = 'moviesEvaluatedJulian'
     result = findIds(filename)
     T = result["T"]
     K = result["K"]
@@ -151,36 +152,47 @@ if __name__ == "__main__":
     print "RATES / DIRECTORS"
     perceptron.evaluatePerceptron(np.hstack((R,D)), result["Label"])
 
-    RGT = np.hstack((RG,T))
+    RGK = np.hstack((RG,K))
     print "\n"
-    print "RATES / GENRES / TITLES / KEYWORDS"
-    perceptron.evaluatePerceptron(np.hstack((RGT,K)), result["Label"])
-    print "RATES / GENRES / TITLES / OVERVIEWS"
-    perceptron.evaluatePerceptron(np.hstack((RGT,O)), result["Label"])
-    print "RATES / GENRES / TITLES / ARTISTES"
-    perceptron.evaluatePerceptron(np.hstack((RGT,A)), result["Label"])
-    print "RATES / GENRES / TITLES / DIRECTORS"
-    perceptron.evaluatePerceptron(np.hstack((RGT,D)), result["Label"])
-
-    RGTA = np.hstack((RGT,A))
-    print "\n"
-    print "RATES / GENRES / TITLES / ARTISTES / KEYWORDS"
-    perceptron.evaluatePerceptron(np.hstack((RGTA,K)), result["Label"])
-    print "RATES / GENRES / TITLES / ARTISTES / OVERVIEWS"
-    perceptron.evaluatePerceptron(np.hstack((RGTA,O)), result["Label"])
-    print "RATES / GENRES / TITLES / ARTISTES / DIRECTORS"
-    perceptron.evaluatePerceptron(np.hstack((RGTA,D)), result["Label"])
+    print "RATES / GENRES / TITLES"
+    perceptron.evaluatePerceptron(np.hstack((RG,T)), result["Label"])
+    print "RATES / GENRES / KEYWORDS"
+    perceptron.evaluatePerceptron(np.hstack((RG,K)), result["Label"])
+    print "RATES / GENRES / OVERVIEWS"
+    perceptron.evaluatePerceptron(np.hstack((RG,O)), result["Label"])
+    print "RATES / GENRES / ARTISTS"
+    perceptron.evaluatePerceptron(np.hstack((RG,A)), result["Label"])
+    print "RATES / GENRES / DIRECTORS"
+    perceptron.evaluatePerceptron(np.hstack((RG,D)), result["Label"])
     
-    RGTAD = np.hstack((RGTA,D))
+    RGKA = np.hstack((RGK,A))
     print "\n"
-    print "RATES / GENRES / TITLES / ARTISTES / DIRECTORS / KEYWORDS"
-    perceptron.evaluatePerceptron(np.hstack((RGTAD,K)), result["Label"])
-    print "RATES / GENRES / TITLES / ARTISTES / DIRECTORS / OVERVIEWS"
-    perceptron.evaluatePerceptron(np.hstack((RGTAD,O)), result["Label"])
+    print "RATES / GENRES / KEYWORDS / TITLES"
+    perceptron.evaluatePerceptron(np.hstack((RGK,T)), result["Label"])
+    print "RATES / GENRES / KEYWORDS / OVERVIEWS"
+    perceptron.evaluatePerceptron(np.hstack((RGK,T)), result["Label"])
+    print "RATES / GENRES / KEYWORDS / ARTISTES"
+    perceptron.evaluatePerceptron(np.hstack((RGK,T)), result["Label"])
+    print "RATES / GENRES / KEYWORDS / DIRECTORS"
+    perceptron.evaluatePerceptron(np.hstack((RGK,T)), result["Label"])
     
-    RGTADO = np.hstack((RGTAD,O))
+    RGKAD = np.hstack((RGKA,D))
     print "\n"
-    print "RATES / GENRES / TITLES / ARTISTES / DIRECTORS / OVERVIEWS / KEYWORDS"
-    perceptron.evaluatePerceptron(np.hstack((RGTADO,K)), result["Label"])
+    print "RATES / GENRES / KEYWORDS / ARTISTES / TITLES"
+    perceptron.evaluatePerceptron(np.hstack((RGKA,T)), result["Label"])
+    print "RATES / GENRES / KEYWORDS / ARTISTES / OVERVIEWS"
+    perceptron.evaluatePerceptron(np.hstack((RGKA,O)), result["Label"])
+    print "RATES / GENRES / KEYWORDS / ARTISTES / DIRECTORS"
+    perceptron.evaluatePerceptron(np.hstack((RGKA,D)), result["Label"])
     
+    RGTADO = np.hstack((RGKAD,O))
+    print "\n"
+    print "RATES / GENRES / KEYWORDS / ARTISTES / DIRECTORS / TITLES"
+    perceptron.evaluatePerceptron(np.hstack((RGKAD,T)), result["Label"])
+    print "RATES / GENRES / KEYWORDS / ARTISTES / DIRECTORS / OVERVIEWS"
+    perceptron.evaluatePerceptron(np.hstack((RGKAD,O)), result["Label"])
+    
+    print "\n"
+    print "RATES / GENRES / KEYWORDS / ARTISTES / DIRECTORS / OVERVIEWS / TITLES"
+    perceptron.evaluatePerceptron(np.hstack((RGTADO,T)), result["Label"])
     
