@@ -179,6 +179,49 @@ def preprocessMatrix(idMovies, mTitles=False, mKeywords=False, mOverviews=False,
         matrix["actors"] = peopleProcessing(credits, dicoGlove, People.ACTOR)
     
     return matrix
+
+
+def _concatData(listMatrix):
+    if(len(listMatrix)==0):
+        return np.array([])
+        
+    if(len(listMatrix)==1):
+        return listMatrix[0]
+    
+    return np.hstack((listMatrix[0], concatData(listMatrix[1:])))
+
+def prepareDico(matrix):
+    dico = {}
+    toConcat = []
+    
+    if(doTitles):
+        toConcat.append(matrix["titles"])
+
+    if(doRating):
+        toConcat.append(matrix["rating"])
+
+    if(doOverviews):
+        toConcat.append(matrix["overviews"])
+
+    if(doKeywords):
+        toConcat.append(matrix["keywords"])
+
+    concatMatrix = _concatData(toConcat)
+    
+    if concatMatrix.size:
+        dico["data"] = concatMatrix
+
+
+    if(doGenres):
+        dico["genres"] = matrix["genres"]
+
+    if(doActors):
+        dico["actors"] = matrix["actors"]
+
+    if(doDirectors):
+        dico["directors"] = matrix["directors"]
+    
+    return dico
     
 
 def overviewProcessingD2V(infos, model):
