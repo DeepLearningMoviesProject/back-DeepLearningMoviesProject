@@ -188,7 +188,7 @@ def _concatData(listMatrix):
     if(len(listMatrix)==1):
         return listMatrix[0]
     
-    return np.hstack((listMatrix[0], concatData(listMatrix[1:])))
+    return np.hstack((listMatrix[0], _concatData(listMatrix[1:])))
 
 def prepareDico(matrix, doTitles=False, doRating=False, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False):
     dico = {}

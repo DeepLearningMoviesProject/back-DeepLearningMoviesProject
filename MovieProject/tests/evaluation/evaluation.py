@@ -14,19 +14,10 @@ from os.path import isfile
 
 path = '../../resources/evaluations/'
 
-doTitles=False
-doKeywords=False
-doOverviews=True
-doRating=False
-
-doGenres=True
-doActors=True
-doDirectors=True
-
 preprocessingChanged = False #Set to true if the processing has changed
 
 #Test function
-def preprocessMovieGeneric(filename):
+def preprocessMovieGeneric(filename, doTitles=False, doRating=False, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False):
     #filename = 'moviesEvaluated-16'
     files = {}
     if(doTitles):
@@ -54,8 +45,11 @@ def preprocessMovieGeneric(filename):
     labels_name = path + filename + '-LABELSsave.data'
 
     dontPreprocess = (not preprocessingChanged) and isfile(labels_name)
+    
     for f in files:
-        dontPreprocess = dontPreprocess and isfile(f)
+        dontPreprocess = dontPreprocess and isfile(files[f])
+        
+    
     
 #    T = np.array([])
 #    G = np.array([])
@@ -92,9 +86,8 @@ def preprocessMovieGeneric(filename):
     else:
         print "File %s load process ..." %(filename)
         #load preprocessed data - all matrix
-        for key, value in files:
-            with open(value, 'w') as f:
-                pickle.dump(matrix[key], f)
+        for key in files:
+            with open(files[key], 'r') as f:
                 matrix[key] = pickle.load(f)
 #        with open(mat_name, 'r') as f:
 #            dico = pickle.load(f)
@@ -103,4 +96,4 @@ def preprocessMovieGeneric(filename):
             labels = pickle.load(f)
         
     'Process OK, model ready to be built !'
-    return prepareDico(matrix, doTitles=False, doKeywords=False, doOverviews=True, doRating=False, doGenres=True, doActors=True, doDirectors=True), labels
+    return prepareDico(matrix, doTitles, doRating, doOverviews, doKeywords, doGenres, doActors, doDirectors), labels
