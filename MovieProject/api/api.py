@@ -7,7 +7,8 @@ Created on Thu Jan 26 14:16:32 2017
 """
 from flask import Flask, jsonify, request, abort, json
 #from testTMDB import searchData, trainData
-from MovieProject.learning import buildModel, buildTestModel, prepareDico, preprocessMatrix
+from MovieProject.learning import buildModel 
+from MovieProject.preprocessing import preprocess 
 import numpy as np
 
 app = Flask(__name__)
@@ -31,8 +32,8 @@ def trainModel():
     
     print "Movies loaded"
     
-    d = preprocess(ids, doTitles=False, doRating=False, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False):
-    model = buildModel(d, labels, folds=5)
+    d = preprocess(ids, doTitles=False, doRating=True, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False) 
+    model = buildModel(d, labels) 
     
     return jsonify({'result': "ok"})
 
