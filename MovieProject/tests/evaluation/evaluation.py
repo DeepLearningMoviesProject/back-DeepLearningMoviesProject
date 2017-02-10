@@ -174,17 +174,20 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
 if __name__ == '__main__':
     
     doOne = False    #If we want to learn a specific movie
-    score = 0
+    scoreP = 0
+    scoreSVM = 0
+    scoreK = 0
     
     if(doOne):
         #One movie : the one we want to learn
         filename = 'moviesEvaluated_Thibaut'
         m, labels = preprocessFileGeneric(filename, doTitles=True, doRating=True, doOverviews=True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True) 
         dico = prepareDico(m, doTitles = True, doRating = True, doOverviews = True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True) 
-        _, score = buildTestModel(dico, labels, folds=2)
+        _, scoreK = buildTestModel(dico, labels, folds=2)
     else:
         #All movies
-        _, _ , score = testClassifier(doSVM=True) #Test for keras
+        scoreK, scoreP , scoreSVM = testClassifier(doSVM=True) #Test for keras
     
-    
-    print "The classifier keras has an average accuracy of ", score
+    print "The classifier keras has an average accuracy of ", scoreK
+    print "The classifier perceptron has an average accuracy of ", scoreP
+    print "The classifier SVM has an average accuracy of ", scoreSVM
