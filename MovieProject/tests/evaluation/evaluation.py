@@ -19,7 +19,15 @@ path = '../../resources/evaluations/'
 preprocessingChanged = False #Set to true if the processing has changed
 
 #Test function
-def preprocessMovieGeneric(filename, doTitles=False, doRating=False, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False):
+def preprocessFileGeneric(filename, doTitles=False, doRating=False, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False):
+    '''
+        Allows to save the preprocessing in files, save some time for the tests
+
+        Parameters : 
+            do... : the data you want to preprocess are set to True
+            filename : from where the data come (json file name - without its extension .json)
+    '''
+
     #filename = 'moviesEvaluated-16'
     files = {}
     if(doTitles):
@@ -42,6 +50,10 @@ def preprocessMovieGeneric(filename, doTitles=False, doRating=False, doOverviews
 
     if(doDirectors):
         files['directors'] = path + filename + '-Dsave.data'
+
+    if not files:
+        #TODO : raise an error
+        print "Nothing to preprocess here !"
 
     #mat_name = path + filename + '-' + names + '-save.data'
     labels_name = path + filename + '-LABELSsave.data'

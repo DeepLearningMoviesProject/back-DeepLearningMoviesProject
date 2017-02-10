@@ -19,6 +19,13 @@ epoch = 1000
 batch = 128
 
 def createModel(dataLen=0, genresLen=0, actorsLen=0, directorsLen=0):
+    '''
+        Creates the model
+
+        Parameters : the length of the matrix we want to fit our model on, at least one must be > 0
+
+        return : The model, ready to be fit
+    '''
     
     totalLen = dataLen + genresLen + actorsLen + directorsLen
 
@@ -59,7 +66,7 @@ def createModel(dataLen=0, genresLen=0, actorsLen=0, directorsLen=0):
     
     #We merge in cascade
     finalBranch = _mergeBranches(*branches)
-    finalBranch.add(Dense(totalLen, activation = 'relu'))
+    #finalBranch.add(Dense(totalLen, activation = 'relu')) # Done in _mergeBranches
     finalBranch.add(Dropout(0.2, input_shape = (totalLen,)))
     
     #Here are all of our layers, we can apply our hidden layers
@@ -189,31 +196,6 @@ def createTrainModelDico(dico, labels, iTest = [], iTrain = [], doTest=False):
 
     return model, scores
 
-# def createTrainModel(textTrain, genresTrain, labelsTrain):
-#     """
-#         Creates, fits and returns the specific model fitting the entries
-        
-#         Parameters : 
-#             textTrain, genresTrain : the data to train on, the first one only needs embedding, the other one(s) needs dense layer before merge
-#             labelsTrain : the labels of the data to train
-#             textTest, genresTest : data to use for the test of the classifier
-#             labelsTest : the labels of the data to test
-            
-#         return :
-#             the model is trained with the parameters
-            
-#     """
-
-#     #Create the model
-#     model = createModel(len(textTrain[0]), len(genresTrain[0]))
-
-#     #Train model
-#     model.fit([textTrain, genresTrain], labelsTrain, batch_size = batch, nb_epoch = epoch, verbose = 1)
-# #    model.fit([textEntries, genresEntries, actorsEntries, realEntries], classEntries, batch_size = 2000, nb_epoch = 100, verbose = 1)
-
-#     return model
-
-
 def buildModel(dico, labels):
     '''
         Builds the model that matches the movies (ids) and the like/dislike
@@ -228,48 +210,6 @@ def buildModel(dico, labels):
 
     model, _ = createTrainModelDico(dico, labels)
     return model
-
-
-# def buildTestModel(T, G, labels, folds):
-#     '''
-#         Builds the model that matches the matrix T and G and the like/dislike
-#         Tests it with k-cross validation
-#         T and G matrix must have been preprocessed correctly
-        
-#         Parameters : 
-#             T, G : the characteristics of the movies we want to build the model on
-#             labels : tells whether the movie is liked or not (binary)           
-            
-#         return :
-#             the model trained on the movies
-#     '''
-    
-#     cvscores = []
-#     model = None # Clearing the NN.
-#     d = {
-#         'data': T,
-#         'genres': G,
-# #        'actors': 'value',
-# #        'directors': 'value',
-#     }
-
-#     n_folds = folds
-#     skf = StratifiedKFold(labels, n_folds=n_folds, shuffle=True)
-
-#     for i, (train, test) in enumerate(skf):
-#         print "Running Fold", i+1, "/", n_folds
-#         # print " train, test : ", train, " ", test
-#         iTrain = np.array(train)
-#         iTest = np.array(test)
-#         model = None # Clearing the NN.
-#        # model, scores = createTrainTestModel(T[indices], G[indices], labels[indices], T[tIndice], G[tIndice], labels[tIndice])
-#         model, scores = createTrainTestModelDico(d, labels, iTest, iTrain)
-#         cvscores.append(scores[1] * 100)
-
-#     mean_score = np.mean(cvscores)
-#     print("%.2f%% (+/- %.2f%%)" % (np.mean(cvscores), np.std(cvscores)))
-#     return model, mean_score
-    
     
 def buildTestModel(dico, labels, folds):
     '''
@@ -307,6 +247,13 @@ def buildTestModel(dico, labels, folds):
 
 
 def _mergeBranches(*listBranch):
+    '''
+        Merge branches of listBranch in cascade (recursively)
+
+        Parameters : a list of the branches we want to merge
+
+        returns : the final branch that results of all the merges
+    '''
     
     if(len(listBranch) == 0):
         #TODO : raise an error
@@ -314,11 +261,14 @@ def _mergeBranches(*listBranch):
         return None
         
     if(len(listBranch) == 1):
-        return listBranch[0]
+        finalBranch = listBranch[0]
+        finalBranch.add(Dense(totalLen, activation = 'relu'))
+        return finalBranch
         
     if(len(listBranch) == 2):
         finalBranch = Sequential()
         finalBranch.add(Merge([listBranch[0], listBranch[1]], mode = 'concat'))
+        finalBranch.add(Dense(totalLen, activation = 'relu'))
         return finalBranch
     
     merge2Branches = Sequential()
@@ -326,8 +276,4 @@ def _mergeBranches(*listBranch):
     merge2Branches.add(Dense(1,  activation = 'sigmoid'))
     
     return _mergeBranches(merge2Branches, *listBranch[2:])
-
-        
-#TODO after call of _mergeBranches
-#finalBranch.add(Dense(totalLen, activation = 'relu'))
     
