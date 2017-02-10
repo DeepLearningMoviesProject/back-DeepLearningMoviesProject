@@ -8,8 +8,8 @@ Created on Thu Feb  9 14:50 2017
 import numpy as np
 import pickle
 import os
-from MovieProject.preprocessing import preprocessMatrix, prepareDico
-from MovieProject.learning import buildTestModel, buildModel
+from MovieProject.preprocessing import preprocessMatrix, prepareDico, concatData
+from MovieProject.learning import buildTestModel, buildModel, LinearSVM
 from flask import json
 from os.path import isfile
 
@@ -141,21 +141,25 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
     #Get all files from PATH, and get the score of the classifier on these files
     for file in os.listdir(path):
         if file.endswith(".json") and ("simple" not in file):
-            #Load the data we want to preprocess
-            dicoMatrix, labels = preprocessFileGeneric(file.replace(".json", ""), doTitles=doTitles, doRating=doRating, doOverviews=doOverviews, doKeywords=doKeywords, doGenres=doGenres, doActors=doActors, doDirectors=doDirectors)
+            dico, labels = preprocessFileGeneric(file.replace(".json", ""), doTitles=True, doRating=True, doOverviews=True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True)
             scoreKeras = 0
             scorePerceptron = 0
             scoreSVM = 0
             if(doKeras):
                 #Prepare the dico that the model takes as parameter
-                dico = prepareDico(dicoMatrix, doTitles, doRating, doOverviews, doKeywords, doGenres, doActors, doDirectors)
+                dico = prepareDico(dico, doTitles, doRating, doOverviews, doKeywords, doGenres, doActors, doDirectors)
                 _, scoreKeras = buildTestModel(dico, labels, folds=5)
             if(doPerceptron):
                 pass
                 #TODO : call perceptron function TMTC
             if(doSVM):
-                pass
-                #TODO : call SVM function TMTC
+                data = concatData([ dico[key] for key in dico ])
+                trainInd = int(0.8*len(data) )
+                
+                svm = LinearSVM()
+                svm.train( data[:trainInd], labels[:trainInd])
+                scoreSVM = svm.evaluate(data[trainInd:], labels[trainInd:])
+
             meanScoreKeras += scoreKeras
             meanScorePerceptron += scorePerceptron
             meanScoreSVM += scoreSVM

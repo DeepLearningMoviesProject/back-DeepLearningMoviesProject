@@ -114,7 +114,7 @@ def preprocessMatrix(idMovies, mTitles=False, mKeywords=False, mOverviews=False,
     return matrix
 
 
-def _concatData(listMatrix):
+def concatData(listMatrix):
     '''
         Recursive function that concats a list of matrixes
         The matrix must have the same dimensions
@@ -127,7 +127,7 @@ def _concatData(listMatrix):
     if(len(listMatrix)==1):
         return listMatrix[0]
     
-    return np.hstack((listMatrix[0], _concatData(listMatrix[1:])))
+    return np.hstack((listMatrix[0], concatData(listMatrix[1:])))
 
 def prepareDico(matrix, doTitles=False, doRating=False, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False):
     '''
@@ -156,7 +156,7 @@ def prepareDico(matrix, doTitles=False, doRating=False, doOverviews=False, doKey
     if(doKeywords):
         toConcat.append(matrix["keywords"])
 
-    concatMatrix = _concatData(toConcat)
+    concatMatrix = concatData(toConcat)
     
     if concatMatrix.size:
         dico["data"] = concatMatrix
