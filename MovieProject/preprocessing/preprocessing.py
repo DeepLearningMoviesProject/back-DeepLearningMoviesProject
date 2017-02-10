@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Feb 01 17:09:54 2017
+Pre-processes the data we want to provide to the learning model.
 
+Created on Wed Feb 01 17:09:54 2017
 @author: darke
 """
 
@@ -24,10 +25,12 @@ class People(Enum):
 
 def preprocess(idMovies, doTitles=False, doRating=False, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False):
     """
-        Parameter : 
-            idMovies : int array of ids of Movies you want to process datas
-            do... : the movies' data you want to extract
-        Return : the dictionnary ready for the classifier
+    Pre-processes the data of interest that we want to provide to the learning model.
+        Parameters: 
+            - idMovies: int array of ids of Movies you want to process datas
+            - doTitles, doKeywords, doOverviews, doRating, doGenres, doActors, doDirectors: boolean (default: False) indicate the movies' data you want to extract
+        Return: 
+            - the dictionnary ready for the classifier
     """
 
     mat = preprocessMatrix(idMovies, mTitles=doTitles, mKeywords=doKeywords, mOverviews=doOverviews, mRating=doRating, mGenres=doGenres, mActors=doActors, mDirectors=doDirectors)
@@ -37,15 +40,13 @@ def preprocess(idMovies, doTitles=False, doRating=False, doOverviews=False, doKe
 
 def preprocessMatrix(idMovies, mTitles=False, mKeywords=False, mOverviews=False, mRating=False, mGenres=False, mActors=False, mDirectors=False):
     """
-        
-        Parameter:
-            idMovies -> array of movie's id from tmdb
-            mTitles, mKeywords, mOverviews, mRating, mGenres, mActors, mDirectors -> boolean (default: False) indicates which matrix to process
-            
+    Create the matrices from the interest data we want to provide to the learning model.
+        Parameters:
+            - idMovies: array of movie's id from tmdb
+            - mTitles, mKeywords, mOverviews, mRating, mGenres, mActors, mDirectors: boolean (default: False) indicates which matrix to process
         return:
-            dictionary of label:matrix, where label is name of matrix processed
+            - dictionary of label:matrix, where label is name of matrix processed (key = titles, keywords, overviews, rating, genres, directors, actors)
     """
-
 
     matrix = {}
     
@@ -116,10 +117,11 @@ def preprocessMatrix(idMovies, mTitles=False, mKeywords=False, mOverviews=False,
 
 def _concatData(listMatrix):
     '''
-        Recursive function that concats a list of matrixes
-        The matrix must have the same dimensions
-
-        returns : a unique matrix that contains all the data that were on the list of matrix
+    Recursive function that concats a list of matrices. The matrices must have the same dimensions.
+        parameters : 
+            - listMatrix : a list of numpy array
+        returns : 
+            - an numpy array containing all data in the list of matrices
     '''
     if(len(listMatrix)==0):
         return np.array([])
@@ -129,16 +131,15 @@ def _concatData(listMatrix):
     
     return np.hstack((listMatrix[0], _concatData(listMatrix[1:])))
 
+    
 def prepareDico(matrix, doTitles=False, doRating=False, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False):
     '''
-        Parameters : 
-            matrixes : the matrixes that have been preprocessed
-            do... : the boolean that tells which matrix has been preprocessed and can be set in the dictionnary
-        return : the dictionnary ready for the classifier with the following matrix if required :
-            data : the matrix with the data concatenate correctly (titles, rating, overviews)
-            genres : matrix for the genres
-            actors : matrix for the actors
-            directors : matrix for the directors
+    Create dictionary for the classifier with the following matrix if required.
+        parameters: 
+            - matrix: matrices that have been preprocessed
+            - doTitles, doKeywords, doOverviews, doRating, doGenres, doActors, doDirectors: boolean (default=False) that tells which matrix has been preprocessed and can be set in the dictionnary
+        return: 
+            - dictionary of label:matrix, where label is name of matrix (key = titles, keywords, overviews, rating, genres, directors, actors)
     '''
     dico = {}
     toConcat = []
@@ -176,11 +177,12 @@ def prepareDico(matrix, doTitles=False, doRating=False, doOverviews=False, doKey
 
 def overviewProcessingD2V(infos, model):
     """
-        Parameter : 
-            infos array of movies you want to get overviews with
-            the Doc2Vec model
-        Return : 
-            ndarray. Matrix of Overviews values calculated by Glove. One line by movie.
+    Pre-process overviews thanks to Dov2Vec model.
+        parameters: 
+            - infos: array of movies you want to get overviews with
+            - model: the Doc2Vec model
+        return: 
+            - a ndarray of overviews values calculated by Glove. One line by movie.
     """
     
     meanMatrixOverview = np.empty([len(infos), SIZE_VECTOR])  
@@ -194,13 +196,15 @@ def overviewProcessingD2V(infos, model):
 
     return meanMatrixOverview
     
+    
 def overviewProcessing(infos, dicoGlove):
     """
-        Parameter : 
-            infos array of movies you want to get overviews with
-            the Glove dictionnary (dicoGlove)
-        Return : 
-            ndarray. Matrix of Overviews values calculated by Glove. One line by movie.
+    Pre-process overviews thanks to Glove model.
+        parameters: 
+            - infos: array of movies you want to get overviews with
+            - model: the Glove dictionnary (dicoGlove)
+        return: 
+            - a ndarray of overviews values calculated by Glove. One line by movie.
     """
     
     sizeVector = dicoGlove[dicoGlove.keys()[0]].shape[0]
@@ -223,9 +227,12 @@ def overviewProcessing(infos, dicoGlove):
     
 def keywordsProcessing(moviesKeywords, dicoGlove):
     """
-        Parameter : keywords array of movies you want to process keywords with
-                    the Glove dictionnary (dicoGlove)
-        Return : Matrix of keywords values calculated by Glove. One line by movie.
+    Pre-process keywords thanks to Glove model.
+        parameters: 
+            - moviesKeywords: array of movies you want to process keywords with
+            - model: the Glove dictionnary (dicoGlove)
+        return:
+            - a ndarray of keywords values calculated by Glove. One line by movie.
     """
     
     sizeVector = dicoGlove[dicoGlove.keys()[0]].shape[0]
@@ -244,11 +251,12 @@ def keywordsProcessing(moviesKeywords, dicoGlove):
 
 def titlesProcessing(infos, dicoGlove):
     """
-        Parameter : 
-            infos array of movies you want to process titles with
-            the Glove dictionnary (dicoGlove)
-        Return : 
-            ndarray. Matrix of titles values calculated by Glove. One line by movie.
+    Pre-process titles thanks to Glove model.
+        parameters : 
+            - infos: array of movies you want to process titles with
+            - model: the Glove dictionnary (dicoGlove)
+        return : 
+            - a ndarray of titles values calculated by Glove. One line by movie.
     """
     
     sizeVector = dicoGlove[dicoGlove.keys()[0]].shape[0]
@@ -272,11 +280,11 @@ def titlesProcessing(infos, dicoGlove):
 
 def ratingProcessing(infos):
     """
-        Parameter : 
-            infos array of movies you want to process rating with
-            the Glove dictionnary (dicoGlove)
-        Return : 
-            ndarray. Matrix of rating values calculated by Glove. One line by movie.
+    Pre-process rating.
+        parameters : 
+            - infos:  array of movies you want to process rating with
+        return : 
+            - a ndarray of rating values. One line by movie.
     """
     
     meanMatrixRating = np.empty([len(infos), 1])
@@ -289,11 +297,11 @@ def ratingProcessing(infos):
 
 def genresProcessing(infos):
     """
+    Pre-process genres.
         Parameter:
-            infos array of movies you want to process rating with
-            the Glove dictionnary (dicoGlove)
+            - infos: array of movies you want to process rating with
         Return:
-            ndarray. Matrix of genres where each value is 1 if genre is present, 0 otherwise
+            - a ndarray. of genres where each value is 1 if genre is present, 0 otherwise
     
     """
     
@@ -319,13 +327,13 @@ def genresProcessing(infos):
 
 def peopleProcessing(moviesCredits, dicoGlove, kindOfPeople):
     """
-        Parameter:
-            moviesCredits -> array of movie's moviesCredits you want to process people with
-                      the Glove dictionnary (dicoGlove)
-            dicoGlove -> GloVe dictionary
-            kindOfPeople -> People enum type, indicating is Directors or Actors 
-        Return:
-            ndarray. Matrix of people values calculated by Glove. One line by movie.
+    Pre-process actors and directors
+        parameters:
+            - moviesCredits -> array of movie's moviesCredits you want to process people
+            - dicoGlove: GloVe dictionary (dicoGlove)
+            - kindOfPeople: People enum type, indicating is Directors or Actors 
+        return:
+            - a ndarray of people values calculated by Glove. One line by movie.
     """
     
     if not isinstance(kindOfPeople, People):
