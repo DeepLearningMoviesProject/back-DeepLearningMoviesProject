@@ -66,7 +66,7 @@ def createModel(dataLen=0, genresLen=0, actorsLen=0, directorsLen=0):
     
     #We merge in cascade
     finalBranch = _mergeBranches(*branches)
-    #finalBranch.add(Dense(totalLen, activation = 'relu')) # Done in _mergeBranches
+    finalBranch.add(Dense(totalLen, activation = 'relu')) # Done in _mergeBranches
     finalBranch.add(Dropout(0.2, input_shape = (totalLen,)))
     
     #Here are all of our layers, we can apply our hidden layers
@@ -262,13 +262,11 @@ def _mergeBranches(*listBranch):
         
     if(len(listBranch) == 1):
         finalBranch = listBranch[0]
-        finalBranch.add(Dense(totalLen, activation = 'relu'))
         return finalBranch
         
     if(len(listBranch) == 2):
         finalBranch = Sequential()
         finalBranch.add(Merge([listBranch[0], listBranch[1]], mode = 'concat'))
-        finalBranch.add(Dense(totalLen, activation = 'relu'))
         return finalBranch
     
     merge2Branches = Sequential()

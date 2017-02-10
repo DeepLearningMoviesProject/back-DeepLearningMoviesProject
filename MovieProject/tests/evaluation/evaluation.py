@@ -9,7 +9,7 @@ import numpy as np
 import pickle
 import os
 from MovieProject.preprocessing import preprocessMatrix, prepareDico
-from MovieProject.learning import buildTestModel
+from MovieProject.learning import buildTestModel, buildModel
 from flask import json
 from os.path import isfile
 
@@ -26,6 +26,7 @@ def preprocessFileGeneric(filename, doTitles=False, doRating=False, doOverviews=
         Parameters : 
             do... : the data you want to preprocess are set to True
             filename : from where the data come (json file name - without its extension .json)
+        return : a dico of the matrix with the data preprocessed, we can build the model with it
     '''
 
     #filename = 'moviesEvaluated-16'
@@ -67,7 +68,7 @@ def preprocessFileGeneric(filename, doTitles=False, doRating=False, doOverviews=
     
 #    T = np.array([])
 #    G = np.array([])
-    matrix = {}
+    dicoMatrix = {}
     labels = np.array([])
     
     if(preprocessingChanged):
@@ -86,14 +87,14 @@ def preprocessFileGeneric(filename, doTitles=False, doRating=False, doOverviews=
         labels = np.array([data[key] for key in data])
 
         #preprocess data
-        matrix = preprocessMatrix(ids, mTitles=doTitles, mKeywords=doKeywords, mOverviews=doOverviews, mRating=doRating, mGenres=doGenres, mActors=doActors, mDirectors=doDirectors)
+        dicoMatrix = preprocessMatrix(ids, mTitles=doTitles, mKeywords=doKeywords, mOverviews=doOverviews, mRating=doRating, mGenres=doGenres, mActors=doActors, mDirectors=doDirectors)
 
         #save preprocessed data - all matrix
         for key in files:
             #Recompute only if the preprocess has changed or if the file doesn't exists
             if(preprocessingChanged or (not isfile(key))):
                 with open(files[key], 'w') as f:
-                    pickle.dump(matrix[key], f)
+                    pickle.dump(dicoMatrix[key], f)
         #Save labels
         with open(labels_name, 'w') as f:
             pickle.dump(labels, f)
@@ -102,7 +103,7 @@ def preprocessFileGeneric(filename, doTitles=False, doRating=False, doOverviews=
         #load preprocessed data - all matrix
         for key in files:
             with open(files[key], 'r') as f:
-                matrix[key] = pickle.load(f)
+                dicoMatrix[key] = pickle.load(f)
 #        with open(mat_name, 'r') as f:
 #            dico = pickle.load(f)
         #Load labels
@@ -110,7 +111,7 @@ def preprocessFileGeneric(filename, doTitles=False, doRating=False, doOverviews=
             labels = pickle.load(f)
         
     'Process OK, model ready to be built !'
-    return prepareDico(matrix, doTitles, doRating, doOverviews, doKeywords, doGenres, doActors, doDirectors), labels
+    return dicoMatrix, labels
 
 def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
     '''
@@ -128,15 +129,26 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
     meanScorePerceptron = 0
     meanScoreSVM = 0
     totalScores = 0
+    
+    doTitles=True
+    doRating=True
+    doOverviews=True
+    doKeywords=True
+    doGenres=True
+    doActors=True
+    doDirectors=True
 
     #Get all files from PATH, and get the score of the classifier on these files
     for file in os.listdir(path):
         if file.endswith(".json") and ("simple" not in file):
-            dico, labels = preprocessMovieGeneric(file.replace(".json", ""), doTitles=True, doRating=True, doOverviews=True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True)
+            #Load the data we want to preprocess
+            dicoMatrix, labels = preprocessFileGeneric(file.replace(".json", ""), doTitles=doTitles, doRating=doRating, doOverviews=doOverviews, doKeywords=doKeywords, doGenres=doGenres, doActors=doActors, doDirectors=doDirectors)
             scoreKeras = 0
             scorePerceptron = 0
             scoreSVM = 0
             if(doKeras):
+                #Prepare the dico that the model takes as parameter
+                dico = prepareDico(dicoMatrix, doTitles, doRating, doOverviews, doKeywords, doGenres, doActors, doDirectors)
                 _, scoreKeras = buildTestModel(dico, labels, folds=5)
             if(doPerceptron):
                 pass
@@ -157,14 +169,15 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
 
 if __name__ == '__main__':
     
-    doOne = False
+    doOne = True    #If we want to learn a specific movie
     score = 0
     
     if(doOne):
-        #One movie
-        filename = 'moviesEvaluated-simple'
-        dico, labels = preprocessMovieGeneric(filename, doTitles=True, doOverviews=True, doActors=True)
-        _, score = buildTestModel(dico, labels, folds=2)
+        #One movie : the one we want to learn
+        filename = 'moviesEvaluated_Thibaut'
+        dico, labels = preprocessFileGeneric(filename, doTitles=True, doRating=True, doOverviews=True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True)
+        #_, score = buildTestModel(dico, labels, folds=2)
+        _ = buildModel(dico, labels)
     else:
         #All movies
         score, _ , _ = testClassifier(doKeras=True) #Test for keras
