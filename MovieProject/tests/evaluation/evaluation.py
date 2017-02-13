@@ -186,7 +186,7 @@ if __name__ == '__main__':
         _, scoreK = buildTestModel(dico, labels, folds=2)
     else:
         #All movies
-        scoreK, scoreP , scoreSVM = testClassifier(doSVM=True) #Test for keras
+        scoreK, scoreP , scoreSVM = testClassifier(doSVM=False, doKeras=True)
     
     print "The classifier keras has an average accuracy of ", scoreK
     print "The classifier perceptron has an average accuracy of ", scoreP
