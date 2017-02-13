@@ -9,10 +9,10 @@ Created on Thu Feb  9 14:50 2017
 import numpy as np
 import pickle
 import os
-from MovieProject.preprocessing import preprocessMatrix, prepareDico, concatData
+from MovieProject.preprocessing import concatData, Preprocessor
 from MovieProject.learning import buildTestModel, LinearSVM, perceptron
 from flask import json
-from os.path import isfile
+from os.path import isfile, join
 
 
 path = '../../resources/evaluations/'
@@ -20,7 +20,7 @@ path = '../../resources/evaluations/'
 preprocessingChanged = False #Set to true if the processing has changed
 
 #Test function
-def preprocessFileGeneric(filename, doTitles=False, doRating=False, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False):
+def preprocessFileGeneric(filename, **kwargs):
     '''
     Allows to save the preprocessing in files, save some time for the tests
         parameters : 
@@ -32,33 +32,16 @@ def preprocessFileGeneric(filename, doTitles=False, doRating=False, doOverviews=
 
     #filename = 'moviesEvaluated-16'
     files = {}
-    if(doTitles):
-        files['titles'] = path + filename + '-Tsave.data'
-
-    if(doRating):
-        files['rating'] = path + filename + '-Rsave.data'
-
-    if(doOverviews):
-        files['overviews'] = path + filename + '-Osave.data'
-
-    if(doKeywords):
-        files['keywords'] = path + filename + '-Ksave.data'
-
-    if(doGenres):
-        files['genres'] = path + filename + '-Gsave.data'
-
-    if(doActors):
-        files['actors'] = path + filename + '-Asave.data'
-
-    if(doDirectors):
-        files['directors'] = path + filename + '-Dsave.data'
+    for key in kwargs:
+        if kwargs[key]:
+            files[key] = join(path, filename + "-%ssave.data" %(key[0].upper()) )
 
     if not files:
         #TODO : raise an error
         print "Nothing to preprocess here !"
 
     #mat_name = path + filename + '-' + names + '-save.data'
-    labels_name = path + filename + '-LABELSsave.data'
+    labels_name = join(path, filename + '-LABELSsave.data')
 
     dontPreprocess = (not preprocessingChanged) and isfile(labels_name)
     
@@ -71,6 +54,8 @@ def preprocessFileGeneric(filename, doTitles=False, doRating=False, doOverviews=
     dicoMatrix = {}
     labels = np.array([])
     
+    pProcessor = Preprocessor(**kwargs)
+    
     if(preprocessingChanged):
         print "Preprocessing has changed !"
 
@@ -78,7 +63,7 @@ def preprocessFileGeneric(filename, doTitles=False, doRating=False, doOverviews=
     if(not dontPreprocess):
         print "File %s in process ..." %(filename)
         #load data from json
-        jname = path + filename + '.json'
+        jname = join(path, filename + '.json')
         with open(jname) as data_file:    
             data = json.load(data_file)
 
@@ -87,7 +72,7 @@ def preprocessFileGeneric(filename, doTitles=False, doRating=False, doOverviews=
         labels = np.array([data[key] for key in data])
 
         #preprocess data
-        dicoMatrix = preprocessMatrix(ids, mTitles=doTitles, mKeywords=doKeywords, mOverviews=doOverviews, mRating=doRating, mGenres=doGenres, mActors=doActors, mDirectors=doDirectors)
+        data = pProcessor.preprocess(ids)
 
         #save preprocessed data - all matrix
         for key in files:
@@ -109,9 +94,11 @@ def preprocessFileGeneric(filename, doTitles=False, doRating=False, doOverviews=
         #Load labels
         with open(labels_name, 'r') as f:
             labels = pickle.load(f)
+            
+        data = pProcessor.prepareDico(dicoMatrix)
         
     'Process OK, model ready to be built !'
-    return dicoMatrix, labels
+    return data, labels
 
     
     
@@ -132,19 +119,18 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
     meanScoreSVM = 0
     totalScores = 0
     
-    doTitles=True
-    doRating=True
-    doOverviews=True
-    doKeywords=True
-    doGenres=True
-    doActors=True
-    doDirectors=True
+    params = { "titles":True,
+               "rating":True,
+               "overviews":True,
+               "keywords":True,
+               "genres":True,
+               "actors":True,
+               "directors":True }
 
     #Get all files from PATH, and get the score of the classifier on these files
-    for file in os.listdir(path):
+    for file in ['moviesEvaluatedCoralie.json']:
         if file.endswith(".json") and ("simple" not in file):
-            dico, labels = preprocessFileGeneric(file.replace(".json", ""), doTitles=True, doRating=True, doOverviews=True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True)
-            data = prepareDico(dico, doTitles, doRating, doOverviews, doKeywords, doGenres, doActors, doDirectors)
+            data, labels = preprocessFileGeneric(file.replace(".json", ""), **params)
             
             scoreKeras = 0
             scorePerceptron = 0
@@ -192,7 +178,7 @@ if __name__ == '__main__':
         _, scoreK = buildTestModel(mat, labels, folds=2)
     else:
         #All movies
-        scoreK, scoreP , scoreSVM = testClassifier(doKeras=True, doSVM=True, doPerceptron=True)
+        scoreK, scoreP , scoreSVM = testClassifier(doKeras=False, doSVM=True, doPerceptron=False)
     
     print "The classifier keras has an average accuracy of ", scoreK
     print "The classifier perceptron has an average accuracy of ", scoreP

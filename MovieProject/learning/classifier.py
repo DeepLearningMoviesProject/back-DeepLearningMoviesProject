@@ -12,7 +12,6 @@ from keras.models import Sequential
 from keras.layers import Dense, Merge, BatchNormalization, Embedding, Flatten, Dropout
 from keras.optimizers import SGD
 from keras.constraints import maxnorm
-from MovieProject.preprocessing import preprocess
 from sklearn.cross_validation import StratifiedKFold
 
 epoch = 800
