@@ -17,6 +17,7 @@ import tmdbsimple as tmdb
 # To pre-process texte in each abtract
 from MovieProject.preprocessing import texts
 
+from os.path import isdir
 
 tmdb.API_KEY = 'ff3f07bf3577a496a2f813488eb29980'
 filePath = "../../resources/train_overviews_treated.txt"
@@ -29,6 +30,12 @@ Load and store abstracts on TMDB, in texte file
 def loadResumes(fileName, pages_max):
     
     file_abstracts = codecs.open(fileName, "w", 'utf-8')
+    
+    # Download stopwords if not present
+    if not isdir(path[0]):
+        from nltk import download
+        download("stopwords")
+    
     cachedStopWords = stopwords.words("english")
     
     for i in range(1,pages_max):
