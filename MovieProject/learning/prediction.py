@@ -10,7 +10,6 @@ from __future__ import unicode_literals
 import numpy as np
 from random import randint
 from MovieProject.preprocessing import preprocess
-from keras.models import Sequential
 #from MovieProject.preprocessing.tools import getMovie
 import tmdbsimple as tmdb
 
@@ -49,13 +48,12 @@ def pickNMovie(n):
         return : 
             - a random list of movies
     '''
-    
+
     #Pick a random page from Discover
     pages_max = 1000
     p = randint(0,pages_max)
     response = tmdb.Discover().movie(page=p)
     pageRes = response['results']
-    
     nbMovies = len(pageRes)
     print 'nb movies : ', nbMovies
 
@@ -70,6 +68,7 @@ def pickNMovie(n):
             movies[i] = pageRes[i]['id']
         return movies
 
+        
 def suggestNMovies(model, n):
     """
     Suggests n movies for the person that has this model

@@ -1,6 +1,8 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
+Evaluate multi couches neuronal network compared to perceptron and SVM
+
 Created on Thu Feb  9 14:50 2017
 @author: elsa
 """
@@ -8,10 +10,9 @@ import numpy as np
 import pickle
 import os
 from MovieProject.preprocessing import preprocessMatrix, prepareDico, concatData
-from MovieProject.learning import buildTestModel, buildModel, LinearSVM, perceptron
+from MovieProject.learning import buildTestModel, LinearSVM, perceptron
 from flask import json
 from os.path import isfile
-
 
 
 path = '../../resources/evaluations/'
@@ -21,12 +22,12 @@ preprocessingChanged = False #Set to true if the processing has changed
 #Test function
 def preprocessFileGeneric(filename, doTitles=False, doRating=False, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False):
     '''
-        Allows to save the preprocessing in files, save some time for the tests
-
-        Parameters : 
-            do... : the data you want to preprocess are set to True
-            filename : from where the data come (json file name - without its extension .json)
-        return : a dico of the matrix with the data preprocessed, we can build the model with it
+    Allows to save the preprocessing in files, save some time for the tests
+        parameters : 
+            - do... : the data you want to preprocess are set to True
+            - filename : from where the data come (json file name - without its extension .json)
+        return : 
+            - a dico of the matrix with the data preprocessed, we can build the model with it
     '''
 
     #filename = 'moviesEvaluated-16'
@@ -64,7 +65,6 @@ def preprocessFileGeneric(filename, doTitles=False, doRating=False, doOverviews=
     for f in files:
         dontPreprocess = dontPreprocess and isfile(files[f])
         
-    
     
 #    T = np.array([])
 #    G = np.array([])
@@ -113,13 +113,15 @@ def preprocessFileGeneric(filename, doTitles=False, doRating=False, doOverviews=
     'Process OK, model ready to be built !'
     return dicoMatrix, labels
 
+    
+    
 def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
     '''
-        Tests the classifiers specified
-        
-        Parameters : booleans that tells the classifiers you want to test
-        
-        returns : the mean scores for the classifiers
+    Tests model accuracy.
+        parameters : 
+            -doKeras, doPerceptron, doSVM : booleans that tells the classifiers you want to test
+        returns : 
+            - the mean scores for the classifiers selected
     '''
 
     if(not (doKeras or doPerceptron or doSVM)):
@@ -150,7 +152,6 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
                 dico = prepareDico(dico, doTitles, doRating, doOverviews, doKeywords, doGenres, doActors, doDirectors)
                 _, scoreKeras = buildTestModel(dico, labels, folds=5)
             if(doPerceptron):
-                pass
                 data = concatData([ dico[key] for key in dico ])
                 scorePerceptron = perceptron.evaluatePerceptron(data, labels)
             if(doSVM):
@@ -172,6 +173,7 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
     return meanScoreKeras, meanScorePerceptron, meanScoreSVM
 
 
+    
 if __name__ == '__main__':
     
     doOne = False    #If we want to learn a specific movie
@@ -187,11 +189,7 @@ if __name__ == '__main__':
         _, scoreK = buildTestModel(dico, labels, folds=2)
     else:
         #All movies
-<<<<<<< Updated upstream
-        scoreK, scoreP , scoreSVM = testClassifier(doSVM=True) #Test for keras
-=======
-        scoreK, scoreP , scoreSVM = testClassifier(doKeras=True, doSVM=True, doPerceptron=True) #Test for keras
->>>>>>> Stashed changes
+        scoreK, scoreP , scoreSVM = testClassifier(doKeras=True, doSVM=True, doPerceptron=True)
     
     print "The classifier keras has an average accuracy of ", scoreK
     print "The classifier perceptron has an average accuracy of ", scoreP
