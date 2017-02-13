@@ -18,6 +18,7 @@ import tmdbsimple as tmdb
 from MovieProject.preprocessing import texts
 
 from os.path import isdir
+from nltk.data import path
 
 tmdb.API_KEY = 'ff3f07bf3577a496a2f813488eb29980'
 filePath = "../../resources/train_overviews_treated.txt"
