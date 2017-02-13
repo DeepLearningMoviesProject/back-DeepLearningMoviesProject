@@ -15,10 +15,10 @@ from keras.constraints import maxnorm
 from MovieProject.preprocessing import preprocess
 from sklearn.cross_validation import StratifiedKFold
 
-epoch = 1000
+epoch = 800
 batch = 128
 
-def createModel(dataLen=0, genresLen=0, actorsLen=0, directorsLen=0):
+def createModel(dataLen = 0, titlesLen = 0, keywordsLen = 0, ratingLen = 0, overviewsLen = 0, genresLen=0, actorsLen=0, directorsLen=0):
     '''
         Creates the model
 
@@ -27,10 +27,14 @@ def createModel(dataLen=0, genresLen=0, actorsLen=0, directorsLen=0):
         return : The model, ready to be fit
     '''
     
-    totalLen = dataLen + genresLen + actorsLen + directorsLen
+    totalLen = dataLen + titlesLen + keywordsLen + ratingLen + overviewsLen + genresLen + actorsLen + directorsLen
 
-    dataInputDim = 1000
-    dataOutputDim = 64
+#    dataInputDim = 1000
+    dataOutputDim = dataLen
+    titlesOutputDim = titlesLen
+    keywordsOutputDim = keywordsLen
+    ratingOutputDim = ratingLen
+    overviewsOutputDim = overviewsLen
     genresOutputDim = genresLen
     actorsOutputDim = actorsLen
     directorsOutputDim = directorsLen
@@ -39,10 +43,36 @@ def createModel(dataLen=0, genresLen=0, actorsLen=0, directorsLen=0):
     
     if(dataLen > 0):
         dataBranch = Sequential()
-        dataBranch.add(Embedding(dataInputDim, dataOutputDim, input_length=dataLen))
-        dataBranch.add(Flatten())
+#        dataBranch.add(Embedding(dataInputDim, dataOutputDim, input_length=dataLen))
+#        dataBranch.add(Flatten())
+        dataBranch.add(Dense(dataOutputDim, input_shape =  (dataLen,) , activation = 'relu'))
+        dataBranch.add(BatchNormalization())
         branches.append(dataBranch)
+        
+    if(titlesLen > 0):
+        titlesBranch = Sequential()
+        titlesBranch.add(Dense(titlesOutputDim, input_shape =  (titlesLen,) , activation = 'relu'))
+        titlesBranch.add(BatchNormalization())
+        branches.append(titlesBranch)
+        
+    if(keywordsLen > 0):
+        keywordsBranch = Sequential()
+        keywordsBranch.add(Dense(keywordsOutputDim, input_shape =  (keywordsLen,) , activation = 'relu'))
+        keywordsBranch.add(BatchNormalization())
+        branches.append(keywordsBranch)
+        
+    if(ratingLen > 0):
+        ratingBranch = Sequential()
+        ratingBranch.add(Dense(ratingOutputDim, input_shape =  (ratingLen,) , activation = 'relu'))
+        ratingBranch.add(BatchNormalization())
+        branches.append(ratingBranch)
     
+    if(overviewsLen > 0):
+        overviewsBranch = Sequential()
+        overviewsBranch.add(Dense(overviewsOutputDim, input_shape = (overviewsLen,), init='normal', activation='relu'))
+        overviewsBranch.add(BatchNormalization())
+        branches.append(overviewsBranch)
+        
     if(genresLen > 0):
         genresBranch = Sequential()
         genresBranch.add(Dense(genresOutputDim, input_shape = (genresLen,), init='normal', activation='relu'))
@@ -65,9 +95,9 @@ def createModel(dataLen=0, genresLen=0, actorsLen=0, directorsLen=0):
         raise ValueError('The model can\'t be created if there is no matrix !')
     
     #We merge in cascade
-    finalBranch = _mergeBranches(*branches)
+    finalBranch = dataBranch
+#    finalBranch = _mergeBranches(*branches)
     finalBranch.add(Dense(totalLen, activation = 'relu')) # Done in _mergeBranches
-    finalBranch.add(Dropout(0.2, input_shape = (totalLen,)))
     
     #Here are all of our layers, we can apply our hidden layers
 #    finalBranch.add(Dense(totalLen, activation = 'relu'))
@@ -141,14 +171,24 @@ def createTrainModelDico(dico, labels, iTest = [], iTrain = [], doTest=False):
         labelsTrain = labels
 
     #Get the data from the dico
-    Data = dico.get("data", None)      #Data
+    Data = dico.get("data", None)     #Data
+    T = dico.get("titles", None)       #title
+    K = dico.get("keywords", None)     #keywords
+    O = dico.get("overviews", None)    #overviews
+    R = dico.get("rating", None)       #rating
     G = dico.get("genres", None)       #Genres
     A = dico.get("actors", None)       #Actors
     D = dico.get("directors", None)    #Directors
+    
     dataL = 0
+    tL = 0
+    kL = 0
+    oL = 0
+    rL = 0
     gL = 0
     aL = 0
     dL = 0
+    
     if Data is not None:
         if(doTest):
             matTrain.append(Data[iTrain])
@@ -156,6 +196,38 @@ def createTrainModelDico(dico, labels, iTest = [], iTrain = [], doTest=False):
         else:
             matTrain.append(Data)
         dataL = len(Data[0])
+    
+    if T is not None:
+        if(doTest):
+            matTrain.append(T[iTrain])
+            matTest.append(T[iTest])
+        else:
+            matTrain.append(T)
+        tL = len(T[0])
+        
+    if K is not None:
+        if(doTest):
+            matTrain.append(K[iTrain])
+            matTest.append(K[iTest])
+        else:
+            matTrain.append(K)
+        kL = len(K[0])
+        
+    if R is not None:
+        if(doTest):
+            matTrain.append(R[iTrain])
+            matTest.append(R[iTest])
+        else:
+            matTrain.append(R)
+        rL = len(R[0])
+        
+    if O is not None:
+        if(doTest):
+            matTrain.append(O[iTrain])
+            matTest.append(O[iTest])
+        else:
+            matTrain.append(O)
+        oL = len(O[0])
     
     if G is not None:
         if(doTest):
@@ -180,9 +252,9 @@ def createTrainModelDico(dico, labels, iTest = [], iTrain = [], doTest=False):
         else:
             matTrain.append(D) 
         dL = len(D[0])
-    
+
     #Create the model
-    model = createModel(dataLen = dataL, genresLen = gL, actorsLen = aL, directorsLen = dL)
+    model = createModel(dataLen = dataL, titlesLen = tL, keywordsLen = kL, ratingLen = rL, overviewsLen = oL, genresLen = gL, actorsLen = aL, directorsLen = dL)
     
     #Train model
 #    model.fit([textTrain], labelsTrain, batch_size = batch, nb_epoch = epoch, verbose = 1)
@@ -202,7 +274,11 @@ def buildModel(dico, labels):
         Builds the model that matches the movies (ids) and the like/dislike
         
         Parameters : 
-            ids : the ids of the movies we want to build the model on
+            dico : a dict of the matrix we want to build the model on
+                "data" : matrix with all the data that will go through the embedding layer
+                "genres" : matrix of binary values for each genre
+                "actors" : matrix of binary values for each actor
+                "directors" : matrix of binary values for each director
             labels : tells whether the movie is liked or not (binary)           
             
         return :
@@ -214,13 +290,14 @@ def buildModel(dico, labels):
     
 def buildTestModel(dico, labels, folds):
     '''
-        Builds the model that matches the matrix T and G and the like/dislike
+        Builds the model that matches the matrix contained in dico and the like/dislike
         Tests it with k-cross validation
         T and G matrix must have been preprocessed correctly
         
         Parameters : 
             T, G : the characteristics of the movies we want to build the model on
-            labels : tells whether the movie is liked or not (binary)           
+            labels : tells whether the movie is liked or not (binary)       
+            folds :
             
         return :
             the model trained on the movies
@@ -262,6 +339,7 @@ def _mergeBranches(*listBranch):
         return None
         
     if(len(listBranch) == 1):
+        finalBranch = Sequential()
         finalBranch = listBranch[0]
         return finalBranch
         

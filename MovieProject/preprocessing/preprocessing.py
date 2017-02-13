@@ -156,21 +156,29 @@ def prepareDico(matrix, doTitles=False, doRating=False, doOverviews=False, doKey
 
     if(doKeywords):
         toConcat.append(matrix["keywords"])
+        
+    if(doGenres):
+        toConcat.append(matrix["genres"])
+
+    if(doActors):
+        toConcat.append(matrix["actors"])
+
+    if(doDirectors):
+        toConcat.append(matrix["directors"])
 
     concatMatrix = concatData(toConcat)
     
     if concatMatrix.size:
         dico["data"] = concatMatrix
 
-
-    if(doGenres):
-        dico["genres"] = matrix["genres"]
-
-    if(doActors):
-        dico["actors"] = matrix["actors"]
-
-    if(doDirectors):
-        dico["directors"] = matrix["directors"]
+#    if(doGenres):
+#        dico["genres"] = matrix["genres"]
+#
+#    if(doActors):
+#        dico["actors"] = matrix["actors"]
+#
+#    if(doDirectors):
+#        dico["directors"] = matrix["directors"]
     
     return dico
     
