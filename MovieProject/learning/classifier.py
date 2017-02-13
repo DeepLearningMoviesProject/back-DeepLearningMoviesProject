@@ -118,13 +118,14 @@ def createTrainModelDico(dico, labels, iTest = [], iTrain = [], doTest=False):
         Creates, fits and returns the specific model fitting the entries
         
         Parameters : 
-            textTrain, genresTrain : the data to train on, the first one only needs embedding, the other one(s) needs dense layer before merge
-            labelsTrain : the labels of the data to train
-            textTest, genresTest : data to use for the test of the classifier
-            labelsTest : the labels of the data to test
+            dico : a dictionary of the data to train on - np.array
+            labels : the labels of the data to train (binary) - np.array
+            iTrain : an array of indexes for the training
+            iTest : an array of indexes for the tests
+            doTest : set to true if you want to test the model
             
         return :
-            the model is trained with the parameters
+            the model that is trained with the parameters
             
     """
     matTrain = []
