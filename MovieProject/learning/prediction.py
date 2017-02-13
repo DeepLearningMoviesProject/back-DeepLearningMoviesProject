@@ -9,14 +9,13 @@ from __future__ import unicode_literals
 
 import numpy as np
 from random import randint
-from MovieProject.preprocessing import preprocess
+from MovieProject.preprocessing import Preprocessor
 #from MovieProject.preprocessing.tools import getMovie
 import tmdbsimple as tmdb
 
 batch = 500
 
-
-def predict(movie, model):
+def predict(movie, model, **kwargs):
     '''
     Predicts the class of the movie according to the model
         parameters : 
@@ -25,18 +24,21 @@ def predict(movie, model):
         returns : 
             - a boolean to tell if the movie is liked or not
     '''
-
+    
     arrayMovie = np.array([movie])
     
     print "movies prediction : ", arrayMovie
-
-    data = preprocess(arrayMovie,  doTitles=True, doRating=True, doOverviews=True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True)
+    
+    pProcessor = Preprocessor(**kwargs)
+    
+    data = pProcessor.preprocess(arrayMovie)
+    
+#    data = preprocess(arrayMovie,  doTitles=True, doRating=True, doOverviews=True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True)
     
     print "preprocessing done for the movie, start the prediction"
-
-    #TODO : The prediction must be done with the model
+    
     pred = model.predict(data, batch_size=batch, verbose=0)
-
+    
     return pred
     
     
@@ -69,7 +71,7 @@ def pickNMovie(n):
         return movies
 
         
-def suggestNMovies(model, n):
+def suggestNMovies(model, n, **kwargs):
     """
     Suggests n movies for the person that has this model
         parameters :
@@ -94,11 +96,11 @@ def suggestNMovies(model, n):
             
         #Keep in suggestion the movies that matches the model
         for m in movies:
-            pred = predict(m, model)
+            pred = predict(m, model, **kwargs)
             print m, ' is predicted with ', pred
-            if(pred):
-                
+            if(pred > 0.7):
                 suggestion = np.append(suggestion, m)
+                print m, " added"
 
     return suggestion
     

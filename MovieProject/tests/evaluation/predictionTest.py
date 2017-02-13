@@ -5,7 +5,7 @@ Created on Tue Feb  7 17:20:44 2017
 @author: elsa
 """
 
-from MovieProject.preprocessing import prepareDico
+#from MovieProject.preprocessing import prepareDico
 from MovieProject.learning import buildModel, suggestNMovies
 from evaluation import preprocessFileGeneric
 
@@ -15,10 +15,19 @@ if __name__ == "__main__":
     '''
 
     filename = 'moviesEvaluated-18'
+    
+    params = { "titles":True,
+               "rating":True,
+               "overviews":True,
+               "keywords":True,
+               "genres":True,
+               "actors":True,
+               "directors":True }
 
-    d, labels = preprocessFileGeneric(filename, doTitles=True, doRating=True, doOverviews=True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True) 
-    mat = prepareDico(d, doTitles = True, doRating = True, doOverviews = True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True) 
-    model= buildModel(mat, labels)    
+    data, labels = preprocessFileGeneric(filename.replace(".json", ""), **params)
+#    d, labels = preprocessFileGeneric(filename, doTitles=True, doRating=True, doOverviews=True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True) 
+#    mat = prepareDico(d, doTitles = True, doRating = True, doOverviews = True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True) 
+    model= buildModel(data, labels)    
     
 
-    print suggestNMovies(model, 10)
+    print suggestNMovies(model, 10, **params)
