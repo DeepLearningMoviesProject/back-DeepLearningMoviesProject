@@ -2,16 +2,16 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Feb  9 14:50 2017
-
 @author: elsa
 """
 import numpy as np
 import pickle
 import os
 from MovieProject.preprocessing import preprocessMatrix, prepareDico, concatData
-from MovieProject.learning import buildTestModel, buildModel, LinearSVM
+from MovieProject.learning import buildTestModel, buildModel, LinearSVM, perceptron
 from flask import json
 from os.path import isfile
+
 
 
 path = '../../resources/evaluations/'
@@ -151,7 +151,8 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
                 _, scoreKeras = buildTestModel(dico, labels, folds=5)
             if(doPerceptron):
                 pass
-                #TODO : call perceptron function TMTC
+                data = concatData([ dico[key] for key in dico ])
+                scorePerceptron = perceptron.evaluatePerceptron(data, labels)
             if(doSVM):
                 data = concatData([ dico[key] for key in dico ])
                 trainInd = int(0.8*len(data) )
@@ -180,13 +181,17 @@ if __name__ == '__main__':
     
     if(doOne):
         #One movie : the one we want to learn
-        filename = 'moviesEvaluated_Thibaut'
+        filename = 'moviesEvaluatedCoralie'
         m, labels = preprocessFileGeneric(filename, doTitles=True, doRating=True, doOverviews=True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True) 
         dico = prepareDico(m, doTitles = True, doRating = True, doOverviews = True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True) 
         _, scoreK = buildTestModel(dico, labels, folds=2)
     else:
         #All movies
+<<<<<<< Updated upstream
         scoreK, scoreP , scoreSVM = testClassifier(doSVM=True) #Test for keras
+=======
+        scoreK, scoreP , scoreSVM = testClassifier(doKeras=True, doSVM=True, doPerceptron=True) #Test for keras
+>>>>>>> Stashed changes
     
     print "The classifier keras has an average accuracy of ", scoreK
     print "The classifier perceptron has an average accuracy of ", scoreP

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Feb 07 15:08 2017
+Allows to predict if a movie will be enjoyed by a user, thanks to his own training model
 
+Created on Thu Feb 07 15:08 2017
 @author: elsa
 """
 from __future__ import unicode_literals
@@ -15,15 +16,15 @@ import tmdbsimple as tmdb
 
 batch = 500
 
+
 def predict(movie, model):
     '''
-        Predicts the class of the movie according to the model
-        
-        Parameters : 
-            movie : the id of the movie we want to know the class of, the id must exist
-            model : the model that matches the taste of the user
-
-        returns : a boolean to tell if the movie is liked or not
+    Predicts the class of the movie according to the model
+        parameters : 
+            - movie : the id of the movie we want to know the class of, the id must exist
+            - model : the model that matches the taste of the user
+        returns : 
+            - a boolean to tell if the movie is liked or not
     '''
 
     arrayMovie = np.array([movie])
@@ -39,12 +40,16 @@ def predict(movie, model):
 
     return pred
     
+    
 def pickNMovie(n):
     '''
-        Get n movies from tmdb, max 20
-
-        return : a random list of movies
+    Get n movies from tmdb, max 20
+        parameters :
+            - n : the number of movie (int)
+        return : 
+            - a random list of movies
     '''
+    
     #Pick a random page from Discover
     pages_max = 1000
     p = randint(0,pages_max)
@@ -67,13 +72,12 @@ def pickNMovie(n):
 
 def suggestNMovies(model, n):
     """
-        Suggests n movies for the person that has this model
-        
-        Parameters :
-            model : the model that the suggestion fits
-            n : the amount of suggestions to return
-        
-        return : a list of n suggestions that are liked according to the model
+    Suggests n movies for the person that has this model
+        parameters :
+            - model : the model that the suggestion fits
+            - n : the amount of suggestions to return
+        return : 
+            - a list of n suggestions that are liked according to the model
     """
     suggestion = np.array([])
     pickSize = 20
