@@ -7,13 +7,22 @@ Created on Tue Jan 31 16:57:58 2017
 
 import numpy as np
 import pickle
-import os
-from MovieProject.learning import buildModel, buildTestModel
 from MovieProject.preprocessing import preprocess
 from flask import json
 from os.path import isfile
 
-path = '../resources/evaluations/'
+path = '../../resources/evaluations/'
+
+doTitles=True
+doKeywords=True
+doOverviews=True
+doRating=True
+
+doGenres=True
+doActors=True
+doDirectors=True
+
+preprocessingChanged = False #Set to true if the processing has changed
 
 #Test function
 def preprocessMovie(filename):
@@ -22,7 +31,6 @@ def preprocessMovie(filename):
     gname = path + filename + '-Gsave.data'
     lname = path + filename + '-LABELSsave.data'
 
-    preprocessingChanged = False #Set to true if the processing has changed
     dontPreprocess = (not preprocessingChanged) and isfile(tname) and isfile(gname) and isfile(lname)
     
     T = np.array([])
@@ -47,15 +55,18 @@ def preprocessMovie(filename):
         #preprocess data
         T, G = preprocess(ids)
 
+        # datas = preprocessMatrix(ids, mTitles = true)
+       # T = datas['titles']
+
         #save preprocessed data (T & G)
         with open(tname, 'w') as f:
             pickle.dump(T, f)
-        with open(gname, 'w') as f:
-            pickle.dump(G, f)
+        # with open(gname, 'w') as f:
+        #     pickle.dump(G, f)
         with open(lname, 'w') as f:
             pickle.dump(labels, f)
     else:
-        print "File % load process ...", filename
+        print "File %s load process ..." %(filename)
         #load preprocessed data (T & G)
         with open(tname, 'r') as f:
             T = pickle.load(f)
@@ -66,30 +77,3 @@ def preprocessMovie(filename):
         
     'Process OK, model ready to be built !'
     return T, G, labels
-    
-def testMovie(filename):
-    T, G, labels = preprocessMovie(filename)
-    model, score = buildTestModel(T, G, labels, folds=5)
-    return model, score
-
-
-def testClassifier():
-
-    meanScore = 0
-    totalScores = 0
-
-    #Get all files from PATH, and get the score of the classifier on these files
-    for file in os.listdir(path):
-        if file.endswith(".json"):
-            model, score = testMovie(file.replace(".json", ""))
-            meanScore += score
-            totalScores += 1
-    #Compute the mean score for the classifier
-    meanScore /= totalScores
-    return meanScore
-
-
-if __name__ == '__main__':
-   # testMovies('moviesEvaluated-16')
-   score = testClassifier()
-   print "The classifier has an average accuracy of ", score

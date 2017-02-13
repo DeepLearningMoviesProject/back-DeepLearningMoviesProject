@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Feb 01 17:09:54 2017
+Pre-processes the data we want to provide to the learning model.
 
+Created on Wed Feb 01 17:09:54 2017
 @author: darke
 """
 
@@ -22,39 +23,59 @@ class People(Enum):
     DIRECTOR = 2
 
 
-def preprocess(idMovies):
+def preprocess(idMovies, doTitles=False, doRating=False, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False):
     """
-        Parameter : 
-            int array of ids of Movies you want to process datas
-        Return : 
-            ndarray. Matrix of KeyWords,Titles,Overview and rating values calculated 
-            by Glove. One line by movie.
+    Pre-processes the data of interest that we want to provide to the learning model.
+        Parameters: 
+            - idMovies: int array of ids of Movies you want to process datas
+            - doTitles, doKeywords, doOverviews, doRating, doGenres, doActors, doDirectors: boolean (default: False) indicate the movies' data you want to extract
+        Return: 
+            - the dictionnary ready for the classifier
     """
+
+    mat = preprocessMatrix(idMovies, mTitles=doTitles, mKeywords=doKeywords, mOverviews=doOverviews, mRating=doRating, mGenres=doGenres, mActors=doActors, mDirectors=doDirectors)
     
-    print "Loading data from TMDB"
-    dicoGlove = loadGloveDicFromFile(GLOVE_DICT_FILE)
-    modelD2V = loadD2VModel(D2V_FILE)
+    return prepareDico(mat, doTitles=doTitles, doRating=doRating, doOverviews=doOverviews, doKeywords=doKeywords, doGenres=doGenres, doActors=doActors, doDirectors=doDirectors)
+
+
+def preprocessMatrix(idMovies, mTitles=False, mKeywords=False, mOverviews=False, mRating=False, mGenres=False, mActors=False, mDirectors=False):
+    """
+    Create the matrices from the interest data we want to provide to the learning model.
+        Parameters:
+            - idMovies: array of movie's id from tmdb
+            - mTitles, mKeywords, mOverviews, mRating, mGenres, mActors, mDirectors: boolean (default: False) indicates which matrix to process
+        return:
+            - dictionary of label:matrix, where label is name of matrix processed (key = titles, keywords, overviews, rating, genres, directors, actors)
+    """
+
+    matrix = {}
+    
+    if mKeywords or mActors or mDirectors or mTitles:
+        dicoGlove = loadGloveDicFromFile(GLOVE_DICT_FILE)
+    
+    if mOverviews:
+        modelD2V = loadD2VModel(D2V_FILE)
     
     movies = getMovies(idMovies)    
     
     infos = []
     keywords = []
     credits = []
-    
-    
+
+    print "Loading data from TMDB"
     cpt = 0
     for i in range(len(movies)):
         movie = movies[i]
         
         try:
             # If those request failed, doesn't append results to arrays
-            info = movie.info()
-            keyword = movie.keywords()
-            credit = movie.credits()
+            if mOverviews or mTitles or mRating or mGenres: info = movie.info()
+            if mKeywords: keyword = movie.keywords()
+            if mActors or mDirectors: credit = movie.credits()
             
-            infos.append(info)
-            keywords.append(keyword)
-            credits.append(credit)
+            if mOverviews or mTitles or mRating or mGenres:infos.append(info)
+            if mKeywords: keywords.append(keyword)
+            if mActors or mDirectors: credits.append(credit)
         except:
             print "Error, movie " + str (movie) + " NOT FOUND"
             
@@ -63,43 +84,113 @@ def preprocess(idMovies):
             print "%.0f%% requests loaded..." %(100*i/(1.0*len(movies)))
             cpt = 0
 
-            
-    print "50% requests loaded..."
-    meanKeywords = keywordsProcessing(keywords, dicoGlove)
-    print "100% requests loaded and keywords preprocessed ! "
+    if mKeywords:
+        print "Processing Keywords"
+        matrix["keywords"] = keywordsProcessing(keywords, dicoGlove)
     
-    print "Processing Overview..."
-   # meanOverviews = overviewProcessing(infos, dicoGlove)
-    meanOverviews = overviewProcessingD2V(infos, modelD2V)
+    if mOverviews:
+        print "Processing Overviews..."
+        matrix["overviews"] = overviewProcessingD2V(infos, modelD2V)
     
-    print "Processing titles..."
-    meanTitles = titlesProcessing(infos, dicoGlove)
+    if mTitles:
+        print "Processing titles..."
+        matrix["titles"] = titlesProcessing(infos, dicoGlove)
     
-    print "Processing rating..."
-    meanRating = ratingProcessing(infos)
+    if mRating:
+        print "Processing rating..."
+        matrix["rating"] = ratingProcessing(infos)
+        
+    if mGenres:
+        print "Processing genres..."
+        matrix["genres"] = genresProcessing(infos)
     
-    finalMatrix = np.hstack((np.hstack((np.hstack((meanKeywords,meanOverviews)),meanTitles)),meanRating))
+    if mDirectors:
+        print "Processing directors..."
+        matrix["directors"] = peopleProcessing(credits, dicoGlove, People.DIRECTOR)
     
-    print "Processing genres..."
-    genres = genresProcessing(infos)
+    if mActors:
+        print "Processing actors..."
+        matrix["actors"] = peopleProcessing(credits, dicoGlove, People.ACTOR)
     
-    print "Processing directors..."
-    directors = peopleProcessing(credits, dicoGlove, People.DIRECTOR)
-    
-    print "Processing actors..."
-    actors = peopleProcessing(credits, dicoGlove, People.ACTOR)
-    
-    return finalMatrix, genres
+    return matrix
 
 
+def concatData(listMatrix):
+    '''
+    Recursive function that concats a list of matrices. The matrices must have the same dimensions.
+        parameters : 
+            - listMatrix : a list of numpy array
+        returns : 
+            - an numpy array containing all data in the list of matrices
+    '''
+    if(len(listMatrix)==0):
+        return np.array([])
+        
+    if(len(listMatrix)==1):
+        return listMatrix[0]
+    
+    return np.hstack((listMatrix[0], concatData(listMatrix[1:])))
+
+    
+def prepareDico(matrix, doTitles=False, doRating=False, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False):
+    '''
+    Create dictionary for the classifier with the following matrix if required.
+        parameters: 
+            - matrix: matrices that have been preprocessed
+            - doTitles, doKeywords, doOverviews, doRating, doGenres, doActors, doDirectors: boolean (default=False) that tells which matrix has been preprocessed and can be set in the dictionnary
+        return: 
+            - dictionary of label:matrix, where label is name of matrix (key = titles, keywords, overviews, rating, genres, directors, actors)
+    '''
+    mat = np.array([])
+    toConcat = []
+    
+
+    if(doTitles):
+        toConcat.append(matrix["titles"])
+
+    if(doRating):
+        toConcat.append(matrix["rating"])
+
+    if(doOverviews):
+        toConcat.append(matrix["overviews"])
+
+    if(doKeywords):
+        toConcat.append(matrix["keywords"])
+        
+    if(doGenres):
+        toConcat.append(matrix["genres"])
+
+    if(doActors):
+        toConcat.append(matrix["actors"])
+
+    if(doDirectors):
+        toConcat.append(matrix["directors"])
+
+    concatMatrix = concatData(toConcat)
+    
+    if concatMatrix.size:
+        mat = concatMatrix
+
+#    if(doGenres):
+#        dico["genres"] = matrix["genres"]
+#
+#    if(doActors):
+#        dico["actors"] = matrix["actors"]
+#
+#    if(doDirectors):
+#        dico["directors"] = matrix["directors"]
+    
+    return mat
+    
 
 def overviewProcessingD2V(infos, model):
     """
-        Parameter : 
-            infos array of movies you want to get overviews with
-            the Doc2Vec model
-        Return : 
-            ndarray. Matrix of Overviews values calculated by Glove. One line by movie.
+    Pre-process overviews thanks to Dov2Vec model.
+        parameters: 
+            - infos: array of movies you want to get overviews with
+            - model: the Doc2Vec model
+        return: 
+            - a ndarray of overviews values calculated by Glove. One line by movie.
     """
     
     meanMatrixOverview = np.empty([len(infos), SIZE_VECTOR])  
@@ -113,13 +204,15 @@ def overviewProcessingD2V(infos, model):
 
     return meanMatrixOverview
     
+    
 def overviewProcessing(infos, dicoGlove):
     """
-        Parameter : 
-            infos array of movies you want to get overviews with
-            the Glove dictionnary (dicoGlove)
-        Return : 
-            ndarray. Matrix of Overviews values calculated by Glove. One line by movie.
+    Pre-process overviews thanks to Glove model.
+        parameters: 
+            - infos: array of movies you want to get overviews with
+            - model: the Glove dictionnary (dicoGlove)
+        return: 
+            - a ndarray of overviews values calculated by Glove. One line by movie.
     """
     
     sizeVector = dicoGlove[dicoGlove.keys()[0]].shape[0]
@@ -142,9 +235,12 @@ def overviewProcessing(infos, dicoGlove):
     
 def keywordsProcessing(moviesKeywords, dicoGlove):
     """
-        Parameter : keywords array of movies you want to process keywords with
-                    the Glove dictionnary (dicoGlove)
-        Return : Matrix of keywords values calculated by Glove. One line by movie.
+    Pre-process keywords thanks to Glove model.
+        parameters: 
+            - moviesKeywords: array of movies you want to process keywords with
+            - model: the Glove dictionnary (dicoGlove)
+        return:
+            - a ndarray of keywords values calculated by Glove. One line by movie.
     """
     
     sizeVector = dicoGlove[dicoGlove.keys()[0]].shape[0]
@@ -163,11 +259,12 @@ def keywordsProcessing(moviesKeywords, dicoGlove):
 
 def titlesProcessing(infos, dicoGlove):
     """
-        Parameter : 
-            infos array of movies you want to process titles with
-            the Glove dictionnary (dicoGlove)
-        Return : 
-            ndarray. Matrix of titles values calculated by Glove. One line by movie.
+    Pre-process titles thanks to Glove model.
+        parameters : 
+            - infos: array of movies you want to process titles with
+            - model: the Glove dictionnary (dicoGlove)
+        return : 
+            - a ndarray of titles values calculated by Glove. One line by movie.
     """
     
     sizeVector = dicoGlove[dicoGlove.keys()[0]].shape[0]
@@ -191,11 +288,11 @@ def titlesProcessing(infos, dicoGlove):
 
 def ratingProcessing(infos):
     """
-        Parameter : 
-            infos array of movies you want to process rating with
-            the Glove dictionnary (dicoGlove)
-        Return : 
-            ndarray. Matrix of rating values calculated by Glove. One line by movie.
+    Pre-process rating.
+        parameters : 
+            - infos:  array of movies you want to process rating with
+        return : 
+            - a ndarray of rating values. One line by movie.
     """
     
     meanMatrixRating = np.empty([len(infos), 1])
@@ -208,11 +305,11 @@ def ratingProcessing(infos):
 
 def genresProcessing(infos):
     """
+    Pre-process genres.
         Parameter:
-            infos array of movies you want to process rating with
-            the Glove dictionnary (dicoGlove)
+            - infos: array of movies you want to process rating with
         Return:
-            ndarray. Matrix of genres where each value is 1 if genre is present, 0 otherwise
+            - a ndarray. of genres where each value is 1 if genre is present, 0 otherwise
     
     """
     
@@ -238,13 +335,13 @@ def genresProcessing(infos):
 
 def peopleProcessing(moviesCredits, dicoGlove, kindOfPeople):
     """
-        Parameter:
-            moviesCredits -> array of movie's moviesCredits you want to process people with
-                      the Glove dictionnary (dicoGlove)
-            dicoGlove -> GloVe dictionary
-            kindOfPeople -> People enum type, indicating is Directors or Actors 
-        Return:
-            ndarray. Matrix of people values calculated by Glove. One line by movie.
+    Pre-process actors and directors
+        parameters:
+            - moviesCredits -> array of movie's moviesCredits you want to process people
+            - dicoGlove: GloVe dictionary (dicoGlove)
+            - kindOfPeople: People enum type, indicating is Directors or Actors 
+        return:
+            - a ndarray of people values calculated by Glove. One line by movie.
     """
     
     if not isinstance(kindOfPeople, People):

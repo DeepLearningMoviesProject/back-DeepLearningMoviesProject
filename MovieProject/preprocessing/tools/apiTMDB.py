@@ -18,13 +18,16 @@ tmdb.API_KEY = 'ff3f07bf3577a496a2f813488eb29980'
     
 def getMovies(idMovies):
     """
-        return an array of movies corresponding to the idMovies given as a parameter 
-        of the function
+        Retrieve list of TMDB Movie object from a list of ids
+        
+        Parameters:
+            idMovies -> array of int 
+        return:
+           Array of TMDB Movie object 
     """
-    movies = []
-    for idMovie in idMovies:
-        movies.append(getMovie(idMovie))
-    return movies
+
+    return [ getMovie(idMovie) for idMovie in idMovies ]
+
 
 def getCredits(movies):
     """
@@ -62,12 +65,8 @@ def getGenres(tmdbGenres=[]):
         return:
             array of string containing each keyword
     """
-    
-    genres = []
-    for genre in tmdbGenres:
-        genres.append(genre["name"].lower().encode('UTF-8'))
         
-    return genres
+    return [ genre["name"].lower().encode('UTF-8') for genre in tmdbGenres ]
     
 
 def getMovie(id): 
@@ -85,11 +84,9 @@ def saveTmdbGenres():
     """
         
     listGenres = tmdb.Genres().list()["genres"]
-    genres = {}
-    for i in range(len(listGenres)):
-        genre = listGenres[i]["name"].lower().encode('UTF-8')
-        genres[genre] = i
     
+    genres = { g["name"].lower().encode('UTF-8'):i for i, g in enumerate(listGenres) }
+
     np.save(GENRES_FILE, np.asarray([genres]))
     
     

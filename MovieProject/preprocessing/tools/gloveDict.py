@@ -7,15 +7,18 @@ Created on Wed Feb  1 10:14:35 2017
 """
 
 from MovieProject.resources import GLOVE_CORPUS_FILE, GLOVE_DICT_FILE
-from os.path import isfile
+from os.path import isfile, isdir
 
 import numpy as np
 
 from nltk.corpus import stopwords
+from nltk.data import path
 
-#TODO: download stop words from nltk if not present
-#import nltk
-#nltk.download()
+
+# Download stopwords if not present
+if not isdir(path[0]):
+    from nltk import download
+    download("stopwords")
 
 _cachedStopWords = stopwords.words("english")
 
