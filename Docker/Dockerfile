@@ -70,3 +70,33 @@ RUN mv back-DeepLearningMoviesProject/ git/back-DeepLearningMoviesProject/
 RUN rm scala-2.10.4.deb
 RUN rm scala-2.11.8.deb
 RUn rm spark-1.2.0-bin-hadoop2.4.tgz
+
+#Mesos-----------------------------------------------------------------------------------
+RUN git clone https://git-wip-us.apache.org/repos/asf/mesos.git
+RUN sudo apt-get update
+
+# Install a few utility tools.
+RUN sudo apt-get install -y tar wget git
+
+# Install the latest OpenJDK.
+RUN sudo apt-get install -y openjdk-7-jdk
+
+# Install autotools (Only necessary if building from git repository).
+RUN sudo apt-get install -y autoconf libtool
+
+# Install other Mesos dependencies.
+RUN sudo apt-get -y install build-essential python-dev libcurl4-nss-dev libsasl2-dev libsasl2-modules maven libapr1-dev libsvn-dev
+
+RUN cd mesos
+
+# Bootstrap (Only required if building from git repository).
+RUN ./bootstrap
+
+# Configure and build.
+RUN mkdir build
+RUN cd build
+RUN ../configure
+RUN make
+#make check
+RUN make install
+#----------------------------------------------------------------------------------------
