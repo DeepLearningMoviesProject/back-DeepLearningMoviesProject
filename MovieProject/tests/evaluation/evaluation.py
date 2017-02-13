@@ -144,18 +144,20 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
     for file in os.listdir(path):
         if file.endswith(".json") and ("simple" not in file):
             dico, labels = preprocessFileGeneric(file.replace(".json", ""), doTitles=True, doRating=True, doOverviews=True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True)
+            data = prepareDico(dico, doTitles, doRating, doOverviews, doKeywords, doGenres, doActors, doDirectors)
+            
             scoreKeras = 0
             scorePerceptron = 0
             scoreSVM = 0
+            
             if(doKeras):
                 #Prepare the dico that the model takes as parameter
-                dico = prepareDico(dico, doTitles, doRating, doOverviews, doKeywords, doGenres, doActors, doDirectors)
-                _, scoreKeras = buildTestModel(dico, labels, folds=5)
+                _, scoreKeras = buildTestModel(data, labels, folds=5)
             if(doPerceptron):
-                data = concatData([ dico[key] for key in dico ])
+                #data = concatData([ dico[key] for key in dico ])
                 scorePerceptron = perceptron.evaluatePerceptron(data, labels)
             if(doSVM):
-                data = concatData([ dico[key] for key in dico ])
+                #data = concatData([ dico[key] for key in dico ])
                 trainInd = int(0.8*len(data) )
                 
                 svm = LinearSVM()
@@ -177,6 +179,7 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
 if __name__ == '__main__':
     
     doOne = False    #If we want to learn a specific movie
+    
     scoreP = 0
     scoreSVM = 0
     scoreK = 0
@@ -184,9 +187,9 @@ if __name__ == '__main__':
     if(doOne):
         #One movie : the one we want to learn
         filename = 'moviesEvaluatedCoralie'
-        m, labels = preprocessFileGeneric(filename, doTitles=True, doRating=True, doOverviews=True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True) 
-        dico = prepareDico(m, doTitles = True, doRating = True, doOverviews = True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True) 
-        _, scoreK = buildTestModel(dico, labels, folds=2)
+        d, labels = preprocessFileGeneric(filename, doTitles=True, doRating=True, doOverviews=True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True) 
+        mat = prepareDico(d, doTitles = True, doRating = True, doOverviews = True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True) 
+        _, scoreK = buildTestModel(mat, labels, folds=2)
     else:
         #All movies
         scoreK, scoreP , scoreSVM = testClassifier(doKeras=True, doSVM=True, doPerceptron=True)

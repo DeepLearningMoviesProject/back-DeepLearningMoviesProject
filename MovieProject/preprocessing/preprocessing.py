@@ -141,7 +141,7 @@ def prepareDico(matrix, doTitles=False, doRating=False, doOverviews=False, doKey
         return: 
             - dictionary of label:matrix, where label is name of matrix (key = titles, keywords, overviews, rating, genres, directors, actors)
     '''
-    dico = {}
+    mat = np.array([])
     toConcat = []
     
 
@@ -169,7 +169,7 @@ def prepareDico(matrix, doTitles=False, doRating=False, doOverviews=False, doKey
     concatMatrix = concatData(toConcat)
     
     if concatMatrix.size:
-        dico["data"] = concatMatrix
+        mat = concatMatrix
 
 #    if(doGenres):
 #        dico["genres"] = matrix["genres"]
@@ -180,7 +180,7 @@ def prepareDico(matrix, doTitles=False, doRating=False, doOverviews=False, doKey
 #    if(doDirectors):
 #        dico["directors"] = matrix["directors"]
     
-    return dico
+    return mat
     
 
 def overviewProcessingD2V(infos, model):

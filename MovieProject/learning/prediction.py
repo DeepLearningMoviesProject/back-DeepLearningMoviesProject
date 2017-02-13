@@ -30,12 +30,12 @@ def predict(movie, model):
     
     print "movies prediction : ", arrayMovie
 
-    T, G = preprocess(arrayMovie)
+    data = preprocess(arrayMovie,  doTitles=True, doRating=True, doOverviews=True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True)
     
     print "preprocessing done for the movie, start the prediction"
 
     #TODO : The prediction must be done with the model
-    pred = 1 #model.predict([T, G], batch_size=batch, verbose=0)
+    pred = model.predict(data, batch_size=batch, verbose=0)
 
     return pred
     
@@ -83,6 +83,7 @@ def suggestNMovies(model, n):
     print "n : ", n, " sugg.len : ", len(suggestion)
     
     while(len(suggestion) < n):
+        print "n : ", n, " sugg.len : ", len(suggestion)
         remains_size = n - len(suggestion)
         movies = pickNMovie(np.minimum(pickSize, remains_size))
         
@@ -93,7 +94,10 @@ def suggestNMovies(model, n):
             
         #Keep in suggestion the movies that matches the model
         for m in movies:
-            if(predict(m, model)):
+            pred = predict(m, model)
+            print m, ' is predicted with ', pred
+            if(pred):
+                
                 suggestion = np.append(suggestion, m)
 
     return suggestion

@@ -32,8 +32,8 @@ def trainModel():
     
     print "Movies loaded"
     
-    d = preprocess(ids, doTitles=False, doRating=True, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False) 
-    model = buildModel(d, labels) 
+    data = preprocess(ids, doTitles=False, doRating=True, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False) 
+    model = buildModel(data, labels) 
     
     return jsonify({'result': "ok"})
 
