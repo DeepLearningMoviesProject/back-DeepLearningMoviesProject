@@ -25,7 +25,7 @@ def preprocessFileGeneric(filename, doTitles=False, doRating=False, doOverviews=
     Allows to save the preprocessing in files, save some time for the tests
         parameters : 
             - do... : the data you want to preprocess are set to True
-            - filename : from where the data come (json file name - without its extension .json)
+            - filename : from where the data come (json file name without its extension .json)
         return : 
             - a dico of the matrix with the data preprocessed, we can build the model with it
     '''

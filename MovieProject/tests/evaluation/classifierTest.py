@@ -7,10 +7,7 @@ Created on Tue Jan 31 16:57:58 2017
 
 import numpy as np
 import pickle
-import os
-from MovieProject.learning import buildTestModel
 from MovieProject.preprocessing import preprocess
-from evaluation import preprocessMovieGeneric
 from flask import json
 from os.path import isfile
 
