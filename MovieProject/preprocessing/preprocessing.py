@@ -17,6 +17,35 @@ import numpy as np
 from string import punctuation
 from enum import Enum
 
+import threading, time
+
+
+
+class _RunRequest(threading.Thread):
+    
+    def __init__(self, result, target, *args):
+        """
+            Run request from TMDB into another thread and assure that less 40 requests
+            are send in 10 seconds
+       
+            Parameters:
+                result -> mutable who will contain the result of method target
+                target -> method to run in another thread
+                args -> param of the function target
+        """
+        self._target = target
+        self._args = args
+        self.res = result
+        self.maxTime = 0.8
+        threading.Thread.__init__(self)
+ 
+    def run(self):
+        start = time.time()
+        self.res.append(self._target(*self._args))
+        timeResquest = time.time() - start
+        
+        if self.maxTime - timeResquest > 0 : time.sleep(self.maxTime - timeResquest)
+        
 
 class People(Enum):
     ACTOR = 1
@@ -86,16 +115,25 @@ class Preprocessor():
         cpt = 0
         for i in range(len(movies)):
             movie = movies[i]
+            info, keyword, credit = [], [], []
+            threads = []
             
             try:
                 # If those request failed, doesn't append results to arrays
-                if self.toDo["overviews"] or self.toDo["titles"] or self.toDo["rating"] or self.toDo["genres"]: info = movie.info()
-                if self.toDo["keywords"]: keyword = movie.keywords()
-                if self.toDo["actors"] or self.toDo["directors"]: credit = movie.credits()
+                if self.toDo["overviews"] or self.toDo["titles"] or self.toDo["rating"] or self.toDo["genres"]: 
+                    threads.append(_RunRequest(info, movie.info))
+                if self.toDo["keywords"]: 
+                    threads.append(_RunRequest(keyword, movie.keywords))
+                if self.toDo["actors"] or self.toDo["directors"]: 
+                    threads.append(_RunRequest(credit, movie.credits))
+                                        
+                for t in threads: t.start()
+                for t in threads: t.join()
                 
-                if self.toDo["overviews"] or self.toDo["titles"] or self.toDo["rating"] or self.toDo["genres"]:infos.append(info)
-                if self.toDo["keywords"]: keywords.append(keyword)
-                if self.toDo["actors"] or self.toDo["directors"]: credits.append(credit)
+                if self.toDo["overviews"] or self.toDo["titles"] or self.toDo["rating"] or self.toDo["genres"]:infos.append(info[0])
+                if self.toDo["keywords"]: keywords.append(keyword[0])
+                if self.toDo["actors"] or self.toDo["directors"]: credits.append(credit[0])
+                
             except:
                 print "Error, movie " + str (movie) + " NOT FOUND"
                 

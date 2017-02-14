@@ -72,7 +72,7 @@ def preprocessFileGeneric(filename, **kwargs):
         labels = np.array([data[key] for key in data])
 
         #preprocess data
-        data = pProcessor.preprocess(ids)
+        dicoMatrix = pProcessor.preprocessMatrix(ids)
 
         #save preprocessed data - all matrix
         for key in files:
@@ -95,7 +95,7 @@ def preprocessFileGeneric(filename, **kwargs):
         with open(labels_name, 'r') as f:
             labels = pickle.load(f)
             
-        data = pProcessor.prepareDico(dicoMatrix)
+    data = pProcessor.prepareDico(dicoMatrix)
         
     'Process OK, model ready to be built !'
     return data, labels
