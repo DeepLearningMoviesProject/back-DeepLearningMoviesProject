@@ -53,7 +53,7 @@ def getKeywords(tmdbKeywords={}):
     
     words = []    
     for keyword in tmdbKeywords["keywords"]:
-        words += keyword["name"].lower().encode('UTF-8').split()
+        words += _format(keyword["name"]).split()
 
     return words
 
@@ -66,7 +66,7 @@ def getGenres(tmdbGenres=[]):
             array of string containing each keyword
     """
         
-    return [ genre["name"].lower().encode('UTF-8') for genre in tmdbGenres ]
+    return [ _format(genre["name"]) for genre in tmdbGenres ]
     
 
 def getMovie(id): 
@@ -85,7 +85,7 @@ def saveTmdbGenres():
         
     listGenres = tmdb.Genres().list()["genres"]
     
-    genres = { g["name"].lower().encode('UTF-8'):i for i, g in enumerate(listGenres) }
+    genres = { _format(g["name"]):i for i, g in enumerate(listGenres) }
 
     np.save(GENRES_FILE, np.asarray([genres]))
     
@@ -135,6 +135,79 @@ def getActors(movieCredit):
     
     return [actor["name"] for actor in actors [:nbActors]]
 
+
+def getRuntime(movieInfo):
+    """
+        Retrieve the movie's runtime
+        
+        Parameter:
+            movieInfo -> dictionary of Movie.info()
+        return:
+            int
+    """
+    return movieInfo["runtime"]
+
+
+def getYear(movieInfo):
+    """
+        Retrieve the release Year of the movie
+        
+        Parameter:
+            movieInfo -> dictionary of Movie.info()
+        return:
+            int 
+    """
+    return int(movieInfo["release_date"][:4])
+
+
+def getProdCompagnies(movieInfo):
+    """
+        Retrieve production compagnies of the movie
+        
+        Parameter:
+            movieInfo -> dictionary of Movie.info()
+        return:
+            array of String of compagnies
+    """
+    return [ info["name"] for info in movieInfo["production_companies"] ]
+
+
+def getLanguage(movieInfo):
+    """
+        Retrieve the movie's spoken language
+        
+        Parameter:
+            movieInfo -> dictionary of Movie.info()
+        return:
+            String
+    """
+    return movieInfo["spoken_languages"]
+    
+    
+def getBelongsTo(movieInfo):
+    """
+        Retrieve the movie's collection
+        
+        Parameter:
+            movieInfo -> dictionary of Movie.info()
+        return:
+            String
+    """
+    
+    belongsTo = movieInfo["belongs_to_collection"]
+    
+    return belongsTo is not None and belongsTo["name"] or belongsTo
+
+def _format(text):
+    """
+        Convert the given text in UTF-8 lowercase 
+        
+        Parameters:
+            text -> String
+        return:
+            text formated
+    """
+    return text.lower().encode("UTF-8")
 
 #if __name__ == "__main__":
 #    
