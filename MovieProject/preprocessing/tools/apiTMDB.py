@@ -179,9 +179,9 @@ def getLanguage(movieInfo):
         Parameter:
             movieInfo -> dictionary of Movie.info()
         return:
-            String
+            array of String
     """
-    return movieInfo["spoken_languages"]
+    return [ _format(language["name"]) for language in movieInfo["spoken_languages"] ]
     
     
 def getBelongsTo(movieInfo):

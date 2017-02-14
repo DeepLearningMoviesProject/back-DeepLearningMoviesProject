@@ -34,7 +34,7 @@ def preprocessFileGeneric(filename, **kwargs):
     files = {}
     for key in kwargs:
         if kwargs[key]:
-            files[key] = join(path, filename + "-%ssave.data" %(key[0].upper()) )
+            files[key] = join(path, filename + "-%ssave.data" %(key) )
 
     if not files:
         #TODO : raise an error
@@ -119,13 +119,18 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
     meanScoreSVM = 0
     totalScores = 0
     
-    params = { "titles":True,
-               "rating":True,
-               "overviews":True,
-               "keywords":True,
-               "genres":True,
-               "actors":True,
-               "directors":True }
+    params = {"titles" : True,
+              "rating" : True,
+              "overviews" : True,
+              "keywords" : True,
+              "genres" : True,
+              "actors" : True,
+              "directors" : True,
+              "compagnies" : True,
+              "language" : True,
+              "belongs" : True,
+              "runtime" : True,
+              "date" : True }
 
     #Get all files from PATH, and get the score of the classifier on these files
     for file in os.listdir(path):

@@ -8,6 +8,7 @@ Created on Wed Feb 01 17:09:54 2017
 
 
 from MovieProject.preprocessing.tools import (getMovies, getKeywords, getDirectors, getActors, getCredits,
+                                              getProdCompagnies, getRuntime, getYear, getBelongsTo, getLanguage,
                                               loadGloveDicFromFile, getGenres, getTmdbGenres, loadD2VModel, SIZE_VECTOR)
 from MovieProject.resources import GLOVE_DICT_FILE, D2V_FILE
 from words import meanWords, wordsToGlove
@@ -65,7 +66,12 @@ class Preprocessor():
                       "keywords" : False,
                       "genres" : False,
                       "actors" : False,
-                      "directors" : False }
+                      "directors" : False,
+                      "compagnies" : False,
+                      "language" : False,
+                      "belongs" : False,
+                      "runtime" : False,
+                      "date" : False }
         
         for key, value in kwargs.items():
             if key in self.toDo:
@@ -169,7 +175,27 @@ class Preprocessor():
         if self.toDo["actors"]:
             print "Processing actors..."
             matrix["actors"] = self.peopleProcessing(credits, People.ACTOR)
-        
+            
+        if self.toDo["compagnies"]:
+            print "Processing compagnies..."
+            matrix["compagnies"] = self.compagniesProcessing(infos)
+            
+        if self.toDo["language"]:
+            print "Processing language..."
+            matrix["language"] = self.languageProcessing(infos)
+
+        if self.toDo["date"]:
+            print "Processing date..."
+            matrix["date"] = self.dateProcessing(infos)
+            
+        if self.toDo["runtime"]:
+            print "Processing runtime..."
+            matrix["runtime"] = self.runtimeProcessing(infos)
+            
+        if self.toDo["belongs"]:
+            print "Processing belongs..."
+            matrix["belongs"] = self.belongsToProcessing(infos)
+
         return matrix
     
     
@@ -346,10 +372,89 @@ class Preprocessor():
             for name in names:
                 words += name.lower().encode('UTF-8').split()
             
-            gArray, wSize = wordsToGlove(words, self.dicoGlove)        
+            gArray, wSize = wordsToGlove(words, self.dicoGlove)     
             meanMatrixPeople[i] = meanWords(gArray, wSize)
         
         return meanMatrixPeople
+    
+    
+    def compagniesProcessing(self, moviesInfo):
+        """
+        
+        """
+        
+        meanMatrixCompagnies = np.empty([len(moviesInfo), self.sizeGloveVector])
+        
+        for i, info in enumerate(moviesInfo):
+            comps = getProdCompagnies(info)
+        
+            words = []
+            for comp in comps:
+                words += comp.lower().encode('UTF-8').split()
+            
+            gArray, wSize = wordsToGlove(words, self.dicoGlove)     
+            meanMatrixCompagnies[i] = meanWords(gArray, wSize)
+            
+        return meanMatrixCompagnies
+    
+    
+    def languageProcessing(self, moviesInfo):
+        """
+        
+        """
+        
+        meanMatrixLanguage = np.empty([len(moviesInfo), self.sizeGloveVector])
+        
+        for i, info in enumerate(moviesInfo):
+            langs = getLanguage(info)
+            
+            words = []
+            for lang in langs:
+                words += lang.split()
+            
+            gArray, wSize = wordsToGlove(words, self.dicoGlove)     
+            meanMatrixLanguage[i] = meanWords(gArray, wSize)
+            
+        return meanMatrixLanguage
+        
+
+    def belongsToProcessing(self, moviesInfo):
+        """
+        
+        """
+        
+        meanMatrixBelongs = np.empty([len(moviesInfo), 1])
+        
+        for i, info in enumerate(moviesInfo):
+            meanMatrixBelongs[i] = getBelongsTo(info) is None and 0 or 1
+        
+        return meanMatrixBelongs
+    
+    
+    def runtimeProcessing(self, moviesInfo):
+        """
+        
+        """
+        
+        meanMatrixRuntime = np.empty([len(moviesInfo), 1])
+        
+        for i, info in enumerate(moviesInfo):
+            meanMatrixRuntime[i] = getRuntime(info)
+        
+        return meanMatrixRuntime
+    
+    
+    def dateProcessing(self, moviesInfo):
+        """
+        
+        """
+        
+        meanMatrixDate = np.empty([len(moviesInfo), 1])
+        
+        for i, info in enumerate(moviesInfo):
+            meanMatrixDate[i] = getYear(info)
+            
+        return meanMatrixDate
 
 
 def concatData(listMatrix):
