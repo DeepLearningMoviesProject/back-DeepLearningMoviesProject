@@ -7,8 +7,8 @@ Created on Thu Jan 26 14:16:32 2017
 """
 from flask import Flask, jsonify, request, abort, json
 #from testTMDB import searchData, trainData
-from MovieProject.learning import buildModel 
-from MovieProject.preprocessing import preprocess 
+from MovieProject.preprocessing import Preprocessor
+from MovieProject.learning import buildModel, suggestNMovies
 import numpy as np
 
 app = Flask(__name__)
@@ -30,10 +30,30 @@ def trainModel():
     #X_train = searchData(ids)
     labels = np.array([dico[key] for key in dico])
     
+    print "Movies received"
+
+    params = { "titles":True,
+               "rating":True,
+               "overviews":True,
+               "keywords":True,
+               "genres":True,
+               "actors":True,
+               "directors":True }
+    
+    pProcessor = Preprocessor(**params)
+
+        #preprocess data
+    data = pProcessor.preprocess(ids)
+    
     print "Movies loaded"
     
-    data = preprocess(ids, doTitles=False, doRating=True, doOverviews=False, doKeywords=False, doGenres=False, doActors=False, doDirectors=False) 
-    model = buildModel(data, labels) 
+    model = buildModel(data, labels)
+    
+    print "Model built"
+    
+    movies = suggestNMovies(model, 5, **params)
+    
+    print "Movies predicted"
     
     return jsonify({'result': "ok"})
 
