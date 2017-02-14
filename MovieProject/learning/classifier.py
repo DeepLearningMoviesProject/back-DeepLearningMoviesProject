@@ -10,7 +10,7 @@ Created on Tue Jan 31 16:33:30 2017
 import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense, Merge, BatchNormalization, Embedding, Flatten, Dropout
-from keras.optimizers import SGD
+from keras.optimizers import SGD, Adam
 from keras.constraints import maxnorm
 from sklearn.cross_validation import StratifiedKFold
 
@@ -32,17 +32,20 @@ def createModel(dataLen = 0):
         raise ValueError('The model can\'t be created if there is no matrix !')
     
     finalBranch = Sequential()
-    finalBranch.add(Dense(dataOutputDim, input_shape =  (dataLen,) , activation = 'relu'))
+    # finalBranch.add(Dropout(0.2, input_shape=(dataLen,)))
+    finalBranch.add(Dense(dataOutputDim, input_dim=dataLen, activation = 'relu'))
     finalBranch.add(BatchNormalization())
     
     #TODO : maybe change this dropout
+    #finalBranch.add(Dropout(0.2))
+    #finalBranch.add(Dense((dataOutputDim/2),  activation = 'relu', W_constraint = maxnorm(3)))
     finalBranch.add(Dropout(0.2))
-    
-    finalBranch.add(Dense(1,  activation = 'sigmoid', W_constraint = maxnorm(3)))
+    finalBranch.add(Dense(1,  activation = 'sigmoid', W_constraint = maxnorm(5)))
     
     #TODO : Change optimizer
-    sgd = SGD(lr = 0.1, momentum = 0.9, decay = 0, nesterov = False)
-    finalBranch.compile(loss = 'binary_crossentropy', optimizer = sgd, metrics = ['accuracy'])
+#    sgd = SGD(lr = 0.1, momentum = 0.9, decay = 0, nesterov = False)
+    adam = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    finalBranch.compile(loss = 'binary_crossentropy', optimizer = adam, metrics = ['accuracy'])
 
     return finalBranch
 

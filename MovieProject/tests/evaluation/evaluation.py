@@ -128,7 +128,7 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
                "directors":True }
 
     #Get all files from PATH, and get the score of the classifier on these files
-    for file in ['moviesEvaluatedCoralie.json']:
+    for file in os.listdir(path):
         if file.endswith(".json") and ("simple" not in file):
             data, labels = preprocessFileGeneric(file.replace(".json", ""), **params)
             
@@ -178,7 +178,7 @@ if __name__ == '__main__':
         _, scoreK = buildTestModel(mat, labels, folds=2)
     else:
         #All movies
-        scoreK, scoreP , scoreSVM = testClassifier(doKeras=False, doSVM=True, doPerceptron=False)
+        scoreK, scoreP , scoreSVM = testClassifier(doKeras=True, doSVM=True, doPerceptron=False)
     
     print "The classifier keras has an average accuracy of ", scoreK
     print "The classifier perceptron has an average accuracy of ", scoreP
