@@ -57,8 +57,7 @@ class LabeledLineSentence(object):
         Create an array of LabeledLineSentence : the method "build_vocab(self)" 
         takes an array of LabeledLineSentence
         
-        Return : 
-            an array of LabeledLineSentence
+        Return : an array of LabeledLineSentence
         """
         self.sentences = []
         for source, prefix in self.sources.items():
@@ -71,10 +70,8 @@ class LabeledLineSentence(object):
         """ 
         Randomize the sequence of sentences : the model is better trained if in each 
         training epoch, the sequence of sentences fed to the model is randomized
-            
-        Return : 
-            a random suffle of sequence into a numpy array
-            
+        
+        Return : a random suffle of sequence into a numpy array
         """
         numpy.random.shuffle(self.sentences)
         return self.sentences
@@ -85,10 +82,9 @@ class LabeledLineSentence(object):
 def _buildModel(sources, modelPath) :
     """
     Build the model and store it
-    
-    Parameters :
-        sources : dictionnary of sources with files path and labels associated at each file
-        modelPath : path to store the model built
+        Parameters :
+            - sources : dictionnary of sources with files path and labels associated at each file
+            - modelPath : path to store the model built
     """
     
     sentences = LabeledLineSentence(sources)
@@ -118,12 +114,10 @@ def _buildModel(sources, modelPath) :
 def loadD2VModel(modelPath):
     """
     Load a preexisting Doc2Vec model
-        
-    Parameter:
-        modelPath : model file path to load
-        
-    Return:
-        Doc2Vec model object
+        Parameter:
+            - modelPath : model file path to load 
+        Return:
+            - Doc2Vec model object
     """
     return Doc2Vec.load(modelPath)
     
@@ -131,13 +125,18 @@ def loadD2VModel(modelPath):
     
 if __name__ == "__main__":    
     
-    # To train on sentiments database
-    sources = {'../../resources/test_twitter_neg.txt':'TEST_NEG', '../../resources/test_twitter_pos.txt':'TEST_POS', '../../resources/train_twitter_neg.txt':'TRAIN_NEG', '../../resources/train_twitter_pos.txt':'TRAIN_POS'}
+    # To train on sentiments database (Tweets)
+    #sources = {'../../resources/test_twitter_neg.txt':'TEST_NEG', '../../resources/test_twitter_pos.txt':'TEST_POS', '../../resources/train_twitter_neg.txt':'TRAIN_NEG', '../../resources/train_twitter_pos.txt':'TRAIN_POS'}
+    #modelPath = '../../resources/sentimentsTwitter10EpochSize100.d2v'    
+
+    # To train on sentiments database (IMDB)
+    sources = {'../../resources/train_imdb_neg.txt':'TRAIN_NEG', '../../resources/train_imdb_pos.txt':'TRAIN_POS'}
+    sources = {'../../resources/test-neg.txt':'TEST_NEG', '../../resources/test-pos.txt':'TEST_POS', '../../resources/train-neg.txt':'TRAIN_NEG', '../../resources/train-pos.txt':'TRAIN_POS', '../../resources/train-unsup.txt':'TRAIN_UNS'}
+    modelPath = '../../resources/sentimentsImdb10EpochSize100.d2v'
     
     # To train on abstracts database
     #sources = {'../../resources/train_overviews_treated.txt':'TRAIN_ABSTRACTS'}
-    
-    modelPath = '../../resources/sentiments20EpochSize100.d2v'
+    #modelPath = '../../resources/overviews10EpochSize100.d2v'
     
     _buildModel(sources, modelPath)
     

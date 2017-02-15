@@ -20,13 +20,11 @@ list_punctuation = [",",".","!","?","[","]","(",")","{","}","-",'"',"'",":","$",
  
 def preprocessTweet(tweet): 
     """ 
-    Preprocess the tweets  
-     
-    Parameters :  
-        tweet : a single tweet 
-     
-    Return : 
-        the tweet preprocessed 
+    Preprocess the tweets
+        Parameters :  
+            - tweet : a single tweet 
+        Return : 
+            - the tweet preprocessed 
     """ 
     #Convert to lower case 
     tweet = tweet.lower() 
@@ -42,12 +40,10 @@ def removeRepetitions(s):
     """ 
     Look for repetitions of character and replace with the character itself 
     Remove also additional white spaces 
-     
-    Parameters : 
-        s : string 
-         
-    Return :  
-        the string without any repetitions of caracters 
+        Parameters : 
+            - s : string   
+        Return :  
+            - the string without any repetitions of caracters 
     """ 
     # Remove additional caracters 
     s = re.sub(r'(\w)\1+', r'\1', s) 
@@ -60,12 +56,10 @@ def convertUselessWords(s):
     """ 
     Convert useless expressions on tweets like urls to URL and "#word" to "word" 
     Remove all @username 
-     
-    Parameters : 
-        s : string 
-         
-    Return :  
-        the string without any useless words 
+        Parameters : 
+            - s : string 
+        Return :  
+            - the string without any useless words 
     """ 
     #Convert www.* or https?://* 
     s = re.sub('((www\.[^\s]+)|(https?://[^\s]+))','URL',s) 
@@ -78,14 +72,12 @@ def convertUselessWords(s):
      
 def tweetToVect(tweet, model): 
     """ 
-        Get descriptors of text thanks to the given model 
-         
+    Get descriptors of text thanks to the given model 
         Parameters: 
-            text -> String 
-            model -> the Doc2Vec model 
-             
-        return: 
-            ndarray. Descriptors of the text passed in parameters 
+            - text -> String 
+            - model -> the Doc2Vec model 
+        Return: 
+            - ndarray. Descriptors of the text passed in parameters 
     """ 
  
     return model.infer_vector(preprocessTweet(tweet))     

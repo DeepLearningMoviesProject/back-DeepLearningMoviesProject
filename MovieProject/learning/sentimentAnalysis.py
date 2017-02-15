@@ -2,25 +2,38 @@
 # -*- coding: utf-8 -*- 
 """ 
 Script to build sentiment analysis model, thanks to Doc2Vec model,  
-train on sentiment tweets 
+train on sentiment tweets or imdb reviews
  
 Created on Tue Feb  7 14:09:39 2017 
 @author: coralie 
 """ 
- 
-from gensim.models import Doc2Vec 
+
 import numpy 
  
-from sklearn.linear_model import LogisticRegression 
- 
-from keras.datasets import mnist 
+from gensim.models import Doc2Vec 
+
 from keras.models import Sequential 
-from keras.layers.core import Dense, Dropout, Activation 
-from keras.utils import np_utils 
+from keras.layers.core import Dense, Dropout, Activation
+from keras.layers import LSTM, Convolution1D, GlobalMaxPooling1D
  
  
-def trainModel(model, trainDatasNb, testDatasNb, dataSize): 
-     
+ 
+def preprocessDatasModel(model, trainDatasNb, testDatasNb, dataSize): 
+    """
+    Preprocesses data of the Doc2Vec model, in order to build a training and testing data set allowed to
+    trains and tests the sentiment analysis neural network
+        Parameters : 
+            - model : the Doc2Vec model trained on corpus of sentiments
+            - trainDatasNb : int number of training datas
+            - testDatasNb : int number of testing datas
+            - dataSize : int number of data dimension
+        Return : 
+            - a dictionary {label:ndarray}. 
+            The label "trainX" is associated with a ndarray of training data
+            The label "trainY" is associated with a ndarray of labels associated with training data
+            The label "testX" is associated with a ndarray of testing data
+            The label "testY" is associated with a ndarray of labels associated with testing data
+    """
     trainDataPosNb = trainDatasNb/2; 
     testDataPosNb = testDatasNb/2; 
      
@@ -71,79 +84,199 @@ def trainModel(model, trainDatasNb, testDatasNb, dataSize):
     train_arrays = train_arrays.astype('float32') 
     test_arrays = test_arrays.astype('float32') 
      
-    print "begin training ..." 
+    return {"trainX":train_arrays, "trainY":train_labels, "testX":test_arrays, "testY":test_labels}
+
+    
+def reshapeData3D(trainX, testX):
+    """
+    Rashape data : 2D -> 3D
+        Parameters : 
+            - trainX : ndarray of training data
+            - testX : ndarray of testing data
+        Return : 
+            - a dictionary {label:ndarray}. The label "trainX" is associated with a 3D ndarray of training data
+            and the label "testX" is associated with a 3D ndarray of testing data
+    """
+    # reshape input to be [samples, time steps, features]
+    train_arrays = numpy.reshape(trainX, (trainX.shape[0], 1, trainX.shape[1]))
+    test_arrays = numpy.reshape(testX, (testX.shape[0], 1, testX.shape[1]))
+    
+    return {"trainX":train_arrays, "testX":test_arrays}
+
+    
+def LSTMModelRN(trainX ,trainY, testX, testY):
+    """
+    Build a LSTM + 2 layer fully connected neural network
+    > On IMDB : Dense(50), nb_epoch=3, batch_size=32 : Acc:0.86
+        Parameters : 
+            - trainX : ndarray of training data
+            - trainY : ndarray of labels associated with training data
+            - testX : ndarray of testing data
+            - testY : ndarray of labels associated with testing data
+        Return : 
+            - the model trained
+    """
+    model = Sequential()
+    model.add(LSTM(50, input_dim=100))
+        
+    # We add a vanilla hidden layer:
+    model.add(Dense(25))
+    model.add(Dropout(0.2))
+    model.add(Activation('relu'))
+    
+    # We project onto a single unit output layer, and squash it with a sigmoid:
+    model.add(Dense(1))
+    model.add(Activation('sigmoid'))
+
+    #model.compile(loss='mean_squared_error', optimizer='adam')
+    model.compile(loss='binary_crossentropy',optimizer='adam', metrics=['accuracy'])
+    model.fit(trainX, trainY, nb_epoch=3, batch_size=32, verbose=1, validation_data=(testX, testY))   
+    
+    return model
+    
+    
+def ConvolutionalRN(trainX, trainY, testX, testY) :
+    """
+    Doesn't work !!! =(
+    Build a convolutional1D + 2 layer fully connected neural network
+        Parameters : 
+            - trainX : ndarray of training data
+            - trainY : ndarray of labels associated with training data
+            - testX : ndarray of testing data
+            - testY : ndarray of labels associated with testing data
+        Return : 
+            - the model trained
+    """
+    # set parameters:
+    maxlen = 100
+    batch_size = 32
+    nb_filter = 50
+    filter_length = 3
+    hidden_dims = 50
+    nb_epoch = 2
+    
+    model = Sequential()
+    
+    # we start off with an efficient embedding layer which maps
+    # our vocab indices into embedding_dims dimensions
+    """
+    model.add(Embedding(max_features,
+                        embedding_dims,
+                        input_length=maxlen,
+                        dropout=0.2))
+    """
+    # we add a Convolution1D, which will learn nb_filter
+    # word group filters of size filter_length:
+    model.add(Convolution1D(nb_filter=nb_filter,
+                            filter_length=filter_length,
+                            border_mode='valid',
+                            activation='relu',
+                            input_dim = maxlen,
+                            subsample_length=1))
+    # we use max pooling:
+    model.add(GlobalMaxPooling1D())
+    
+    # We add a vanilla hidden layer:
+    model.add(Dense(hidden_dims))
+    model.add(Dropout(0.2))
+    model.add(Activation('relu'))
+    
+    # We project onto a single unit output layer, and squash it with a sigmoid:
+    model.add(Dense(1))
+    model.add(Activation('sigmoid'))
+    
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.fit(trainX, trainY, batch_size=batch_size, nb_epoch=nb_epoch, validation_data=(testX, testY))
  
-     
-     
-    """ 
-    Build the neural network : 
-        a simple 3 layer fully connected network 
-    """ 
-     
+    return model
+    
+    
+def fullyConnectedRN(trainX, trainY) :
+    """
+    Build a simple 3 layer fully connected neural network
+    > On IMDB : Dense(output_dim=50, input_dim=100, init='normal', activation='relu'), Dropout(0.2), Dense(output_dim=10, input_dim=50, init='normal', activation='softmax'), nb_epoch=4, batch_size=32 : Acc:0.86
+        Parameters : 
+            - trainX : ndarray of training data
+            - trainY : ndarray of labels associated with training data
+        Return : 
+            - the model trained
+    """
     model = Sequential() 
-     
-    model.add(Dense(output_dim=200, input_dim=100, init='normal', activation='relu')) 
-    model.add(Dense(output_dim=100, input_dim=200, init='normal', activation='relu')) 
-    model.add(Dense(output_dim=10, input_dim=100, init='normal', activation='softmax')) 
-     
-    """ 
-    model.add(Dense(512, input_shape=(100,))) 
-     
-    # An "activation" is just a non-linear function applied to the output of the layer above.  
-    # Here, with a "rectified linear unit", we clamp all values below 0 to 0. 
-    model.add(Activation('relu'))  
-    # Dropout helps protect the model from memorizing or "overfitting" the training data                            
-    model.add(Dropout(0.2))    
-    model.add(Dense(512)) 
-    model.add(Activation('relu')) 
-    model.add(Dropout(0.2)) 
-    model.add(Dense(10)) 
-    # This special "softmax" activation among other things, ensures the output is  
-    # a valid probaility distribution, that its values are all non-negative and sum to 1. 
-    model.add(Activation('softmax'))  
-    """ 
- 
-     
-    """ 
-    Compile the model 
-    """ 
-     
+    model.add(Dense(output_dim=50, input_dim=100, init='normal', activation='relu'))
+    model.add(Dropout(0.2))
+    model.add(Dense(output_dim=10, input_dim=50, init='normal', activation='softmax'))
+    
     model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=["accuracy"]) 
-     
-     
+    model.fit(trainX, trainY, batch_size=32, nb_epoch=4, verbose=1, validation_data=(testX, testY)) 
+    
+    return model
+    
+    
+def evaluate(model, testX, testY) :
     """ 
-    Train the model 
+    Evaluate model performance
+        Parameters :
+            - model : the model created by Keras to test
+            - testX : ndarray of testing data
+            - testY : ndarray of labels associated with testing data
+        Return :
+            - the model score (loss, accuracy)
+            
     """ 
-     
-    model.fit(train_arrays, train_labels, batch_size=1000, nb_epoch=50, show_accuracy=True, verbose=1, validation_data=(test_arrays, test_labels)) 
-     
-     
-    """ 
-    Evaluate its performance 
-    """ 
-     
-    score = model.evaluate(test_arrays, test_labels, verbose=0) 
+    score = model.evaluate(testX, testY, verbose=0) 
     print('Loss on tests:', score[0]) 
-    print('Accuracy on test:', score[1]) 
-     
-     
-    """ 
-    classifier = LogisticRegression() 
-    classifier.fit(train_arrays, train_labels) 
-     
-    LogisticRegression(C=1.0, class_weight=None, dual=False, fit_intercept=True,intercept_scaling=1, penalty='l2', random_state=None, tol=0.0001) 
-     
-    score = classifier.score(test_arrays, test_labels) 
-     
-    print(score) 
-    """ 
- 
-     
+    print('Accuracy on test:', score[1])   
+    
+    return score
+    
+    
 if __name__ == "__main__":   
  
-    model = Doc2Vec.load('../resources/sentimentsv210EpochSize100.d2v') 
+    """
+    # Doc2Vec trained on Twitter Corpus
+    modelD2V = Doc2Vec.load('../resources/sentimentsTwitter10EpochSize100.d2v') 
     trainDatasNb = 750000 
     testDatasNb = 750000 
     dataSize = 100 
-     
-    trainModel(model, trainDatasNb, testDatasNb, dataSize) 
+    """
+    
+    # Doc2Vec trained on IMDB Corpus
+    modelD2V = Doc2Vec.load('../resources/sentimentsImdb10EpochSize100.d2v') 
+    trainDatasNb = 25000
+    testDatasNb = 25000
+    dataSize = 100 
+    
+    data = preprocessDatasModel(modelD2V, trainDatasNb, testDatasNb, dataSize) 
+    trainX = data["trainX"]
+    trainY = data["trainY"]
+    testX = data["testX"]
+    testY = data["testY"]
+ 
+    """
+    # Simple RN fully connected
+    print "Test a simple 3 layer fully connected network : \n"
+    model1 = fullyConnectedRN(trainX,trainY)
+    evaluate(model1, testX, testY)
+    """
+    
+    
+    # LSTM RN
+    print "Test LSTM : \n"
+    data3D = reshapeData3D(trainX, testX)
+    trainX3D = data3D["trainX"]
+    testX3D = data3D["testX"]
+    model2 = LSTMModelRN(trainX3D ,trainY, testX3D, testY)
+    print(model2.summary())
+    evaluate(model2, testX3D, testY)
+    
+    
+    """
+    # Convolutional RN
+    print "Test Convolution1D : \n"
+    data3D = reshapeData3D(trainX, testX)
+    trainX3D = data3D["trainX"]
+    testX3D = data3D["testX"]
+    model3 = ConvolutionalRN(trainX3D, trainY, testX3D, testY)
+    print(model3.summary())
+    evaluate(model3, testX3D, testY)
+    """
