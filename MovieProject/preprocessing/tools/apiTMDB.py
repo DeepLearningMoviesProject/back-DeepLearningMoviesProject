@@ -8,6 +8,7 @@ Created on Fri Jan 27 14:32:28 2017
 
 import numpy as np
 import tmdbsimple as tmdb
+from string import punctuation
 
 from os.path import isfile
 from MovieProject.resources import GENRES_FILE
@@ -37,7 +38,6 @@ def getCredits(movies):
             movies -> list of TMDB Movie object
         return:
             array containing movie's credits
-        
     """
     
     return [ movie.credits() for movie in movies ]
@@ -58,19 +58,45 @@ def getKeywords(tmdbKeywords={}):
     return words
 
 
-def getGenres(tmdbGenres=[]):
+def getGenres(movieInfo):
     """
         Extract keywords from tmdb keyword's dictionary 
         
         return:
             array of string containing each keyword
     """
-        
-    return [ _format(genre["name"]) for genre in tmdbGenres ]
     
+    return [ _format(genre["name"]) for genre in movieInfo["genres"] ]
+
+def getRating(movieInfo):
+    """
+        Retrieve the movie's Rating
+        
+        Parameter:
+            movieInfo -> dictionary of Movie.info()
+        return:
+            int
+    """
+    
+    return movieInfo["vote_average"]
+
+def getTitle(movieInfo):
+    """
+        Retrieve the movie's Title
+        
+        Parameter:
+            movieInfo -> dictionary of Movie.info()
+        return:
+            string
+    """
+    
+    overview = "".join(c for c in movieInfo["title"] if c not in punctuation)
+    overview = overview.split()
+    return overview
 
 def getMovie(id): 
-    """ Parameters:
+    """
+        Parameters:
             ids: movie's id
         return:
             movie object
@@ -119,6 +145,18 @@ def getDirectors(movieCredit):
     
     return [ people["name"] for people in movieCredit["crew"] if people["job"].lower() == "director" ] 
     
+def getOverview(movieInfo):
+    """
+        Retrieve the movie's Overview
+        
+        Parameter:
+            movieInfo -> dictionary of Movie.info()
+        return:
+            string
+    """
+    
+    return "".join(c for c in movieInfo["overview"] if c not in punctuation)   
+    
 def getActors(movieCredit):
     """
         Retrieve the movie's Actors
@@ -158,6 +196,17 @@ def getYear(movieInfo):
             int 
     """
     return int(movieInfo["release_date"][:4])
+
+def getBudget(movieInfo):
+    """
+        Retrieve the Budget of the movie
+        
+        Parameter:
+            movieInfo -> dictionary of Movie.info()
+        return:
+            int 
+    """
+    return int(movieInfo["budget"])
 
 
 def getProdCompagnies(movieInfo):

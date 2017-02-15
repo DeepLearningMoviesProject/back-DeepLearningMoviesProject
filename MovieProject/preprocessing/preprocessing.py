@@ -13,9 +13,8 @@ from MovieProject.preprocessing.tools import (getMovies, getKeywords, getDirecto
 from MovieProject.resources import GLOVE_DICT_FILE, D2V_FILE
 from words import meanWords, wordsToGlove
 from texts import textToVect
-
+from math import exp
 import numpy as np
-from string import punctuation
 from enum import Enum
 
 import threading, time
@@ -71,7 +70,8 @@ class Preprocessor():
                       "language" : False,
                       "belongs" : False,
                       "runtime" : False,
-                      "date" : False }
+                      "date" : False,
+                      "budget" : False }
         
         for key, value in kwargs.items():
             if key in self.toDo:
@@ -187,6 +187,10 @@ class Preprocessor():
         if self.toDo["date"]:
             print "Processing date..."
             matrix["date"] = self.dateProcessing(infos)
+
+        if self.toDo["budget"]:
+            print "Processing budget..."
+            matrix["budget"] = self.budgetProcessing(infos)
             
         if self.toDo["runtime"]:
             print "Processing runtime..."
@@ -225,7 +229,7 @@ class Preprocessor():
         meanMatrixOverview = np.empty([len(infos), SIZE_VECTOR])  
         
         for i, info in enumerate(infos):            
-            overview = "".join(c for c in info["overview"] if c not in punctuation)       
+            overview = getOverview(info)
             
             meanMatrixOverview[i] = textToVect(overview, self.modelD2V)
     
@@ -244,7 +248,7 @@ class Preprocessor():
         meanMatrixOverview = np.empty([len(infos), self.sizeGloveVector])  
         
         for i, info in enumerate(infos):            
-            overview = "".join(c for c in info["overview"] if c not in punctuation)       
+            overview = getOverview(info) 
             words = []
                 
             for w in overview.split():
@@ -289,8 +293,7 @@ class Preprocessor():
         meanMatrixTitles = np.empty([len(infos), self.sizeGloveVector]) 
         
         for i, info in enumerate(infos):            
-            overview = "".join(c for c in info["title"] if c not in punctuation)
-            overview = overview.split()
+            overview = getTitle(info)
             words = []
                 
             for w in overview:
@@ -314,7 +317,7 @@ class Preprocessor():
         
         meanMatrixRating = np.empty([len(infos), 1])
         for i, info in enumerate(infos):  
-            meanMatrixRating[i] = info["vote_average"]/10.0
+            meanMatrixRating[i] = getRating(info)/10.0
     
         return meanMatrixRating
     
@@ -336,7 +339,7 @@ class Preprocessor():
         for i, info in enumerate(infos):      
             genresVect = np.zeros(len(TMDB_GENRES.keys()))
     
-            for genre in getGenres(info["genres"]):
+            for genre in getGenres(info):
                 try:
                     genresVect[TMDB_GENRES[genre]] = 1
                 except:
@@ -455,6 +458,22 @@ class Preprocessor():
             meanMatrixDate[i] = getYear(info)
             
         return meanMatrixDate
+    
+    def budgetProcessing(self, moviesInfo):
+        """
+        Pre-process budget.
+            parameters : 
+                - infos:  array of movies you want to process rating with
+            return : 
+                - a ndarray of budget values. One line by movie.
+        """
+        
+        meanMatrixBudget = np.empty([len(moviesInfo), 1])
+        
+        for i, info in enumerate(moviesInfo):
+            meanMatrixBudget[i] = 1. / (1 + exp(-getBudget(info)))
+            
+        return meanMatrixBudget
 
 
 def concatData(listMatrix):
