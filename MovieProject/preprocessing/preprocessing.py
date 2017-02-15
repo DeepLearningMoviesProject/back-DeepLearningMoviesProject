@@ -7,8 +7,8 @@ Created on Wed Feb 01 17:09:54 2017
 """
 
 
-from MovieProject.preprocessing.tools import (getMovies, getKeywords, getDirectors, getActors, getCredits,
-                                              getProdCompagnies, getRuntime, getYear, getBelongsTo, getLanguage,
+from MovieProject.preprocessing.tools import (getMovies, getKeywords, getDirectors, getActors, getCredits, getRating,
+                                              getProdCompagnies, getBudget, getRuntime, getYear, getBelongsTo, getLanguage, getOverview, getTitle,
                                               loadGloveDicFromFile, getGenres, getTmdbGenres, loadD2VModel, SIZE_VECTOR)
 from MovieProject.resources import GLOVE_DICT_FILE, D2V_FILE
 from words import meanWords, wordsToGlove
