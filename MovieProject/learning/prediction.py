@@ -61,14 +61,13 @@ def pickNMovie(n):
 
     if(n==1):
         mIndex = randint(0,nbMovies)
-        movie = pageRes[mIndex]['id']
-        print "return movie no : ", movie
+        movie = int(pageRes[mIndex]['id'])
         return np.array(movie)
     else:
         n = np.minimum(n, nbMovies)
         movies = np.zeros(n)
         for i in range(0,n):
-            movies[i] = pageRes[i]['id']
+            movies[i] = int(pageRes[i]['id'])
         return movies
 
         

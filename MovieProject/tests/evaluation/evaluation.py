@@ -19,6 +19,19 @@ path = '../../resources/evaluations/'
 
 preprocessingChanged = False #Set to true if the processing has changed
 
+params = {"titles" : True,
+          "rating" : True,
+          "overviews" : True,
+          "keywords" : True,
+          "genres" : True,
+          "actors" : True,
+          "directors" : True,
+          "compagnies" : True,
+          "language" : True,
+          "belongs" : True,
+          "runtime" : True,
+          "date" : True }
+
 #Test function
 def preprocessFileGeneric(filename, **kwargs):
     '''
@@ -119,19 +132,6 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
     meanScoreSVM = 0
     totalScores = 0
     
-    params = {"titles" : True,
-              "rating" : True,
-              "overviews" : True,
-              "keywords" : True,
-              "genres" : True,
-              "actors" : True,
-              "directors" : True,
-              "compagnies" : True,
-              "language" : True,
-              "belongs" : True,
-              "runtime" : True,
-              "date" : True }
-
     #Get all files from PATH, and get the score of the classifier on these files
     for file in os.listdir(path):
         if file.endswith(".json") and ("simple" not in file):
@@ -178,9 +178,9 @@ if __name__ == '__main__':
     if(doOne):
         #One movie : the one we want to learn
         filename = 'moviesEvaluatedCoralie'
-        d, labels = preprocessFileGeneric(filename, doTitles=True, doRating=True, doOverviews=True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True) 
-        mat = prepareDico(d, doTitles = True, doRating = True, doOverviews = True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True) 
-        _, scoreK = buildTestModel(mat, labels, folds=2)
+        
+        data, labels = preprocessFileGeneric(file.replace(".json", ""), **params)
+        _, scoreK = buildTestModel(data, labels, folds=2)
     else:
         #All movies
         scoreK, scoreP , scoreSVM = testClassifier(doKeras=True, doSVM=True, doPerceptron=False)

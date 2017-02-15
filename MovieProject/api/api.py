@@ -38,7 +38,12 @@ def trainModel():
                "keywords":True,
                "genres":True,
                "actors":True,
-               "directors":True }
+               "directors":True,
+              "compagnies" : True,
+              "language" : True,
+              "belongs" : True,
+              "runtime" : True,
+              "date" : True }
     
     pProcessor = Preprocessor(**params)
 
@@ -51,11 +56,14 @@ def trainModel():
     
     print "Model built"
     
-    movies = suggestNMovies(model, 5, **params)
+    movies = suggestNMovies(model, 30, **params)
     
     print "Movies predicted"
     
-    return jsonify({'result': "ok"})
+    # return jsonify({'result': "ok"})
+    
+    dico = {"prediction" : movies.tolist()}
+    return jsonify(dico)
 
 if __name__ == '__main__':
     app.run(debug=False, host= '0.0.0.0')
