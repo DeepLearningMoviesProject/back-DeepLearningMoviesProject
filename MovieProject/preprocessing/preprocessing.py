@@ -231,7 +231,10 @@ class Preprocessor():
         for i, info in enumerate(infos):            
             overview = getOverview(info)
             
-            meanMatrixOverview[i] = textToVect(overview, self.modelD2V)
+            if overview is None: 
+                meanMatrixOverview[i] = np.zeros(SIZE_VECTOR)
+            else:
+                meanMatrixOverview[i] = textToVect(overview, self.modelD2V)
     
         return meanMatrixOverview
         
@@ -249,14 +252,13 @@ class Preprocessor():
         
         for i, info in enumerate(infos):            
             overview = getOverview(info) 
-            words = []
-                
-            for w in overview.split():
-                words.append(w.lower().encode('UTF-8'))
-         
-            gArray, wSize = wordsToGlove(words, self.dicoGlove)
             
-            meanMatrixOverview[i] = meanWords(gArray, wSize)
+            if overview is None:
+                meanMatrixOverview[i] = np.zeros(self.sizeGloveVector)
+            
+            else:             
+                gArray, wSize = wordsToGlove(overview.split(), self.dicoGlove)                
+                meanMatrixOverview[i] = meanWords(gArray, wSize)
     
         return meanMatrixOverview
         

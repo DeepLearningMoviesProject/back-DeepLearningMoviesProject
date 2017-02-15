@@ -152,10 +152,15 @@ def getOverview(movieInfo):
         Parameter:
             movieInfo -> dictionary of Movie.info()
         return:
-            string
+            string or None if overview doesn't exist
     """
     
-    return "".join(c for c in movieInfo["overview"] if c not in punctuation)   
+    if movieInfo["overview"] is not None:
+        return _format("".join(c for c in movieInfo["overview"] if c not in punctuation))
+    else: 
+        return None
+    
+    
     
 def getActors(movieCredit):
     """
@@ -183,7 +188,8 @@ def getRuntime(movieInfo):
         return:
             int
     """
-    return movieInfo["runtime"]
+    
+    return 0 if movieInfo["runtime"] is None else movieInfo["runtime"]
 
 
 def getYear(movieInfo):
@@ -258,32 +264,36 @@ def _format(text):
     """
     return text.lower().encode("UTF-8")
 
-#if __name__ == "__main__":
-#    
-#    movie = getMovie(415)
-#    response = movie.info()
-#    
-#    #for people in movie.credits()["crew"]:
-#    #   print "Name: %s - %s" %(people["name"], people["job"]) # important: Director
-#    
-#    print "############################"
-#    
-#    
-#    #for people in movie.credits()["cast"]: print "%s" %(people["name"])
-#    
-#    print "############################"
-#    
-#    print "Title: %s" %(response["title"])
-#    print "Keywords: %s" %(" ".join(getKeywords(movie.keywords())))
-#    print "Genres: %s" %(" ".join(getGenres(response["genres"])))
-#    print "Overview: %s" %(response["overview"])
-#    print "Vote: %s" %(response["vote_average"])
-#    print "Budget: %s" %(response["budget"])
-#    
-#    print "------------------------------"
-#    
-#    #for key in response.keys(): print "%s: %s" %(key, response[key])
-#        
-#    print "------------------------------"
+if __name__ == "__main__":
+    
+    movie = getMovie(205056)
+    response = movie.info()
+    
+    print movie.reviews()
+    
+    #for people in movie.credits()["crew"]:
+    #   print "Name: %s - %s" %(people["name"], people["job"]) # important: Director
+    
+    print "############################"
+    
+    
+    #for people in movie.credits()["cast"]: print "%s" %(people["name"])
+    
+    print "############################"
+    
+    print "Title: %s" %(response["title"])
+    print "Keywords: %s" %(" ".join(getKeywords(movie.keywords())))
+    print "Genres: %s" %(" ".join(getGenres(response)))
+    print "Overview: %s" %(response["overview"])
+    print "Vote: %s" %(response["vote_average"])
+    print "Budget: %s" %(response["budget"])
+    
+    print "runtime: {}".format(getRuntime(response))
+    
+    print "------------------------------"
+    
+    #for key in response.keys(): print "%s: %s" %(key, response[key])
+        
+    print "------------------------------"
     
     #for key in response.keys(): print key,
