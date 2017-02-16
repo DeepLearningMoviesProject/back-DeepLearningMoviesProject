@@ -50,17 +50,17 @@ def trainModel():
         #preprocess data
     data = pProcessor.preprocess(ids)
     
-    print "Movies loaded"
+    print "Movies loaded, building model"
     
     model = buildModel(data, labels)
     
-    print "Model built"
+    print "Model built, start prediction"
     
-    movies = suggestNMovies(model, 30, **params)
+    movies = suggestNMovies(model, 10, **params)
     
-    print "Movies predicted"
+    print "Movies predicted !"
     
-    # return jsonify({'result': "ok"})
+#    return jsonify({'result': "ok"})
     
     dico = {"prediction" : movies.tolist()}
     return jsonify(dico)

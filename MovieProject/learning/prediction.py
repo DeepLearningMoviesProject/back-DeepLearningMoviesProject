@@ -27,7 +27,7 @@ def predict(movies, model, **kwargs):
     
     #arrayMovie = np.array([movie])
     
-    print "movies prediction : ", movies
+#    print "movies prediction : ", movies
     
     pProcessor = Preprocessor(**kwargs)
     
@@ -48,7 +48,7 @@ def pickNMovie(n):
         parameters :
             - n : the number of movie (int)
         return : 
-            - a random list of movies
+            - a random np.array of movies
     '''
 
     #Pick a random page from Discover
@@ -57,12 +57,12 @@ def pickNMovie(n):
     response = tmdb.Discover().movie(page=p)
     pageRes = response['results']
     nbMovies = len(pageRes)
-    print 'nb movies : ', nbMovies
+#    print 'nb movies : ', nbMovies
 
     if(n==1):
         mIndex = randint(0,nbMovies)
         movie = int(pageRes[mIndex]['id'])
-        return np.array(movie)
+        return np.array([movie])
     else:
         n = np.minimum(n, nbMovies)
         movies = np.zeros(n)
@@ -82,30 +82,30 @@ def suggestNMovies(model, n, **kwargs):
     """
     suggestion = np.array([])
     pickSize = 20
-    print "n : ", n, " sugg.len : ", len(suggestion)
+#    print "n : ", n, " sugg.len : ", len(suggestion)
     
     while(len(suggestion) < n):
-        print "n : ", n, " sugg.len : ", len(suggestion)
+#        print "n : ", n, " sugg.len : ", len(suggestion)
         remains_size = n - len(suggestion)
         movies = pickNMovie(np.minimum(pickSize, remains_size))
         
-        print 'movies len :', len(movies)
+#        print 'movies len :', len(movies)
         #checks if movies are not already in suggestion and remove them if so
         inter = np.intersect1d(suggestion, movies)
         if( inter.size != 0):
             suggestion = np.setdiff1d(movies, inter)
-        
-        print 'movies len :', len(movies)
-        #Keep in suggestion the movies that matches the model
-        predictions = predict(movies, model, **kwargs)
-        print "predictions : ", predictions
-        i = 0 
-        for p in predictions:
-#            pred = predict(m, model, **kwargs)
-            if(p > 0.7):
-                suggestion = np.append(suggestion, movies[i])
-                print movies[i], " added with prediction ", p
-            i += 1
+
+        if(movies.shape[0] != 0):
+            #Keep in suggestion the movies that matches the model
+            predictions = predict(movies, model, **kwargs)
+    #        print "predictions : ", predictions
+            i = 0 
+            for p in predictions:
+    #            pred = predict(m, model, **kwargs)
+                if(p > 0.7):
+                    suggestion = np.append(suggestion, movies[i])
+    #                print movies[i], " added with prediction ", p
+                i += 1
 
     return suggestion
     

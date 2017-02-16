@@ -102,7 +102,6 @@ final_branch.add(Dense(1,  activation = 'sigmoid'))
 
 sgd = SGD(lr = 0.1, momentum = 0.9, decay = 0, nesterov = False)
 final_branch.compile(loss = 'binary_crossentropy', optimizer = sgd, metrics = ['accuracy'])
-np.random.seed(2017)
 
 final_branch.fit([X_train, X3_train,X1_train, X2_train], Y_train, batch_size = 2000, nb_epoch = 100, verbose = 1)
 print("done")	

@@ -177,10 +177,10 @@ if __name__ == '__main__':
     
     if(doOne):
         #One movie : the one we want to learn
-        filename = 'moviesEvaluatedCoralie'
+        filename = 'moviesEvaluated-18'
         
-        data, labels = preprocessFileGeneric(file.replace(".json", ""), **params)
-        _, scoreK = buildTestModel(data, labels, folds=2)
+        data, labels = preprocessFileGeneric(filename.replace(".json", ""), **params)
+        _, scoreK = buildTestModel(data, labels, folds=5)
     else:
         #All movies
         scoreK, scoreP , scoreSVM = testClassifier(doKeras=True, doSVM=True, doPerceptron=False)
