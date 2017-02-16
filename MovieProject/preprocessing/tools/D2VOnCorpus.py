@@ -1,7 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-
 -- Script allowed to train the Doc2Vec model on data base --
 
 To train it, we use documents, each one taking up one entire line. So, each document should be on one line, separated by new lines.
@@ -126,13 +125,13 @@ def loadD2VModel(modelPath):
 if __name__ == "__main__":    
     
     # To train on sentiments database (Tweets)
-    #sources = {'../../resources/test_twitter_neg.txt':'TEST_NEG', '../../resources/test_twitter_pos.txt':'TEST_POS', '../../resources/train_twitter_neg.txt':'TRAIN_NEG', '../../resources/train_twitter_pos.txt':'TRAIN_POS'}
-    #modelPath = '../../resources/sentimentsTwitter10EpochSize100.d2v'    
+    sources = {'../../resources/test_twitter_neg_processed.txt':'TEST_NEG', '../../resources/test_twitter_pos_processed.txt':'TEST_POS', '../../resources/train_twitter_neg_processed.txt':'TRAIN_NEG', '../../resources/train_twitter_pos_processed.txt':'TRAIN_POS'}
+    modelPath = '../../resources/sentimentsTwitter10EpochSize100.d2v'    
 
     # To train on sentiments database (IMDB)
-    sources = {'../../resources/train_imdb_neg.txt':'TRAIN_NEG', '../../resources/train_imdb_pos.txt':'TRAIN_POS'}
-    sources = {'../../resources/test-neg.txt':'TEST_NEG', '../../resources/test-pos.txt':'TEST_POS', '../../resources/train-neg.txt':'TRAIN_NEG', '../../resources/train-pos.txt':'TRAIN_POS', '../../resources/train-unsup.txt':'TRAIN_UNS'}
-    modelPath = '../../resources/sentimentsImdb10EpochSize100.d2v'
+    #sources = {'../../resources/train_imdb_neg.txt':'TRAIN_NEG', '../../resources/train_imdb_pos.txt':'TRAIN_POS'}
+    #sources = {'../../resources/test-neg.txt':'TEST_NEG', '../../resources/test-pos.txt':'TEST_POS', '../../resources/train-neg.txt':'TRAIN_NEG', '../../resources/train-pos.txt':'TRAIN_POS', '../../resources/train-unsup.txt':'TRAIN_UNS'}
+    #modelPath = '../../resources/sentimentsImdb10EpochSize100.d2v'
     
     # To train on abstracts database
     #sources = {'../../resources/train_overviews_treated.txt':'TRAIN_ABSTRACTS'}

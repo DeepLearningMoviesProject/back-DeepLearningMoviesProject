@@ -15,7 +15,7 @@ from gensim.models import Doc2Vec
 from keras.models import Sequential 
 from keras.layers.core import Dense, Dropout, Activation
 from keras.layers import LSTM, Convolution1D, GlobalMaxPooling1D
- 
+from keras.models import load_model
  
  
 def preprocessDatasModel(model, trainDatasNb, testDatasNb, dataSize): 
@@ -108,6 +108,7 @@ def LSTMModelRN(trainX ,trainY, testX, testY):
     """
     Build a LSTM + 2 layer fully connected neural network
     > On IMDB : Dense(50), nb_epoch=3, batch_size=32 : Acc:0.86
+    > On Twitter : Dense(50), nb_epoch=10, batch_size=32 : Acc:0.72
         Parameters : 
             - trainX : ndarray of training data
             - trainY : ndarray of labels associated with training data
@@ -230,21 +231,39 @@ def evaluate(model, testX, testY) :
     return score
     
     
+def saveModel(model, filename):
+    """
+    Save a Keras model into a single HDF5 file which will contain all that we need to re-create this model
+        Parameters:
+            - model : keras model to store
+            - filename : the filename of the HDF5 file (.h5)
+    """
+    # creates a HDF5 file
+    model.save(filename)  
+    # deletes the existing model
+    del model
+    
+    
+    
 if __name__ == "__main__":   
- 
+   
     """
     # Doc2Vec trained on Twitter Corpus
+    modelPath = '../resources/sentimentAnalysisModel.h5'
     modelD2V = Doc2Vec.load('../resources/sentimentsTwitter10EpochSize100.d2v') 
     trainDatasNb = 750000 
     testDatasNb = 750000 
     dataSize = 100 
     """
     
+    
     # Doc2Vec trained on IMDB Corpus
+    modelPath = '../resources/sentimentAnalysisModelIMDB.h5'
     modelD2V = Doc2Vec.load('../resources/sentimentsImdb10EpochSize100.d2v') 
     trainDatasNb = 25000
     testDatasNb = 25000
     dataSize = 100 
+    
     
     data = preprocessDatasModel(modelD2V, trainDatasNb, testDatasNb, dataSize) 
     trainX = data["trainX"]
@@ -255,8 +274,8 @@ if __name__ == "__main__":
     """
     # Simple RN fully connected
     print "Test a simple 3 layer fully connected network : \n"
-    model1 = fullyConnectedRN(trainX,trainY)
-    evaluate(model1, testX, testY)
+    model = fullyConnectedRN(trainX,trainY)
+    evaluate(model, testX, testY)
     """
     
     
@@ -265,9 +284,9 @@ if __name__ == "__main__":
     data3D = reshapeData3D(trainX, testX)
     trainX3D = data3D["trainX"]
     testX3D = data3D["testX"]
-    model2 = LSTMModelRN(trainX3D ,trainY, testX3D, testY)
-    print(model2.summary())
-    evaluate(model2, testX3D, testY)
+    model = LSTMModelRN(trainX3D ,trainY, testX3D, testY)
+    print(model.summary())
+    evaluate(model, testX3D, testY)
     
     
     """
@@ -276,7 +295,11 @@ if __name__ == "__main__":
     data3D = reshapeData3D(trainX, testX)
     trainX3D = data3D["trainX"]
     testX3D = data3D["testX"]
-    model3 = ConvolutionalRN(trainX3D, trainY, testX3D, testY)
-    print(model3.summary())
-    evaluate(model3, testX3D, testY)
+    model = ConvolutionalRN(trainX3D, trainY, testX3D, testY)
+    print(model.summary())
+    evaluate(model, testX3D, testY)
     """
+    
+    model.save(modelPath)  
+    
+    
