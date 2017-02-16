@@ -1,10 +1,13 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Created on Thu Feb 16 14:50:35 2017
+Allows to create a dictionary of opinion words to preprocess tweets (filter words of interest).
 
+Created on Thu Feb 16 14:50:35 2017
 @author: coralie
 """
+
+from __future__ import unicode_literals 
 # Library to write utf-8 text file
 import codecs
 
@@ -16,18 +19,23 @@ import numpy as np
 
 list_punctuation = ["-","'"] 
 
+
 def extractOpinionWords():
     """ 
-    Creates the opinions dictionnary from the opinion file as a map, where the words are the key
+    Creates the opinion dictionary from the opinion file as a map, where the words are the keys
         return:
             - dictionary Object, which key->word and value->word
     """
     opinionDict = {}
 
     with codecs.open(OPINION_FILE,'r','utf-8') as f:
+        
+        #Read the files line by line (word by word) and store each word in the dictionary
         for line in f:
             values = line.split()
             word = values[0]
+
+            #For each composed word, store them as a composed word, a concatened word and as two differents word
             for c in word :
                 if c in list_punctuation :
                     ww = "".join(cc for cc in word if cc not in list_punctuation)
@@ -57,10 +65,9 @@ def loadGloveDicFromFile(filename):
             - filename : the name of the binary file
     """
         
-    #if the resource file is not present, creates the file containing all vectors
-    #and return vectors
+    #if the resource file is not present, creates the file containing all vectors and return vectors
     if not isfile(OPINION_DICT_FILE):
-        dic = _extractOpinionWords()
+        dic = extractOpinionWords()
         saveGloveDicIntoFile(dic)
         return dic
     
@@ -69,6 +76,6 @@ def loadGloveDicFromFile(filename):
 
 if __name__ == "__main__":
     
-    # if the script is run, create dictionary of vectors and save it into file
-    #print "Creating and saving the GloVe dictionary"
+    # if the script is run, create dictionary and save it into file
+    print "Creating and saving the opinion dictionary"
     saveGloveDicIntoFile(extractOpinionWords())

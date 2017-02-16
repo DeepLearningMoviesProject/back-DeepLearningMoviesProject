@@ -22,6 +22,9 @@ from gensim.models import Doc2Vec
 # numpy
 import numpy
 
+from MovieProject.resources import TRAIN_TWITTER_NEG_TR_FILE, TRAIN_TWITTER_POS_TR_FILE, TEST_TWITTER_NEG_TR_FILE, TEST_TWITTER_POS_TR_FILE, SENTIMENT_TWITTER_MODEL, LABEL_TEST_NEG, LABEL_TEST_POS, LABEL_TRAIN_NEG, LABEL_TRAIN_POS
+#from MovieProject.resources import OVERVIEW_MODEL, LABEL_TRAIN_ABTRACTS, OVERVIEWS_TR_FILE
+
 
 
 class LabeledLineSentence(object):
@@ -125,17 +128,22 @@ def loadD2VModel(modelPath):
 if __name__ == "__main__":    
     
     # To train on sentiments database (Tweets)
-    sources = {'../../resources/test_twitter_neg_processed.txt':'TEST_NEG', '../../resources/test_twitter_pos_processed.txt':'TEST_POS', '../../resources/train_twitter_neg_processed.txt':'TRAIN_NEG', '../../resources/train_twitter_pos_processed.txt':'TRAIN_POS'}
-    modelPath = '../../resources/sentimentsTwitter10EpochSize100.d2v'    
+    print "Training on sentiment tweet database :"
+    sources = {TEST_TWITTER_NEG_TR_FILE:LABEL_TEST_NEG, TEST_TWITTER_POS_TR_FILE:LABEL_TEST_POS, TRAIN_TWITTER_NEG_TR_FILE:LABEL_TRAIN_NEG, TRAIN_TWITTER_POS_TR_FILE:LABEL_TRAIN_POS}
+    modelPath = SENTIMENT_TWITTER_MODEL    
 
-    # To train on sentiments database (IMDB)
+    """
+    #print "Training on sentiment review database :"
     #sources = {'../../resources/train_imdb_neg.txt':'TRAIN_NEG', '../../resources/train_imdb_pos.txt':'TRAIN_POS'}
     #sources = {'../../resources/test-neg.txt':'TEST_NEG', '../../resources/test-pos.txt':'TEST_POS', '../../resources/train-neg.txt':'TRAIN_NEG', '../../resources/train-pos.txt':'TRAIN_POS', '../../resources/train-unsup.txt':'TRAIN_UNS'}
     #modelPath = '../../resources/sentimentsImdb10EpochSize100.d2v'
+    """
     
-    # To train on abstracts database
-    #sources = {'../../resources/train_overviews_treated.txt':'TRAIN_ABSTRACTS'}
-    #modelPath = '../../resources/overviews10EpochSize100.d2v'
+    """
+    print "Training on abstracts database :"
+    sources = {OVERVIEWS_TR_FILE:'TRAIN_ABSTRACTS'}
+    modelPath = OVERVIEW_MODEL
+    """
     
     _buildModel(sources, modelPath)
     

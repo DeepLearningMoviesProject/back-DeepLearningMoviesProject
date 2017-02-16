@@ -1,11 +1,13 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Created on Wed Feb 15 17:09:59 2017
+Allows to predict opinion about a tweet thank's to a pre-trained model.
 
+Created on Wed Feb 15 17:09:59 2017
 @author: coralie
 """
 
+from MovieProject.resources import SENTIMENT_TWITTER_MODEL, SENTIMENT_ANALYSIS_MODEL
 from MovieProject.tests import twitterSearch as ts
 from MovieProject.preprocessing.tools import D2VOnCorpus as d2v
 from MovieProject.preprocessing import tweets as tw
@@ -13,9 +15,9 @@ from keras.models import load_model
 
 batch = 500
 
-modelD2VPath = '../resources/sentimentsTwitter10EpochSize100.d2v'
-#modelPath = '../resources/sentimentAnalysisModel.h5'
-modelPath = '../resources/sentimentAnalysisModelIMDB.h5'
+modelD2VPath = SENTIMENT_TWITTER_MODEL
+modelPath = SENTIMENT_ANALYSIS_MODEL
+#modelPath = '../resources/sentimentAnalysisModelIMDB.h5'
 
 
 def predict(tweet, modelD2V, model):

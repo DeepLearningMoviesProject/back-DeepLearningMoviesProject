@@ -36,7 +36,7 @@ def preprocessTweet(tweet, dico):
     tweet = "".join(c for c in tweet if c not in list_punctuation)
     # Remove caractere repetition (more than 3 repetition only)
     tweet = removeRepetitions(tweet)
-    # Check words in the dictionnary
+    # Check if words are present in the dictionnary
     listWords=[]
     words = tweet.split()
     for word in words :
@@ -64,7 +64,8 @@ def removeRepetitions(s):
      
 def convertUselessWords(s): 
     """ 
-    Remove useless expressions on tweets like urls #word and @username 
+    Remove useless expressions on tweets like urls and @username.
+    Convert #word to word
         Parameters : 
             - s : string 
         Return :  
@@ -99,7 +100,7 @@ if __name__ == "__main__":
     
     #print removeRepetitions("girlllll have fun!! it will be amazing!! i miss theeem!! loop ")    
     #print convertUselessWords("@Nemrodx3 Ce site est vraiment trop top ! www.deepLearning.com #DeepLearning #ProjetDeFou") 
-    print preprocessTweet("@Nemrodx3 Great ! Wonderfuuuul ! Ce siiiiiiite est vraiment trop tooooooop !!!   !!!!!  www.deepLearning.com #DeepLearning #ProjetDeFou",dico) 
+    print preprocessTweet("@Nemrodx3 Great ! Wonderfuuuul ! Ce siiiiiiite est vraiment trop tooooooop !!!   !!!!!  www.deepLearning.com #DeepLearning #ProjetDeFou #Good",dico) 
     #print "".join(c for c in "!/\:?,!;.+=&<>)](['" if c not in list_punctuation) 
     #print "".join(c for c in '"' if c not in list_punctuation) 
      

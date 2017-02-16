@@ -15,9 +15,10 @@ from gensim.models import Doc2Vec
 from keras.models import Sequential 
 from keras.layers.core import Dense, Dropout, Activation
 from keras.layers import LSTM, Convolution1D, GlobalMaxPooling1D
-from keras.models import load_model
  
+from MovieProject.resources import SENTIMENT_ANALYSIS_MODEL, SENTIMENT_TWITTER_MODEL
  
+
 def preprocessDatasModel(model, trainDatasNb, testDatasNb, dataSize): 
     """
     Preprocesses data of the Doc2Vec model, in order to build a training and testing data set allowed to
@@ -247,23 +248,23 @@ def saveModel(model, filename):
     
 if __name__ == "__main__":   
    
-    """
+    
     # Doc2Vec trained on Twitter Corpus
-    modelPath = '../resources/sentimentAnalysisModel.h5'
-    modelD2V = Doc2Vec.load('../resources/sentimentsTwitter10EpochSize100.d2v') 
+    modelPath = SENTIMENT_ANALYSIS_MODEL
+    modelD2V = Doc2Vec.load(SENTIMENT_TWITTER_MODEL) 
     trainDatasNb = 750000 
     testDatasNb = 750000 
     dataSize = 100 
+    
+    
     """
-    
-    
     # Doc2Vec trained on IMDB Corpus
     modelPath = '../resources/sentimentAnalysisModelIMDB.h5'
     modelD2V = Doc2Vec.load('../resources/sentimentsImdb10EpochSize100.d2v') 
     trainDatasNb = 25000
     testDatasNb = 25000
     dataSize = 100 
-    
+    """
     
     data = preprocessDatasModel(modelD2V, trainDatasNb, testDatasNb, dataSize) 
     trainX = data["trainX"]
