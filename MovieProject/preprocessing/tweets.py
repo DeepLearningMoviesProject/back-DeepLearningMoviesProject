@@ -9,7 +9,11 @@ Created on Tue Feb  7 14:18:47 2017
 from __future__ import unicode_literals 
 
 from MovieProject.preprocessing.texts import withoutAccents 
-from MovieProject.preprocessing.tools import opinionDict as od
+from MovieProject.preprocessing import words as w
+
+from MovieProject.preprocessing.tools import gloveDict
+from MovieProject.resources import GLOVE_DICT_FILE
+
 #import regex 
 import re 
  
@@ -78,32 +82,39 @@ def convertUselessWords(s):
     #Replace #word with word 
     s = re.sub(r'#([^\s]+)', r'\1', s) 
     return s 
-     
-     
-def tweetToVect(tweet, model): 
+    
+    
+def tweetToVect(tweet, dicoGlove): 
     """ 
-    Get descriptors of text thanks to the given model 
+    Get descriptors of text thank's to glove model
         Parameters: 
-            - tweet -> string
-            - model -> the Doc2Vec model 
+            - tweet : string of the preprocessed tweet
+            - dicoGlove : 
         Return: 
-            - ndarray. Descriptors of the text passed in parameters 
+            - ndarray. vector of the text passed in parameters 
     """ 
- 
-    return model.infer_vector(preprocessTweet(tweet))     
- 
+    #return model.infer_vector(tweet)     
+    
+    gArray, wSize = w.wordsToGlove(tweet.split(), dicoGlove)             
+    meanMatrixOverview = w.meanWords(gArray, wSize)
+    
+    return meanMatrixOverview       
  
      
 if __name__ == "__main__":    
      
-    dico = od.extractOpinionWords()
+    #dico = od.extractOpinionWords()
     
     #print removeRepetitions("girlllll have fun!! it will be amazing!! i miss theeem!! loop ")    
     #print convertUselessWords("@Nemrodx3 Ce site est vraiment trop top ! www.deepLearning.com #DeepLearning #ProjetDeFou") 
-    print preprocessTweet("@Nemrodx3 Great ! Wonderfuuuul ! Ce siiiiiiite est vraiment trop tooooooop !!!   !!!!!  www.deepLearning.com #DeepLearning #ProjetDeFou #Good",dico) 
+    #print preprocessTweet("@Nemrodx3 Great ! Wonderfuuuul ! Ce siiiiiiite est vraiment trop tooooooop !!!   !!!!!  www.deepLearning.com #DeepLearning #ProjetDeFou #Good",dico) 
     #print "".join(c for c in "!/\:?,!;.+=&<>)](['" if c not in list_punctuation) 
     #print "".join(c for c in '"' if c not in list_punctuation) 
      
+    dicoGlove = gloveDict.loadGloveDicFromFile(GLOVE_DICT_FILE)
+
+    print tweetToVect("Hello beautiful man", dicoGlove)
+    
     """
     source = ['../resources/test_twitter_neg.txt','../resources/test_twitter_pos.txt','../resources/train_twitter_neg.txt','../resources/train_twitter_pos.txt'] 
     processed = ['../resources/test_twitter_neg_processed.txt','../resources/test_twitter_pos_processed.txt','../resources/train_twitter_neg_processed.txt','../resources/train_twitter_pos_processed.txt'] 
@@ -125,3 +136,10 @@ if __name__ == "__main__":
         fSource.close() 
         fProcessed.close() 
     """
+    
+    
+
+    
+    
+    
+    
