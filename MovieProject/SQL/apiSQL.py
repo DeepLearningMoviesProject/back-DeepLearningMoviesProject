@@ -2,6 +2,7 @@ from __future__ import print_function
 import mysql.connector
 import os
 import User
+
 db1 = mysql.connector.connect(host="localhost",user="root")
 cursor = db1.cursor()
 init = False
@@ -140,65 +141,531 @@ def saveDB(DBname, SQLname):
     command = 'mysqldump -u root '+ DBname + '  > ' + SQLname
     os.system(command)
     
-def createUser(user):
+def insertUser(user, listMovies = None):
     """
-        Creating OR UPDATING user. Database needs to be initalized
-        Parameter:
-            user : User that will be inserted in the database
+        Creating a user. You can also add a list of movies and their 
+        user rating. Database needs to be initalized
+        Parameters:
+            user -> User that will be inserted in the database
+            listMovies -> Dictionnary of (K:id movie, V:Boolean like/dislike)
     """
     try:
         if(not init):
             raise Exception('Database need to be initialized')
+            
         userId, userName, userMail, tmdbKey, pw = user.getInfo()
-        command = 'REPLACE into USER values('+str(userId)+',"'+userName+'","'+userMail+'","'+tmdbKey+'","'+pw+'")'
-        cursor.execute(command)
+        command = 'INSERT into USER values('+str(userId)+',"'+userName+'","'+userMail+'","'+tmdbKey+'","'+pw+'")'
+        cursor.execute(command) 
         row = cursor.fetchone()
         if row is not None:
             print(row)
         db1.commit()
         
-    except Exception as error:
-        print('Error: ' + repr(error))
-def getUser(idUser):
-    """
-        Return the user with the id User. None otherwise
-        Parameter:
-            idUser -> id of the user
-        Return: user with id idUser in the database. None otherwise
-    """
-    try:
-        if(not init):
-            raise Exception('Database need to be initialized')
+        if(listMovies is not None):
+            idMovies = listMovies.keys() 
+            insertMovies(idMovies)
+            for idMovie in idMovies:
+
+                insertUserMovie(userId,idMovie,listMovies[idMovie])
+        
     except Exception as error:
         print('Error: ' + repr(error))
         
-def showAllUsers():
+def updateUser(idUser, userName = None, userTmdbkey = None, userMail = None, userPassword = None):
     """
-        Print all users of the database
+        Update informations of a User. You can avoid not new informations.
+        Parameters:
+            idUser -> id of the user
+            userName -> new name of the user
+            userTmdbkey -> new tmdbkey of the user
+            userMail -> new mail of the user
+            userPassword -> new password of the user
+            
     """
-    sql = "SELECT * from USER"
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')  
+
+        sql = "UPDATE USER SET " 
+        added = False
+           
+        if(userName is not None):
+            sql += 'name =  "' + userName + '"'
+            added = True
+        if(userTmdbkey is not None):
+            if added == True:
+                sql+=","
+            sql += 'tmdbkey = "' +userTmdbkey + '"'
+            added = True
+        if(userMail is not None):
+            if added == True:
+                sql+=","
+            sql += 'mail = "' +userMail + '"'
+            added = True
+        if(userPassword is not None):
+            if added == True:
+                sql+=","
+            sql += 'password = "' +userPassword + '"'
+ 
+        sql += " WHERE id = " + str(idUser)
+ 
+        cursor.execute(sql) 
+        row = cursor.fetchone()
+        if row is not None:
+            print(row)
+        db1.commit()
+             
+    except Exception as error:
+        print('Error: ' + repr(error))
+    
+        
+def getUser(idUser):
+    """
+        Return the user with idUser. Return a user with id -1 if no user with
+        idUser exists.
+        Parameter:
+            idUser -> id of the user
+        Return: 
+            user with id idUser in the database. 
+    """
     try:
         if(not init):
             raise Exception('Database need to be initialized')
+            
+        sql = "SELECT * from USER WHERE id = " + str(idUser)
+        user = User.User(-1,"","","","")
+        cursor.execute(sql)
+        row = cursor.fetchall()
+        if row is not None:
+            empty = True
+            for r in row:
+                empty = False
+                l = []
+                for t in r:
+                    l.append(t)
+            if(not empty):
+                user.setInfoList(l)
+            return user
+        
+    except Exception as error:
+        print('Error: ' + repr(error))
+        
+def getUsers(idUsers):
+    """
+        Return a list of users. Return a user with id -1 if no user with
+        idUser exists.
+        Parameter:
+            idUsers -> list of id of users
+        Return: 
+            list of users
+    """
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')
+            
+        users = []
+        for idUser in idUsers:  
+            user = getUser(idUser)
+            users.append(user)
+        return users
+            
+    except Exception as error:
+        print('Error: ' + repr(error))
+        
+def getAllUsers():
+    """
+        return all users of the database
+        Return:
+            list of all users of the database
+            
+    """
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')
+        
+        sql = "SELECT * from USER"
+        cursor.execute(sql)
+        row = cursor.fetchall()
+        result = []
+        if row is not None:
+            for r in row:
+                l = []
+                user = User.User(-1,"","","","")
+                for t in r:
+                    l.append(t)
+                user.setInfoList(l)
+                result.append(user)
+        return result
+    
+    except Exception as error:
+        print('Error: ' + repr(error))
+        
+def removeUser(idUser):
+    """
+        Remove the user with idUser.
+        Parameter:
+            idUser -> id of the user
+    """
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')
+        removeAllUserMoviefromUser(idUser)
+        sql = "DELETE FROM USER WHERE id = " + str(idUser)
+        cursor.execute(sql)
+        row = cursor.fetchone()
+        if row is not None:
+            for r in row:
+                print(r)
+        db1.commit()
+        
+    except Exception as error:
+        print('Error: ' + repr(error))
+        
+def removeUsers(idUsers):
+    """
+        Remove a list of users
+        Parameter:
+            idUsers -> list of id of users
+    """
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')
+
+        for idUser in idUsers:    
+             removeUser(idUser)
+        db1.commit()
+        
+    except Exception as error:
+        print('Error: ' + repr(error))
+        
+def insertMovie(idMovie):
+    """
+        Creating a movie. Database needs to be initalized
+        Parameter:
+            movie -> id of the movie that will be added to the database
+    """
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')
+            
+        command = 'INSERT IGNORE into MOVIE values('+str(idMovie) +')'
+        cursor.execute(command)
+        row = cursor.fetchone()
+        if row is not None:
+            print(row)
+        db1.commit()
+
+    except Exception as error:
+        print('Error: ' + repr(error))
+        
+def insertMovies(idMovies):
+    """
+        Creating OR UPDATING a list of movies. Database needs to be initalized
+        Parameter:
+            movie -> list of id movies that will be added to the database
+    """
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')
+            
+        for idMovie in idMovies:
+            insertMovie(idMovie)
+        db1.commit()
+
+    except Exception as error:
+        print('Error: ' + repr(error))
+                   
+def getAllMovies():
+    """
+        return all movies of the database
+        Return:
+            list of all movies of the database
+            
+    """
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')
+        
+        sql = "SELECT * from MOVIE"
+        cursor.execute(sql)
+        row = cursor.fetchall()
+        result = []
+        if row is not None:
+            for r in row:
+                result.append(r[0])
+        return result
+    
+    except Exception as error:
+        print('Error: ' + repr(error))
+        
+def removeMovie(idMovie):
+    """
+        Remove the movie with idMovier.
+        Parameter:
+            idMovie -> id of the movie
+    """
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')
+        removeAllUserMoviefromMovie(idMovie)     
+        sql = "DELETE FROM MOVIE WHERE id = " + str(idMovie)
+        cursor.execute(sql)
+        row = cursor.fetchone()
+        if row is not None:
+            for r in row:
+                print(r)
+        db1.commit()
+        
+    except Exception as error:
+        print('Error: ' + repr(error))
+        
+def removeMovies(idMovies):
+    """
+        Remove a list of movies
+        Parameter:
+            idUsers -> list of id of movies
+    """
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')
+
+        for idMovie in idMovies:    
+             removeMovie(idMovie)
+        db1.commit()
+        
+    except Exception as error:
+        print('Error: ' + repr(error))
+         
+def insertUserMovie(idU, idM, like):
+    """
+        Creating OR UPDATING a UserMovie. Database needs to be initalized
+        Parameters:
+            idU -> id of the User
+            idV -> id of the Movie
+            like -> boolean. If the user like ou disliked the movie
+    """
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')
+        command = 'REPLACE into USERMOVIE values('+str(idU) +',' + str(idM) +','+ str(like) + ')'
+        cursor.execute(command)
+        row = cursor.fetchone()
+        if row is not None:
+            print(row)
+        db1.commit()
+    except Exception as error:
+        print('Error: ' + repr(error))
+
+def getLike(idU, idM):
+    """
+        return what the user think about a movie
+        Parameters:
+            idU -> id of the User
+            idV -> id of the Movie
+        Return:
+            boolean 0 if disliked, 1 if liked. -1 if not found
+            
+    """
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')
+        
+        sql = "SELECT LIKED from USERMOVIE WHERE IDUSER = "+str(idU)+" AND IDMOVIE = " + str(idM)
+        cursor.execute(sql)
+        row = cursor.fetchall()
+        result = -1
+        if row is not None:
+            for r in row:
+                result = r[0]
+        return result
+    
+    except Exception as error:
+        print('Error: ' + repr(error))
+
+def showAllUsersMovies():
+    """
+        show all UsersMovies of the database
+            
+    """
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')
+        
+        sql = "SELECT * from USERMOVIE"
         cursor.execute(sql)
         row = cursor.fetchall()
         if row is not None:
             for r in row:
-                print(r) #TODO : unicode to utf8
-
-        db1.commit()
+                print("idU: "+str(r[0])+" idM: "+str(r[1])+" liked: "+ str(r[2]))
+    
     except Exception as error:
         print('Error: ' + repr(error))
         
-def removerUser(idUser):
+def getAllMoviesFromUser(idUser):
     """
-        Remove the user with the id User. Null otherwise
+        return all movies of the database that a user said its opinion
+        Parameter:
+            idUser -> id of the User
+        Return:
+            dictionnary (K:idmovie, V:Opinion)
+            
+    """
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')
+        
+        sql = "SELECT IDMOVIE, LIKED from USERMOVIE WHERE IDUSER = " + str(idUser)
+        cursor.execute(sql)
+        row = cursor.fetchall()
+        result = {}
+        if row is not None:
+            for r in row:
+                result[r[0]] = r[1]
+        return result
+    
+    except Exception as error:
+        print('Error: ' + repr(error))
+        
+def getLikedMoviesFromUser(idUser,liked = 1):
+    """
+        return all liked movies of a user from the database. If liked = 0, return
+        all disliked movies
+        Parameters:
+            idUser -> id of the User
+            (optional) liked -> write 0 if you want disliked values
+        Return:
+            list of id of liked/disliked movies
+            
+    """
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')
+        
+        sql = "SELECT IDMOVIE from USERMOVIE WHERE IDUSER = " + str(idUser) + " AND LIKED = " + str(liked)
+        cursor.execute(sql)
+        row = cursor.fetchall()
+        result = []
+        if row is not None:
+            for r in row:
+                result.append(r[0])
+        return result
+    
+    except Exception as error:
+        print('Error: ' + repr(error))
+              
+def getAllUsersFromMovie(idMovie):
+    """
+        return all users of the database that gave a opinion of the movie
+        Parameter:
+            idMovie -> id of the Movie
+        Return:
+            dictionnary (K:idUser, V:Opinion)
+            
+    """
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')
+        
+        sql = "SELECT IDUSER, LIKED from USERMOVIE WHERE IDMOVIE = " + str(idMovie)
+        cursor.execute(sql)
+        row = cursor.fetchall()
+        result = {}
+        if row is not None:
+            for r in row:
+                result[r[0]] = r[1]
+        return result
+    
+    except Exception as error:
+        print('Error: ' + repr(error))
+        
+def getLikedUsersFromMovie(idMovie,liked = 1):
+    """
+        return all users that liked the movie from the database. If liked = 0, return
+        all users that disliked the movie
+        Parameters:
+            idMovie -> id of the movie
+            (optional) liked -> write 0 if you want disliked values
+        Return:
+            list of id of users
+            
+    """
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')
+        
+        sql = "SELECT IDUSER from USERMOVIE WHERE IDMOVIE = " + str(idMovie) + " AND LIKED = " + str(liked)
+        cursor.execute(sql)
+        row = cursor.fetchall()
+        result = []
+        if row is not None:
+            for r in row:
+                result.append(r[0])
+        return result
+    
+    except Exception as error:
+        print('Error: ' + repr(error))
+              
+
+def removeUserMovie(idUser,idMovie):
+    """
+        Remove the USERMOVIE with idMovie and idUser.
+        Parameter:
+            idUser -> id of the user
+            idMovie -> id of the movie
+    """
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')
+                
+        sql = "DELETE FROM USERMOVIE WHERE IDUSER = " + str(idUser) + " AND IDMOVIE = " + str(idMovie)
+        cursor.execute(sql)
+        row = cursor.fetchone()
+        if row is not None:
+            for r in row:
+                print(r)
+        db1.commit()
+        
+    except Exception as error:
+        print('Error: ' + repr(error))
+        
+def removeAllUserMoviefromUser(idUser):
+    """
+        Remove all USERMOVIES of a user.
         Parameter:
             idUser -> id of the user
     """
     try:
         if(not init):
             raise Exception('Database need to be initialized')
+                
+        sql = "DELETE FROM USERMOVIE WHERE IDUSER = " + str(idUser) 
+        cursor.execute(sql)
+        row = cursor.fetchone()
+        if row is not None:
+            for r in row:
+                print(r)
+        db1.commit()  
+    except Exception as error:
+        print('Error: ' + repr(error))  
+
+def removeAllUserMoviefromMovie(idMovie):
+    """
+        Remove all USERMOVIES of a movie.
+        Parameter:
+            idMovie -> id of the movie
+    """
+    try:
+        if(not init):
+            raise Exception('Database need to be initialized')
+                
+        sql = "DELETE FROM USERMOVIE WHERE IDMOVIE = " + str(idMovie) 
+        cursor.execute(sql)
+        row = cursor.fetchone()
+        if row is not None:
+            for r in row:
+                print(r)
+        db1.commit() 
+        
     except Exception as error:
         print('Error: ' + repr(error))
         
@@ -211,13 +678,14 @@ def customRequest(sql):
     try:
         if(not init):
             raise Exception('Database need to be initialized')
+            
         cursor.execute(sql)
         row = cursor.fetchall()
         if row is not None:
             for r in row:
                 print(r)
-
         db1.commit()
+        
     except Exception as error:
         print('Error: ' + repr(error))
 

@@ -1,4 +1,4 @@
--- MySQL dump 10.13  Distrib 5.5.54, for debian-linux-gnu (x86_64)
+	-- MySQL dump 10.13  Distrib 5.5.54, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: test_bdd
 -- ------------------------------------------------------
@@ -47,8 +47,8 @@ DROP TABLE IF EXISTS `USER`;
 CREATE TABLE `USER` (
   `ID` int(11) NOT NULL,
   `NAME` text NOT NULL,
-  `TMDBKEY` text NOT NULL,
   `MAIL` text NOT NULL,
+  `TMDBKEY` text NOT NULL,
   `PASSWORD` text NOT NULL,
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

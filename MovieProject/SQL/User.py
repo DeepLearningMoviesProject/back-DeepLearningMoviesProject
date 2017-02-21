@@ -25,3 +25,19 @@ class User:
         
     def getInfo(self):
         return self.userId, self.userName, self.userMail, self.tmdbKey, self.pw
+    
+    def setInfoList(self,l):
+        self.userId = int(l[0])
+
+        self.userName = l[1]
+
+        self.userMail = l[2]
+
+        self.tmdbKey = l[3]
+        
+        self.pw = l[4]
+        
+    
+    def showInfo(self):
+        print ('userId: '+ str(self.userId) + ', userName: ' + self.userName + ', userMail: ' 
+            + self.userMail + ', tmdbKey: ' + self.tmdbKey +', pw: ' + self.pw)
