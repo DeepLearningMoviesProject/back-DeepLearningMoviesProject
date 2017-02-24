@@ -28,7 +28,7 @@ class User:
         self.userPassword = userPassword
         
         
-    def getInfo(self):
+    def getInfos(self):
         """
             Return user informations
         """
@@ -53,10 +53,10 @@ class User:
         self.userPassword = l[4]
         
     
-    def showInfo(self):
+    def showInfos(self):
         """
             Print user informations
         """
         
-        print ('userId: '+ str(self.userId) + ', userName: ' + self.userName + ', userMail: ' 
-            + self.userMail + ', tmdbKey: ' + self.userTmdbKey +', pw: ' + self.userPassword)
+        print ('userId: "'+ str(self.userId) + '", userName: "' + self.userName + '", userMail: "' 
+            + self.userMail + '", tmdbKey: "' + self.userTmdbKey +'", pw: "' + self.userPassword + '"')

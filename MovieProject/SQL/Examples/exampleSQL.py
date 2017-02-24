@@ -13,11 +13,13 @@ try:
     
 #PREMIERE FOIS: On crée une base de données
     createDB("bdd","w+") #On crée la base de données "bdd". On peut ajouter un attribut "w+"
-                    # pour signaler si on overwrite la BDD "bdd" si elle existe déjà
+                    # pour signaler si on overwrite la BDD "bdd" si elle existe déjà.
                     #Si on ne veut pas overwrite: createDB("bdd")
                     
 #A CHAQUE FOIS: Charger les données dans la BDD.
     loadDB("bdd","../Ressources/bdd.sql") #On charge dans "bdd" le fichier "bdd.sql"
+#Note: Si vous voulez savoir quelle BDD vous utilisez : showDBName()
+#      Si vous voulez savoir la liste des tables de votre BDD : showAllTables()
 
 #On peut maintenant utiliser notre BDD (vierge actuellement)
 
@@ -41,18 +43,19 @@ try:
     
 #Elsa n'est pas content et veut changer son mot de passe et son nom
     elsa = User(1,"Elsa Dunand","bonjour@gmail.com","456sdsl","viveleweb")
-    elsaId, elsaName, elsaMail, tmdbKey, pw = elsa.getInfo() #On récupère ses infos
+    elsaId, elsaName, elsaMail, tmdbKey, pw = elsa.getInfos() #On récupère ses infos
     
 #On update la BDD
 #Note: On précise ce qu'on veut update, seul l'id est obligatoire et non modifiable     
     updateUser(elsaId, userName = elsaName, userPassword = pw) 
+#Note: paramètres de updateUser : userName, userMail, userTmdbkey, userPassword
 #DECONSEILLE : Si on veut update l'id, il faut supprimer l'utilisateur et on le refait (mais on perdra tout ses goûts (Table USERMOVIE) !!!)
 
 #Récupérons la liste des utilisateurs de la BDD.
     result = getAllUsers()
     print("Methode : getAllUsers()")
     for u in result: #Affichage de tout les utilisateurs
-        u.showInfo() 
+        u.showInfos() 
     print("") 
        
 #Si on ne veut pas les récupérer mais juste les afficher en console: On utilise:
@@ -104,16 +107,31 @@ try:
     print("")
     
 #Regardons qui n'a pas aimé le film 12
-#Note: Il suffit d'ajouter la variable "liked = 0" pour récuper les films non aimés
+#Note: Il suffit d'ajouter la variable "liked = 0" pour récupérer les films non aimés
     result = getLikedUsersFromMovie(12,0)
     print("Utilisateurs n'ayant pas aimé le film 12")
     for r in result:
         print ("Utilisateur " + str(r))
     print("")
+
+#Regardons ce que a aimé Edwin
+    result = getLikedMoviesFromUser(edwin.userId)
+    print("Films que Edwin a aimé:")
+    for r in result:
+        print ("Film " + str(r))
+    print("")
     
-#Finallement Elsa veut se supprimer, il suffit de faire:
-#Note: Tout les liens avec ses films sont automatiquement supprimés
+#Regardons ce que n'a pas aimé Edwin
+#Note: Il suffit d'ajouter la variable "liked = 0" pour récupérer les films non aimés
+    result = getLikedMoviesFromUser(edwin.userId,0)
+    print("Films que Edwin n'a pas aimé:")
+    for r in result:
+        print ("Film " + str(r))
+    print("")
+    
+#Finallement Elsa doit être supprimé de la BDD. Il suffit de faire:
     removeUser(elsaId) 
+#Note: Tout les liens avec ses films sont automatiquement supprimés
 
 #Affichons la liste des utilisateurs
     print("Methode : showAllUsers()")
@@ -133,6 +151,6 @@ try:
     
 #Fin du programme, il faut maintenant sauvegarder la BDD.
     saveDB("bdd", "../Ressources/newbdd.sql")
-    
+
 except Exception as error:
     print('Error: ' + repr(error))        

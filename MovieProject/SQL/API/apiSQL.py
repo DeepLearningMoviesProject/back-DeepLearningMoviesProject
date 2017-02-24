@@ -60,9 +60,10 @@ def showAllDB():
     sql = "show databases";
     cursor.execute(sql)
     row = cursor.fetchall()
+    print("List of all databases:")
     if row is not None:
         for r in row:
-            print(r) #TODO : Unicode to utf8
+            print('Database: "' + str(r) + '"') #TODO : Unicode to utf8
             
 def showDBName():
     """ 
@@ -73,18 +74,19 @@ def showDBName():
     row = cursor.fetchall()
     if row is not None:
         for r in row:
-            print(r) #TODO : Unicode to utf8
+            print('Current DB: "' + str(r) + '"') #TODO : Unicode to utf8
 
-def showTables():
+def showAllTables():
     """
         Printing names of all tables of the currentDatabase
     """
     sql = "show tables";
     cursor.execute(sql)
     row = cursor.fetchall()
+    print("List of all tables:")
     if row is not None:
         for r in row:
-            print(r) #TODO : Unicode to utf8
+            print('Table: "' + str(r) + '"') #TODO : Unicode to utf8
             
                  
 def executeScriptsFromFile(filename):
@@ -160,7 +162,7 @@ def insertUser(user, listMovies = None):
         if(not init):
             raise Exception('Database need to be initialized')
             
-        userId, userName, userMail, tmdbKey, pw = user.getInfo()
+        userId, userName, userMail, tmdbKey, pw = user.getInfos()
         command = 'INSERT IGNORE into USER values('+str(userId)+',"'+userName+'","'+userMail+'","'+tmdbKey+'","'+pw+'")'
         cursor.execute(command) 
         row = cursor.fetchone()
@@ -339,9 +341,10 @@ def showAllUsers():
         sql = "SELECT * from USER"
         cursor.execute(sql)
         row = cursor.fetchall()
+        print ("List of all users:")
         if row is not None:
             for r in row:
-                print("userId: "+str(r[0])+", nameUser: "+str(r[1])+", userMail: "+ str(r[2]) + ", userTmdbKey: "+ str(r[3]) + ", userPassword: "+ str(r[4]) )
+                print('userId: "'+str(r[0])+'", nameUser: "'+str(r[1])+'", userMail: "'+ str(r[2]) + '", userTmdbKey: "'+ str(r[3]) + '", userPassword: "'+ str(r[4]) + '"' )
     
     except Exception as error:
         print('Error: ' + repr(error))
@@ -456,9 +459,10 @@ def showAllMovies():
         sql = "SELECT * from MOVIE"
         cursor.execute(sql)
         row = cursor.fetchall()
+        print ("List of all movies:")
         if row is not None:
             for r in row:
-                print("Movie: "+str(r[0]))
+                print('Movie: "'+str(r[0]) + '"')
     
     except Exception as error:
         print('Error: ' + repr(error))
@@ -561,9 +565,10 @@ def showAllUsersMovies():
         sql = "SELECT * from USERMOVIE"
         cursor.execute(sql)
         row = cursor.fetchall()
+        print ("List of all USERMOVIES:")
         if row is not None:
             for r in row:
-                print("idUser: "+str(r[0])+", idMovie: "+str(r[1])+", Liked: "+ str(r[2]))
+                print('idUser: "'+str(r[0])+'", idMovie: "'+str(r[1])+'", Liked: "'+ str(r[2]) +'"')
     
     except Exception as error:
         print('Error: ' + repr(error))
@@ -608,6 +613,9 @@ def getLikedMoviesFromUser(idUser,liked = 1):
         if(not init):
             raise Exception('Database need to be initialized')
         
+        if(liked != 1 and liked != 0):
+            raise Exception('Error, "liked" value argument invalid')
+
         sql = "SELECT IDMOVIE from USERMOVIE WHERE IDUSER = " + str(idUser) + " AND LIKED = " + str(liked)
         cursor.execute(sql)
         row = cursor.fetchall()
@@ -659,7 +667,10 @@ def getLikedUsersFromMovie(idMovie,liked = 1):
     try:
         if(not init):
             raise Exception('Database need to be initialized')
-        
+
+        if(liked != 1 and liked != 0):
+            raise Exception('Error, "liked" value argument invalid')    
+ 
         sql = "SELECT IDUSER from USERMOVIE WHERE IDMOVIE = " + str(idMovie) + " AND LIKED = " + str(liked)
         cursor.execute(sql)
         row = cursor.fetchall()
@@ -679,6 +690,7 @@ def removeUserMovie(idUser,idMovie):
         Parameter:
             idUser -> id of the user
             idMovie -> id of the movie
+
     """
     try:
         if(not init):
