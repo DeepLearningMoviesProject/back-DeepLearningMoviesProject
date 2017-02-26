@@ -10,12 +10,27 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-engine = create_engine('mysql://root:root@localhost/DeepMoviesDB?charset=utf8&use_unicode=0', pool_recycle=60)
-db_session = scoped_session(sessionmaker(autocommit=False,
-                                         autoflush=False,
-                                         bind=engine))
+
+DB_NAME = "DeepMoviesDB"
+
+DB_CONFIG_DICT = { "database" : DB_NAME,
+                   "user" : "root", #Change this
+                   "password" : "root", #Change this
+                   "host" : "localhost",
+                   "port" : "3306" }
+
+DB_CONN_FORMAT = "mysql://{user}:{password}@{host}:{port}/{database}"
+
+DB_OPTIONS = "?charset=utf8&use_unicode=0"                     
+
+
+engine = create_engine((DB_CONN_FORMAT+DB_OPTIONS).format(**DB_CONFIG_DICT), pool_recycle=60)
+
+dbSession = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
+
 Base = declarative_base()
-Base.query = db_session.query_property()
+Base.query = dbSession.query_property()
+
 
 def init_db():
     # import all modules here that might define models so that

@@ -6,15 +6,15 @@ Created on Fri Feb 24 22:44:09 2017
 @author: Julian
 """
 
-from database import db_session, init_db
+from database import dbSession, init_db
 from models import User, Movie, UserMovie
 
 
 init_db()
 
 #u = User("Kaito", "test@gmail.com")
-#db_session.add(u)
-#db_session.commit()
+#dbSession.add(u)
+#dbSession.commit()
 
 #users = User.query.all()
 #
@@ -24,16 +24,16 @@ init_db()
 #uKaito.name = "Kaito Kuroba"
 #
 ## print new value 
-#print db_session.dirty
+#print dbSession.dirty
 #
 ##commit changes
-#db_session.commit()
+#dbSession.commit()
 
 
 
 #for m in Movie.query.all():
-#    db_session.delete(m)
-#db_session.commit()
+#    dbSession.delete(m)
+#dbSession.commit()
 
 
 
@@ -46,21 +46,32 @@ movies = [ Movie(11),
          ]
 
 
-
-for u in users: db_session.add(u)
-
-db_session.commit()
+try:
+    for u in users: dbSession.add(u)
     
-for m in movies: db_session.add(m)
+    dbSession.commit()
+    print "users inserted"
+except:
+    print "users already inserted"
+    
+try:
+    for m in movies: dbSession.add(m)
+    
+    dbSession.commit()
+    print "movies inserted"
+except:
+    print "movies already inserted"
 
-db_session.commit()
+try:
+    um = UserMovie(User.query.filter_by(name="Kaito").first().id,
+                   Movie.query.filter_by(idMovie=415).first().idMovie,
+                   liked=True)
 
-um = UserMovie(user= User.query.filter_by(name="Kaito").first(),
-               movie=Movie.query.filter_by(idMovie=415).first(),
-               liked=True)
-
-db_session.add(um)
-db_session.commit()
+    dbSession.add(um)
+    dbSession.commit()
+    print "info inserted"
+except:
+    print "info already inserted"
 
 print "Information inserted"
     
