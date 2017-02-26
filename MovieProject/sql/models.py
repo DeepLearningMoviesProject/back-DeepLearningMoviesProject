@@ -14,7 +14,7 @@ class User(Base):
     __tablename__ = 'user'
     id = Column(Integer, name="id", primary_key=True, nullable=False)
     name = Column(String(64), unique=True, nullable=False)
-    email = Column(String(128), unique=True, nullable=False)
+    email = Column(String(128), unique=False, nullable=False)
     tmdbKey = Column(String(32), unique=False, nullable=False)
     password = Column(String(128), unique=False, nullable=False)
     movies = relationship("UserMovie", back_populates="user")
