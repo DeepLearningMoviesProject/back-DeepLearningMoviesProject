@@ -84,19 +84,38 @@ user1 = User("Kaito", email="test1")
 print "Insertion of user %s" %(user1)
 manager.insertUser(user1.name, email=user1.email)
 
-print "Getting user %s" %(user1.name)
+print "Getting user %s..." %(user1.name),
 user = manager.getUser(user1.name)
 print user
 
-print "Updating user %s with new email" %(user.name)
+print "Updating user %s with new email..." %(user.name),
 manager.updateUser(user.name, email="test@yahoo.fr")
 
-print "New value %s" %(manager.getUser(user.name).email)
+print manager.getUser(user.name).email
 
-print "Removing user %s" %(user.name)
+print "Removing user %s..." %(user.name),
 manager.removeUser(user.name)
 
 if manager.getUser(user.name) is None:
     print "Successfull"
 else:
     print "Error"    
+    
+print 
+movie1 = Movie(415)
+
+print "Insertion of movie %s" %(movie1)
+manager.insertMovie(movie1.idMovie)
+
+print "Getting movie %d..." %(movie1.idMovie),
+movie = manager.getMovie(movie1.idMovie)
+print movie
+
+print "Removing movie %s..." %(movie.idMovie), 
+manager.removeMovie(movie.idMovie)
+
+if manager.getMovie(movie.idMovie) is None:
+    print "Successfull"
+else:
+    print "Error"    
+

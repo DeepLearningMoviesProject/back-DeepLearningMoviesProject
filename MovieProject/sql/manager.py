@@ -32,7 +32,7 @@ class DatabaseManager():
         
     def insertUser(self, name, email="", tmdbKey="", password=""):
         """
-            Insert a new user in database, raise a RunTimeError if already existed
+            Insert a new user in database, raise a RunTimeError if already exist
             
             Parameters:
                 name -> String, name of the user
@@ -71,6 +71,7 @@ class DatabaseManager():
         
         db.commit()
         
+        
     def removeUser(self, name):
         """
              Remove user specified by its name
@@ -83,3 +84,48 @@ class DatabaseManager():
             
         db.delete(user)
         db.commit()
+        
+        
+    def getMovie(self, idMovie):
+        """
+            Get movie from database by its id
+            
+            Parameters:
+                idMovie -> int, id of movie from TDMB
+            return:
+                Movie object or None if not exist
+        """
+        
+        return Movie.query.filter_by(idMovie=idMovie).first()
+    
+    
+    def insertMovie(self, idMovie):
+        """
+            Insert a new movie in database, raise a RunTimeError if already exist
+            
+            Parameters:
+                idMovie -> int, id of movie from TDMB
+        """
+        
+        if self.getMovie(idMovie) is not None:
+            raise RuntimeError("Movie %d already exist in database" %(idMovie))
+            
+        newMovie = Movie(idMovie)
+        db.add(newMovie)
+        db.commit()
+        
+        
+    def removeMovie(self, idMovie):
+        """
+             Remove movie specified by its id
+        """
+        
+        movie = self.getMovie(idMovie)
+        
+        if movie is None:
+            raise RuntimeError("Movie %d is not present into the database")
+            
+        db.delete(movie)
+        db.commit()
+        
+        
