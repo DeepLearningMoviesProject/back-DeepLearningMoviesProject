@@ -14,6 +14,9 @@ from exceptions import RuntimeError
 class DatabaseManager():
     
     def __init__(self):
+        """
+            initialize the database, creates tables if not exists
+        """
         initDb()
         
         
@@ -123,9 +126,106 @@ class DatabaseManager():
         movie = self.getMovie(idMovie)
         
         if movie is None:
-            raise RuntimeError("Movie %d is not present into the database")
+            raise RuntimeError("Movie %d is not present into the database" %(idMovie))
             
         db.delete(movie)
         db.commit()
+    
+    
+    def getUserMovie(self, idUser, idMovie):
+        """
+            Get usermovie from database by its idUser and idMovie
+            
+            Parameters:
+                idUser -> int, id of user
+                idMovie -> int, id of movie from TMDB
+            return:
+                UserMovie object or None if not exist
+        """
+        
+        return UserMovie.query.filter_by(idUser=idUser, idMovie=idMovie).first()
         
         
+    
+    def insertUserMovie(self, username, idMovie, liked=None):
+        """
+            Insert a new usermovie in database, raise a RunTimeError if already exist
+            
+            Parameters:
+                username -> String, name of user 
+                idMovie -> int, id of movie from TDMB
+        """
+        
+        print username, idMovie, liked
+        
+        user = self.getUser(username)
+        
+        if user is None:
+            raise RuntimeError("User %s is not in the database" %(username))
+            
+        if self.getUserMovie(user.id, idMovie):
+            raise RuntimeError("UserMovie %s, %s already exist in database" %(user.id, idMovie))
+        
+        if self.getMovie(idMovie) is None:
+            self.insertMovie(idMovie)
+        
+        print user, self.getMovie(idMovie)
+        
+        usermovie = UserMovie(user.id, idMovie, liked)
+        db.add(usermovie)
+        db.commit()
+        
+    
+    def updateLikedMoviesForUser(self, username, likedMovies):
+        """
+            Update all movies liked by user
+            
+            Parameters:
+                username -> String, name of user
+                likedMovies -> dict, {idMovie:True/False}
+        """
+        
+        self.removeAllUserMovieFromUser(username)
+        for idMovie, liked in likedMovies.items():
+            self.insertUserMovie(username, idMovie, liked)
+        
+        
+    def removeAllUserMovieFromUser(self, username):
+        """
+            Delete all informations about movies liked by specified user
+            
+            Parameters:
+                username -> String, name of user
+        """
+        
+        user = self.getUser(username)
+        
+        if user is None:
+            raise RuntimeError("User %s is not in the database" %(username))
+            
+        for usermovie in user.movies:
+            db.delete(usermovie)
+        db.commit()
+        
+        
+    def getMoviesLikedByUser(self, username, liked=None):
+        """
+            Get all movies liked or not by user
+            
+            Parameters:
+                username -> String, name of user
+                liked -> Boolean, True to get all movies liked by user, False not liked
+                         None for all movies
+            return 
+                array of Movie object 
+        """
+        
+        user = self.getUser(username)
+        
+        if user is None:
+            raise RuntimeError("User %s is not in the database" %(username))
+            
+        if liked is None:
+            return user.movies
+        else:
+            return [ movie for movie in user.movies if movie.liked == liked ]

@@ -17,7 +17,7 @@ class User(Base):
     email = Column(String(128), unique=False, nullable=False)
     tmdbKey = Column(String(32), unique=False, nullable=False)
     password = Column(String(128), unique=False, nullable=False)
-    movies = relationship("UserMovie", back_populates="user")
+    movies = relationship("UserMovie", back_populates="user", cascade="save-update, merge, delete")
     
     def __init__(self, name, email="", tmdbKey="", password=""):
         self.name = name
@@ -33,7 +33,7 @@ class Movie(Base):
     __tablename__ = 'movie'
     id = Column(Integer, name="id", primary_key=True, nullable=False)
     idMovie = Column(Integer, unique=True, nullable=False)
-    users = relationship("UserMovie", back_populates="movie")
+    users = relationship("UserMovie", back_populates="movie", cascade="save-update, merge, delete")
     
     def __init__(self, idMovie):
         self.idMovie = idMovie
