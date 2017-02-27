@@ -7,3 +7,4 @@ Created on Mon Jan 30 11:09:56 2017
 """
 
 from models import User, Movie, UserMovie
+from manager import DatabaseManager
