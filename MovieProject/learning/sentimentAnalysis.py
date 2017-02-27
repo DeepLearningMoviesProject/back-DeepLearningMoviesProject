@@ -19,8 +19,11 @@ from keras.layers.core import Dense, Dropout, Activation
 from keras.layers import LSTM
  
 from MovieProject.resources import TRAIN_TWITTER_NEG_TR_FILE, TRAIN_TWITTER_POS_TR_FILE, TEST_TWITTER_NEG_TR_FILE, TEST_TWITTER_POS_TR_FILE, GLOVE_DICT_FILE
+from MovieProject.resources import SENTIMENT_ANALYSIS_MODEL
 from MovieProject.preprocessing import tweets as tw
 from MovieProject.preprocessing.tools import gloveDict
+
+modelPath = SENTIMENT_ANALYSIS_MODEL
 
 
 def preprocessDatasModel(): 
@@ -228,6 +231,25 @@ def saveModel(model, filename):
     model.save(filename)  
     # deletes the existing model
     del model
+ 
     
+    
+def createModel():
+    """
+    Create model based on LSTM neuronal network
+    """
+        
+    data = preprocessDatasModel()
+    trainX = data["trainX"]
+    trainY = data["trainY"]
+    testX = data["testX"]
+    testY = data["testY"]
+
+    # LSTM RN
+    model = LSTMModelRN(trainX ,trainY, testX, testY)
+    print(model.summary())
+    evaluateLSTM(model, testX, testY)
+    
+    model.save(modelPath)          
     
     

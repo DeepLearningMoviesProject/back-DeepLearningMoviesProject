@@ -6,11 +6,13 @@ Created on Mon Feb 27 11:32:22 2017
 @author: coralie
 """
 from MovieProject.learning import sentimentAnalysis as sa
-from MovieProject.resources import SENTIMENT_ANALYSIS_MODEL
 
 
 if __name__ == "__main__":   
    
+    sa.createModel()
+    
+    """
     modelPath = SENTIMENT_ANALYSIS_MODEL
     
     data = sa.preprocessDatasModel()
@@ -20,12 +22,15 @@ if __name__ == "__main__":
     testY = data["testY"]
  
     """
+    
+    """
     # Simple RN fully connected
     print "Test a simple 3 layer fully connected network : \n"
     model = fullyConnectedRN(trainX,trainY)
     evaluate(model, testX, testY)
     """
     
+    """
     # LSTM RN
     print "Test LSTM : \n"
     model = sa.LSTMModelRN(trainX ,trainY, testX, testY)
@@ -33,3 +38,4 @@ if __name__ == "__main__":
     sa.evaluateLSTM(model, testX, testY)
     
     model.save(modelPath)  
+    """

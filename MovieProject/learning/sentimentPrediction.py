@@ -34,6 +34,7 @@ def predict(tweet, model, dico):
     # Tweet preprocessing thank's to glove dictionnary
     dicoGlove = gloveDict.loadGloveDicFromFile(GLOVE_DICT_FILE)
     tweet = tw.preprocessTweet(tweet,dico)
+    #print tweet
     
     # Predict classe and return it when probability is hight
     if tweet :
@@ -47,13 +48,14 @@ def predict(tweet, model, dico):
         tweet = tweet.reshape(tweet.shape[0], 1, tweet.shape[1])
         # Predict the tweet classe
         pred = model.predict_classes(tweet, batch_size=batch, verbose=0)
+        pred = -1 if pred == 0 else 1
         result = model.predict_proba(tweet, batch_size=batch, verbose=0)
         print "Predicted classe %d with probability %f " %(pred,result)
         # Return classe only for hight probabilities
         if result <=0.10 or result >= 0.90 :
-            return pred[0][0]
+            return pred
 
     # Return neutral classe in others cases    
-    return -1 
+    return 0 
     
     
