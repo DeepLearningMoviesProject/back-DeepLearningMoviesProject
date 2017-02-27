@@ -42,7 +42,7 @@ def predict(movies, model, **kwargs):
     return pred
     
     
-def pickNMovie(n):
+def pickNMovies(n):
     '''
     Get n movies from tmdb, max 20
         parameters :
@@ -51,10 +51,12 @@ def pickNMovie(n):
             - a random np.array of movies
     '''
 
+    pages = tmdb.Discover().movie(vote_count_gte=20)
+
     #Pick a random page from Discover
-    pages_max = 1000
+    pages_max = pages['total_pages']
     p = randint(0,pages_max)
-    response = tmdb.Discover().movie(page=p)
+    response = tmdb.Discover().movie(page=p, vote_count_gte=20)
     pageRes = response['results']
     nbMovies = len(pageRes)
 #    print 'nb movies : ', nbMovies
@@ -87,7 +89,7 @@ def suggestNMovies(model, n, **kwargs):
     while(len(suggestion) < n):
 #        print "n : ", n, " sugg.len : ", len(suggestion)
         remains_size = n - len(suggestion)
-        movies = pickNMovie(np.minimum(pickSize, remains_size))
+        movies = pickNMovies(np.minimum(pickSize, remains_size))
         
 #        print 'movies len :', len(movies)
         #checks if movies are not already in suggestion and remove them if so
@@ -98,14 +100,14 @@ def suggestNMovies(model, n, **kwargs):
         if(movies.shape[0] != 0):
             #Keep in suggestion the movies that matches the model
             predictions = predict(movies, model, **kwargs)
-    #        print "predictions : ", predictions
+#            print "movies : ", movies
+#            print "predictions : ", predictions
             i = 0 
             for p in predictions:
     #            pred = predict(m, model, **kwargs)
-                if(p > 0.7):
+                if(p > 0.5):
                     suggestion = np.append(suggestion, movies[i])
-    #                print movies[i], " added with prediction ", p
+                    print movies[i], " added with prediction ", p
                 i += 1
 
     return suggestion
-    

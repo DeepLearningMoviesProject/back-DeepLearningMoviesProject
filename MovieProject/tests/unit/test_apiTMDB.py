@@ -12,10 +12,10 @@ import unittest
 
 class TextTest(unittest.TestCase):
 
-    """Test case utilisé pour tester les fonctions du module 'preprocessing.tools.apiTMDB'."""
+    """Test case used to test 'preprocessing.tools.apiTMDB'."""
 
     def test_getMovies(self):
-        """Teste le fonctionnement de la fonction 'apiTMDB.getMovies'."""
+        """Tests 'apiTMDB.getMovies'."""
         # 11 is Star Wars, 1 not found, 12 is Finding Nemo
         moviesId = [1,11,12]
         movies = getMovies(moviesId)
@@ -43,7 +43,7 @@ class TextTest(unittest.TestCase):
         self.assertEquals(info12["title"], "Finding Nemo")
 
     def test_getKeywords(self):
-    	"""Teste le fonctionnement de la fonction 'apiTMDB.getKeywords'."""
+    	"""Tests 'apiTMDB.getKeywords'."""
         nemo = getMovie(12)
         keywords = getKeywords(nemo.keywords())
         #12 is finding nemo, 
@@ -57,7 +57,7 @@ class TextTest(unittest.TestCase):
     # def test_textToVect(self):
         
     def test_getDirectors(self):
-        """ Teste le fonctionnement de la fonction 'apiTMDB.getDirectors' """
+        """ Tests 'apiTMDB.getDirectors' """
         
         movie = getMovie(11)
         
@@ -68,7 +68,7 @@ class TextTest(unittest.TestCase):
         self.assertEqual(directorsTest[0], directors[0])
         
     def test_getActors(self):
-        """ Teste le fonctionnement de la fonction 'apiTMDB.getActors' """
+        """ Tests 'apiTMDB.getActors' """
         
         movie = getMovie(11)
         

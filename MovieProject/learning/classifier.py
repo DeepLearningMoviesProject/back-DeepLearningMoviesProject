@@ -15,7 +15,7 @@ from keras.constraints import maxnorm
 from sklearn.cross_validation import StratifiedKFold
 
 epoch = 800
-batch = 128
+batch = 64
 
 def createModel(dataLen = 0):
     '''
@@ -32,15 +32,17 @@ def createModel(dataLen = 0):
         raise ValueError('The model can\'t be created if there is no matrix !')
     
     finalBranch = Sequential()
-    # finalBranch.add(Dropout(0.2, input_shape=(dataLen,)))
+    #finalBranch.add(Dropout(0.2, input_shape=(dataLen,)))
     finalBranch.add(Dense(dataOutputDim, input_dim=dataLen, activation = 'relu'))
     finalBranch.add(BatchNormalization())
     
     #TODO : maybe change this dropout
-    #finalBranch.add(Dropout(0.2))
-    #finalBranch.add(Dense((dataOutputDim/2),  activation = 'relu', W_constraint = maxnorm(3)))
     finalBranch.add(Dropout(0.2))
-    finalBranch.add(Dense(1,  activation = 'sigmoid', W_constraint = maxnorm(5)))
+    finalBranch.add(Dense((dataOutputDim/2),  activation = 'relu', W_constraint = maxnorm(3)))
+    # finalBranch.add(Dropout(0.2))
+    # finalBranch.add(Dense((dataOutputDim/2),  activation = 'relu', W_constraint = maxnorm(3)))
+    finalBranch.add(Dropout(0.2))
+    finalBranch.add(Dense(1,  activation = 'sigmoid', W_constraint = maxnorm(3)))
     
     #TODO : Change optimizer
 #    sgd = SGD(lr = 0.1, momentum = 0.9, decay = 0, nesterov = False)

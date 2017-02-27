@@ -19,18 +19,18 @@ path = '../../resources/evaluations/'
 
 preprocessingChanged = False #Set to true if the processing has changed
 
-params = {"titles" : True,
+params = {"titles" : False,
           "rating" : True,
           "overviews" : True,
-          "keywords" : True,
+          "keywords" : False,
           "genres" : True,
-          "actors" : True,
+          "actors" : False,
           "directors" : True,
           "compagnies" : True,
-          "language" : True,
+          "language" : False,
           "belongs" : True,
           "runtime" : True,
-          "date" : True }
+          "date" : False }
 
 #Test function
 def preprocessFileGeneric(filename, **kwargs):
@@ -159,17 +159,19 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
             meanScorePerceptron += scorePerceptron
             meanScoreSVM += scoreSVM
             totalScores += 1
+    
     #Compute the mean score for the classifier
     meanScoreKeras /= totalScores
     meanScorePerceptron /= totalScores
     meanScoreSVM /= totalScores
+    
     return meanScoreKeras, meanScorePerceptron, meanScoreSVM
 
 
     
 if __name__ == '__main__':
     
-    doOne = False    #If we want to learn a specific movie
+    doOne = True    #If we want to learn a specific movie
     
     scoreP = 0
     scoreSVM = 0
@@ -177,7 +179,7 @@ if __name__ == '__main__':
     
     if(doOne):
         #One movie : the one we want to learn
-        filename = 'moviesEvaluated-18'
+        filename = 'moviesEvaluated_test'
         
         data, labels = preprocessFileGeneric(filename.replace(".json", ""), **params)
         _, scoreK = buildTestModel(data, labels, folds=5)

@@ -12,20 +12,19 @@ import unittest
 
 class TextTest(unittest.TestCase):
 
-    """Test case utilisé pour tester les fonctions du module 'preprocessing.text'."""
+    """Test case used to test the module 'preprocessing.text'."""
 
     def test_withoutAccents(self):
-        """Teste le fonctionnement de la fonction 'text.withoutAccents'."""
+        """Tests 'text.withoutAccents'."""
         wordInit = "àAâäO0jkfåçsgqéhgèêhëjîjïkôöùkûèoüÿxcğ"
         wordFinal = "aAaaO0jkfacsgqehgeehejijikooukueouyxcg"
         word = withoutAccents(wordInit)
         self.assertEquals(word, wordFinal)
 
     def test_preProcessingAbstracts(self):
-    	"""Teste le fonctionnement de la fonction 'text.preProcessingAbstracts'."""
+    	"""Tests 'text.preProcessingAbstracts'."""
         abstractInit = "Hello here! J'ai demandé un café noir... C'est pour demain ?"
         abstractFinal = "hello here j'ai demande un cafe noir c'est pour demain "
         abstract = preProcessingAbstracts(abstractInit)
         self.assertEquals(abstract, abstractFinal)
 
-    # def test_textToVect(self):
