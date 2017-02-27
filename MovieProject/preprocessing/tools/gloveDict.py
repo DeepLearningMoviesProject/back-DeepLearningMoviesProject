@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Feb  1 10:14:35 2017
-
 @author: Julian
 """
 
@@ -80,4 +79,3 @@ if __name__ == "__main__":
     # if the script is run, create dictionary of vectors and save it into file
     print "Creating and saving the GloVe dictionary"
     saveGloveDicIntoFile(_extractGloveVects())
-

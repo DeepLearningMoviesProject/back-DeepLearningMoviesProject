@@ -1,8 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-
--- Allows to train the Doc2Vec model on the corpus created --
+-- Script allowed to train the Doc2Vec model on data base --
 
 To train it, we use documents, each one taking up one entire line. So, each document should be on one line, separated by new lines.
 
@@ -23,15 +22,16 @@ from gensim.models import Doc2Vec
 # numpy
 import numpy
 
+from MovieProject.resources import TRAIN_TWITTER_NEG_TR_FILE, TRAIN_TWITTER_POS_TR_FILE, TEST_TWITTER_NEG_TR_FILE, TEST_TWITTER_POS_TR_FILE, SENTIMENT_TWITTER_MODEL, LABEL_TEST_NEG, LABEL_TEST_POS, LABEL_TRAIN_NEG, LABEL_TRAIN_POS
+#from MovieProject.resources import OVERVIEW_MODEL, LABEL_TRAIN_ABTRACTS, OVERVIEWS_TR_FILE
 
-SIZE_VECTOR = 100
 
 
 class LabeledLineSentence(object):
     
     def __init__(self,sources):
         """
-            Constructor of LabeledLineSentence
+        Constructor of LabeledLineSentence
         """
         # take a dictionary of many text file as parameter (insteed of a single text file. 
         # the dictionary defines the files to read and the label prefixes sentences from that document should take on
@@ -46,7 +46,7 @@ class LabeledLineSentence(object):
 
     def __iter__(self):
         """
-            Iterator of LabeledLineSentence
+        Iterator of LabeledLineSentence
         """
         # each document should be on one line, separated by new lines
         for source, prefix in self.sources.items():
@@ -56,11 +56,10 @@ class LabeledLineSentence(object):
 
     def to_array(self): 
         """
-            Create an array of LabeledLineSentence : the method "build_vocab(self)" 
-            takes an array of LabeledLineSentence
-            
-            Return : 
-                an array of LabeledLineSentence
+        Create an array of LabeledLineSentence : the method "build_vocab(self)" 
+        takes an array of LabeledLineSentence
+        
+        Return : an array of LabeledLineSentence
         """
         self.sentences = []
         for source, prefix in self.sources.items():
@@ -71,11 +70,10 @@ class LabeledLineSentence(object):
 
     def sentences_perm(self):
         """ 
-            Randomize the sequence of sentences : the model is better trained if in each 
-            training epoch, the sequence of sentences fed to the model is randomized
-                
-            Return : 
-                a random suffle of sequence into a numpy array
+        Randomize the sequence of sentences : the model is better trained if in each 
+        training epoch, the sequence of sentences fed to the model is randomized
+        
+        Return : a random suffle of sequence into a numpy array
         """
         numpy.random.shuffle(self.sentences)
         return self.sentences
@@ -83,16 +81,14 @@ class LabeledLineSentence(object):
         
 
 
-def _buildModel(sources, modelPath, epochs) :
+def _buildModel(sources, modelPath) :
     """
-        Build the model and store it
-        
+    Build the model and store it
         Parameters :
-            sources : dictionnary of sources with files path and labels associated at each file
-            modelPath : path to store the model built
+            - sources : dictionnary of sources with files path and labels associated at each file
+            - modelPath : path to store the model built
     """
     
-    print "Preprocessing data ..."
     sentences = LabeledLineSentence(sources)
     
     # min_count: ignore all words with total frequency lower than this. We have to set this to 1, since the sentence labels only appear once.
@@ -101,15 +97,13 @@ def _buildModel(sources, modelPath, epochs) :
     # sample: threshold for configuring which higher-frequency words are randomly downsampled
     # workers: use this many worker threads to train the model
     # DBOW mode (dm=0) is faster and creates better vectors for many purposes/datasets ?!? <- Bad idea !
-    model = Doc2Vec(min_count=1, window=10, size=SIZE_VECTOR, sample=1e-4, negative=5, workers=7, alpha=0.025, min_alpha=0.025)
+    model = Doc2Vec(min_count=1, window=10, size=100, sample=1e-4, negative=5, workers=7, alpha=0.025, min_alpha=0.025)
     
-    print "Building vocabulary ..."
     model.build_vocab(sentences.to_array())
     
-    print "Training ..."
     i=0
-    for epoch in range(epochs):
-        print '%d/%d ...' % (i,epochs)
+    for epoch in range(10):
+        print(i)
         model.train(sentences.sentences_perm())
         model.alpha -= 0.002  # decrease the learning rate
         model.min_alpha = model.alpha  # fix the learning rate, no decay
@@ -119,31 +113,39 @@ def _buildModel(sources, modelPath, epochs) :
 
     
 
-def loadD2VModel(modelPath):
+#def loadD2VModel(modelPath):
     """
-        Load a preexisting Doc2Vec model
-            
+    Load a preexisting Doc2Vec model
         Parameter:
-            modelPath : model file path to load
-            
+            - modelPath : model file path to load 
         Return:
-            Doc2Vec model object
+            - Doc2Vec model object
     """
-    return Doc2Vec.load(modelPath)
-    
+#    return Doc2Vec.load(modelPath)
+   
     
     
 if __name__ == "__main__":    
     
-    # To train on sentiments database
-    #sources = {'../../resources/train_twitter_neg_processed.txt':'TRAIN_NEG', '../../resources/train_twitter_pos_processed.txt':'TRAIN_POS','../../resources/test_twitter_neg_processed.txt':'TEST_NEG', '../../resources/test_twitter_pos_processed.txt':'TEST_POS'}
-    #modelPath = '../../resources/sentiments10EpochSize100.d2v'
+    # To train on sentiments database (Tweets)
+    print "Training on sentiment tweet database :"
+    sources = {TEST_TWITTER_NEG_TR_FILE:LABEL_TEST_NEG, TEST_TWITTER_POS_TR_FILE:LABEL_TEST_POS, TRAIN_TWITTER_NEG_TR_FILE:LABEL_TRAIN_NEG, TRAIN_TWITTER_POS_TR_FILE:LABEL_TRAIN_POS}
+    modelPath = SENTIMENT_TWITTER_MODEL    
 
-    # To train on abstracts database
-    sources = {'../../resources/train_overviews_treated.txt':'TRAIN_ABSTRACTS'}
-    modelPath = '../../resources/abstracts20EpochSize100.d2v'
+    """
+    #print "Training on sentiment review database :"
+    #sources = {'../../resources/train_imdb_neg.txt':'TRAIN_NEG', '../../resources/train_imdb_pos.txt':'TRAIN_POS'}
+    #sources = {'../../resources/test-neg.txt':'TEST_NEG', '../../resources/test-pos.txt':'TEST_POS', '../../resources/train-neg.txt':'TRAIN_NEG', '../../resources/train-pos.txt':'TRAIN_POS', '../../resources/train-unsup.txt':'TRAIN_UNS'}
+    #modelPath = '../../resources/sentimentsImdb10EpochSize100.d2v'
+    """
     
-    _buildModel(sources, modelPath, 10)
+    """
+    print "Training on abstracts database :"
+    sources = {OVERVIEWS_TR_FILE:'TRAIN_ABSTRACTS'}
+    modelPath = OVERVIEW_MODEL
+    """
+    
+    _buildModel(sources, modelPath)
     
 
             

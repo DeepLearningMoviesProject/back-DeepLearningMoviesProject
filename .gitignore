@@ -88,12 +88,12 @@ ENV/
 # Rope project settings
 .ropeproject
 
-\.spyproject/
-
-MovieProject/resources/glove\.6B\.50d\.txt
 MovieProject/resources/*.txt
 MovieProject/resources/*.h5
+MovieProject/resources/*.npy
 *.DS_STORE
+
+MovieProject/resources/glove\.6B\.50d\.txt
 
 *.npy
 
