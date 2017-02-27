@@ -87,7 +87,7 @@ def classificationMovies(titles):
             print "%d / %d" %(i,len(tweets))
             print "> Original tweet : %s" %(tweet)
             tweet = tw.removeMovie(tweet, title)
-            p = pred.predict(tweet, model, dico)
+            p = predict(tweet, model, dico)
             sentiments[title] = sentiments[title] - 1 if p==-1 else sentiments[title] + p
 
         sentiments[title] = sentiments[title] / len(tweets) if len(tweets)>0 else 0
