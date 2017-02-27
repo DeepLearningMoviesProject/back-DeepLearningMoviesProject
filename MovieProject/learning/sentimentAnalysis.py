@@ -18,7 +18,7 @@ from keras.models import Sequential
 from keras.layers.core import Dense, Dropout, Activation
 from keras.layers import LSTM
  
-from MovieProject.resources import TRAIN_TWITTER_NEG_TR_FILE, TRAIN_TWITTER_POS_TR_FILE, TEST_TWITTER_NEG_TR_FILE, TEST_TWITTER_POS_TR_FILE, GLOVE_DICT_FILE, SENTIMENT_ANALYSIS_MODEL
+from MovieProject.resources import TRAIN_TWITTER_NEG_TR_FILE, TRAIN_TWITTER_POS_TR_FILE, TEST_TWITTER_NEG_TR_FILE, TEST_TWITTER_POS_TR_FILE, GLOVE_DICT_FILE
 from MovieProject.preprocessing import tweets as tw
 from MovieProject.preprocessing.tools import gloveDict
 
@@ -189,7 +189,7 @@ def fullyConnectedRN(trainX, trainY) :
     model.add(Dense(output_dim=10, input_dim=25, init='normal', activation='softmax'))
     
     model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=["accuracy"]) 
-    model.fit(trainX, trainY, batch_size=32, nb_epoch=4, verbose=1, validation_data=(testX, testY)) 
+    model.fit(trainX, trainY, batch_size=32, nb_epoch=4, verbose=1) 
     
     return model
     
@@ -229,31 +229,5 @@ def saveModel(model, filename):
     # deletes the existing model
     del model
     
-    
-    
-if __name__ == "__main__":   
-   
-    modelPath = SENTIMENT_ANALYSIS_MODEL
-    
-    data = preprocessDatasModel()
-    trainX = data["trainX"]
-    trainY = data["trainY"]
-    testX = data["testX"]
-    testY = data["testY"]
- 
-    """
-    # Simple RN fully connected
-    print "Test a simple 3 layer fully connected network : \n"
-    model = fullyConnectedRN(trainX,trainY)
-    evaluate(model, testX, testY)
-    """
-    
-    # LSTM RN
-    print "Test LSTM : \n"
-    model = LSTMModelRN(trainX ,trainY, testX, testY)
-    print(model.summary())
-    evaluateLSTM(model, testX, testY)
-    
-    model.save(modelPath)  
     
     

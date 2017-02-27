@@ -113,7 +113,7 @@ def _buildModel(sources, modelPath) :
 
     
 
-def loadD2VModel(modelPath):
+#def loadD2VModel(modelPath):
     """
     Load a preexisting Doc2Vec model
         Parameter:
@@ -121,8 +121,8 @@ def loadD2VModel(modelPath):
         Return:
             - Doc2Vec model object
     """
-    return Doc2Vec.load(modelPath)
-    
+#    return Doc2Vec.load(modelPath)
+   
     
     
 if __name__ == "__main__":    

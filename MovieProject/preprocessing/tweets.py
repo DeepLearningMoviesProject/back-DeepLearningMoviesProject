@@ -19,7 +19,7 @@ import re
  
  
 list_punctuation = [",",".","!","?","[","]","(",")","{","}","-",'"',"'",":","$","\\","/",";","+","=","&","<",">","@","*","_"] 
- 
+                     
  
 def preprocessTweet(tweet, dico): 
     """ 
@@ -82,6 +82,21 @@ def convertUselessWords(s):
     #Replace #word with word 
     s = re.sub(r'#([^\s]+)', r'\1', s) 
     return s 
+
+    
+def removeMovie(tweet, title):
+    """
+    Remove movie title in the tweet, so as not to distort the results
+        Parameters :
+            - tweet : string of the tweet
+            - title : title of the movie
+    """
+    # Convert to lower case 
+    tweet = tweet.lower()
+    title = title.lower()
+    # Remove accentued caracters
+    tweet = re.sub(title,'',tweet) 
+    return tweet
     
     
 def tweetToVect(tweet, dicoGlove): 
