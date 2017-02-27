@@ -91,6 +91,9 @@ ENV/
 \.spyproject/
 
 MovieProject/resources/glove\.6B\.50d\.txt
+MovieProject/resources/*.txt
+MovieProject/resources/*.h5
+*.DS_STORE
 
 *.npy
 
