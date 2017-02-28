@@ -132,6 +132,8 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
     meanScoreSVM = 0
     totalScores = 0
     
+    trackFile = 1
+    
     #Get all files from PATH, and get the score of the classifier on these files
     for file in os.listdir(path):
         if file.endswith(".json") and ("simple" not in file):
@@ -159,6 +161,8 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
             meanScorePerceptron += scorePerceptron
             meanScoreSVM += scoreSVM
             totalScores += 1
+            
+            print "File no ", trackFile, " computed!"
     
     #Compute the mean score for the classifier
     meanScoreKeras /= totalScores
