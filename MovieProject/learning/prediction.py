@@ -40,74 +40,74 @@ def predict(movies, model, **kwargs):
     pred = model.predict(data, batch_size=batch, verbose=0)
     
     return pred
-    
-    
-def pickNMovies(n):
-    '''
-    Get n movies from tmdb, max 20
-        parameters :
-            - n : the number of movie (int)
-        return : 
-            - a random np.array of movies
-    '''
 
-    pages = tmdb.Discover().movie(vote_count_gte=20)
-
-    #Pick a random page from Discover
-    pages_max = pages['total_pages']
-    p = randint(0,pages_max)
-    response = tmdb.Discover().movie(page=p, vote_count_gte=20)
-    pageRes = response['results']
-    nbMovies = len(pageRes)
-#    print 'nb movies : ', nbMovies
-
-    if(n==1):
-        mIndex = randint(0,nbMovies)
-        movie = int(pageRes[mIndex]['id'])
-        return np.array([movie])
-    else:
-        n = np.minimum(n, nbMovies)
-        movies = np.zeros(n)
-        for i in range(0,n):
-            movies[i] = int(pageRes[i]['id'])
-        return movies
-
-        
 def suggestNMovies(model, n, **kwargs):
     """
     Suggests n movies for the person that has this model
         parameters :
             - model : the model that the suggestion fits
             - n : the amount of suggestions to return
+            - kwargs : the arguments necessary to preprocess the data
         return : 
             - a list of n suggestions that are liked according to the model
     """
     suggestion = np.array([])
-    pickSize = 20
-#    print "n : ", n, " sugg.len : ", len(suggestion)
+    checkedIds = []
+    toFind = n
     
-    while(len(suggestion) < n):
-#        print "n : ", n, " sugg.len : ", len(suggestion)
-        remains_size = n - len(suggestion)
-        movies = pickNMovies(np.minimum(pickSize, remains_size))
+    #While we haven't found all of the movies
+    while(toFind > 0):
         
-#        print 'movies len :', len(movies)
-        #checks if movies are not already in suggestion and remove them if so
-        inter = np.intersect1d(suggestion, movies)
-        if( inter.size != 0):
-            suggestion = np.setdiff1d(movies, inter)
-
-        if(movies.shape[0] != 0):
-            #Keep in suggestion the movies that matches the model
-            predictions = predict(movies, model, **kwargs)
-#            print "movies : ", movies
-#            print "predictions : ", predictions
-            i = 0 
-            for p in predictions:
-    #            pred = predict(m, model, **kwargs)
-                if(p > 0.5):
-                    suggestion = np.append(suggestion, movies[i])
-                    print movies[i], " added with prediction ", p
+        #Get the amount of pages from tmdb that suits our criteria
+        pages = tmdb.Discover().movie(vote_count_gte=20)
+        totalPages = pages['total_pages'] 
+        
+        print totalPages, " pages to exploit"
+        
+        #Init an array of the movies to Find and then fill it
+        movies = []
+        moviesIds = np.zeros(toFind)
+        i = 0
+        while(len(movies) < toFind):
+            #We pick a random page and a random movie in this page
+            iPage =  randint(1,totalPages)
+            page = tmdb.Discover().movie(page=iPage, vote_count_gte=20)
+            iMovie = randint(0,len(page))
+            resMovie = page["results"][iMovie]
+            idMovie = resMovie['id']
+            #We check that we didn't already checked the movie
+            if(idMovie not in checkedIds):
+                #We save the movie, and remember its id
+                movies.append(resMovie)
+                checkedIds.append(idMovie)
+                moviesIds[i] = int(idMovie)
+#                np.append(moviesIds, int(idMovie))
+#                print movies[i]['id'], " added in movies !"
                 i += 1
-
+        #Now we have a movies list of the movies we need to find
+        #We compute the predictions matching the model to know which movies to keep
+        predictions = predict(moviesIds, model, **kwargs)
+        
+        
+        i = 0
+        added = 0
+        #For each prediction keep in the suggestion the ones that are > 0.5
+        for p in predictions:
+#            print moviesIds[i], " has prediction ", p[0]
+            if(moviesIds[i] != movies[i]['id']):
+                #TODO : raise an exception
+                print "Error : the movies ids are not correct !"
+            if(p[0] > 0.5):
+                #Add the accuracy of the movie according to the model
+                movie = movies[i]
+                movie['accuracy'] = p[0]
+                suggestion = np.append(suggestion, movie)
+                print movie['id'], " added with prediction ", movie['accuracy']
+                added += 1
+            i += 1
+        toFind -= added
+    
     return suggestion
+    
+          
+    

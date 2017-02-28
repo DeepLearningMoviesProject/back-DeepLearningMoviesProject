@@ -17,7 +17,7 @@ from os.path import isfile, join
 
 path = '../../resources/evaluations/'
 
-preprocessingChanged = False #Set to true if the processing has changed
+preprocessingChanged = False #Set to true if the preprocessing has changed
 
 params = {"titles" : False,
           "rating" : True,
@@ -60,10 +60,8 @@ def preprocessFileGeneric(filename, **kwargs):
     
     for f in files:
         dontPreprocess = dontPreprocess and isfile(files[f])
-        
-    
-#    T = np.array([])
-#    G = np.array([])
+
+
     dicoMatrix = {}
     labels = np.array([])
     
@@ -109,8 +107,12 @@ def preprocessFileGeneric(filename, **kwargs):
             labels = pickle.load(f)
             
     data = pProcessor.prepareDico(dicoMatrix)
+    
+    if( data.shape[0] != labels.shape[0]):
+        #TODO raise an error
+        print "Warning : labels and data doesn't match !"
         
-    'Process OK, model ready to be built !'
+    print 'Process OK, model ready to be built !'
     return data, labels
 
     
@@ -175,7 +177,7 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
     
 if __name__ == '__main__':
     
-    doOne = False    #If we want to learn a specific movie
+    doOne = True    #If we want to learn a specific movie
     
     scoreP = 0
     scoreSVM = 0
@@ -183,7 +185,7 @@ if __name__ == '__main__':
     
     if(doOne):
         #One movie : the one we want to learn
-        filename = 'moviesEvaluated_test'
+        filename = 'moviesEvaluated-test'
         
         data, labels = preprocessFileGeneric(filename.replace(".json", ""), **params)
         _, scoreK = buildTestModel(data, labels, folds=5)
