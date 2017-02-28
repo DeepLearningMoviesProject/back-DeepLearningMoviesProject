@@ -11,15 +11,15 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 
-DB_NAME = "DeepMoviesDB"
+DB_NAME = "deepmoviesdb"
 
 DB_CONFIG_DICT = { "database" : DB_NAME,
-                   "user" : "root", #Change this
-                   "password" : "root", #Change this
-                   "host" : "localhost",
+                   "user" : "DeepMoviesUser", 
+                   "password" : "DeepMovies", 
+                   "host" : "deepmoviesdb.cz8sn0m4yqrw.eu-west-1.rds.amazonaws.com",
                    "port" : "3306" }
 
-DB_CONN_FORMAT = "mysql://{user}:{password}@{host}:{port}/{database}"
+DB_CONN_FORMAT = "mysql+pymysql://{user}:{password}@{host}:{port}/{database}"
 
 DB_OPTIONS = "?charset=utf8&use_unicode=0"                     
 
