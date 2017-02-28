@@ -14,7 +14,7 @@ if __name__ == "__main__":
         Builds the model fitting the movies in filename and then suggests a list of 10 movies
     '''
 
-    filename = 'moviesEvaluated_test.json'
+    filename = 'moviesEvaluated-simple.json'
     
     params = {"titles" : False,
               "rating" : True,
@@ -32,9 +32,13 @@ if __name__ == "__main__":
     data, labels = preprocessFileGeneric(filename.replace(".json", ""), **params)
 #    d, labels = preprocessFileGeneric(filename, doTitles=True, doRating=True, doOverviews=True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True) 
 #    mat = prepareDico(d, doTitles = True, doRating = True, doOverviews = True, doKeywords=True, doGenres=True, doActors=True, doDirectors=True) 
-    model= buildModel(data, labels)    
+    print data.shape
+    print labels.shape
+    
+    model= buildModel(data, labels)
     
     print "suggestion to do"
 
-    print suggestNMovies(model, 10, **params)
-    print "suggestion done"
+    suggestion = suggestNMovies(model, 10, **params)
+    
+    print "suggestion done, ", len(suggestion), " movies suggested"
