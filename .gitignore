@@ -99,3 +99,5 @@ MovieProject/resources/glove\.6B\.50d\.txt
 *.npy
 
 *.data
+
+*.d2v

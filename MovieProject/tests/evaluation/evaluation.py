@@ -171,7 +171,7 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
     
 if __name__ == '__main__':
     
-    doOne = True    #If we want to learn a specific movie
+    doOne = False    #If we want to learn a specific movie
     
     scoreP = 0
     scoreSVM = 0

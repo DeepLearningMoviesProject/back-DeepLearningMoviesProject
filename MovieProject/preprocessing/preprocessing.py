@@ -10,7 +10,7 @@ Created on Wed Feb 01 17:09:54 2017
 from MovieProject.preprocessing.tools import (getMovies, getKeywords, getDirectors, getActors, getCredits, getRating,
                                               getProdCompagnies, getBudget, getRuntime, getYear, getBelongsTo, getLanguage, getOverview, getTitle,
                                               loadGloveDicFromFile, getGenres, getTmdbGenres, loadD2VModel, SIZE_VECTOR)
-from MovieProject.resources import GLOVE_DICT_FILE, D2V_FILE
+from MovieProject.resources import GLOVE_DICT_FILE, OVERVIEW_MODEL
 from words import meanWords, wordsToGlove
 from texts import textToVect
 from math import exp
@@ -83,7 +83,7 @@ class Preprocessor():
             self.sizeGloveVector = self.dicoGlove[self.dicoGlove.keys()[0]].shape[0]
         
         if self.toDo["overviews"]:
-            self.modelD2V = loadD2VModel(D2V_FILE)
+            self.modelD2V = loadD2VModel(OVERVIEW_MODEL)
         
 
     def preprocess(self, idMovies):

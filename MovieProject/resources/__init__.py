@@ -48,8 +48,6 @@ TEST_TWITTER_POS_TR_FILE = join(RES_PATH, "test_twitter_pos_tr.txt")
 
 OVERVIEW_MODEL = join(RES_PATH, "overviewModel.d2v")
 
-#SENTIMENT_TWITTER_MODEL = join(RES_PATH, "sentimentTwitterModel.d2v")
-
 SENTIMENT_ANALYSIS_MODEL = join(RES_PATH, "sentimentAnalysisModel.h5")
 
 
@@ -62,6 +60,3 @@ LABEL_TEST_POS = 'TEST_POS'
 LABEL_TRAIN_NEG = 'TRAIN_NEG'
 
 LABEL_TRAIN_POS = 'TRAIN_POS'
-
-
-

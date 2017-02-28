@@ -39,10 +39,11 @@ def loadResumes(filename, pagesMax):
         from nltk import download
         download("stopwords")
     
-    cachedStopWords = stopwords.words("english")
+#    cachedStopWords = stopwords.words("english")
     
     for i in range(1,pagesMax):
-        response = discover.movie(page=i)
+#        response = tmdb.discover.movie(page=i)
+        response = tmdb.Discover().movie(page=i)
         filmsNb = len(response[u'results'])
         for j in range (filmsNb):
             abstract = response[u'results'][j][u'overview']
