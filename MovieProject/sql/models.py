@@ -9,8 +9,6 @@ Created on Fri Feb 24 22:44:09 2017
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from database import Base
-from datetime import datetime, timedelta
-import jwt
 
 
 class User(Base):
@@ -30,16 +28,6 @@ class User(Base):
 
     def __repr__(self):
         return '<User %r>' % (self.name)
-    
-    
-    def token(self, appKey):
-        payload = {
-            'sub': self.id,
-            'iat': datetime.utcnow(),
-            'exp': datetime.utcnow() + timedelta(days=14)
-        }
-        token = jwt.encode(payload, appKey)
-        return token.decode('unicode_escape')
     
     
 class Movie(Base):
