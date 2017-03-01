@@ -220,8 +220,11 @@ def login():
     password = data["password"].encode('utf-8')
 
     if user.password == hashpw(password, user.password):
-        session['logged_in'] = True
-        return jsonify(token=createToken(user)), 200
+        session['logged_in'] = True               
+               
+               
+        return jsonify(movies={umovie.idMovie:int(umovie.liked) for umovie in user.movies},
+                       token=createToken(user)), 200
     else:
         return jsonify(error="Wrong name or password"), 400
 
