@@ -10,13 +10,6 @@ from __future__ import unicode_literals
 
 # Import Twitter library for python
 from TwitterSearch import TwitterSearchOrder, TwitterSearchException, TwitterSearch
-from tweepy.streaming import StreamListener
-from tweepy import OAuthHandler
-from tweepy import Stream
-
-import pandas as pd
-
-from MovieProject.preprocessing import tweets as tw 
 
 
 # User credentials to access Twitter API 
@@ -26,47 +19,7 @@ consumer_key = "HR1S4juinegecRkr9Oc8LeBhr" #API KEY
 consumer_secret = "YPIhNTZNYAOkYgMFaf4j5d9upu8PCWQZu87e0GA4eG2NHivW9u" #API SECRET
 
 
-"""
-TWEEPY LIBRARY
-"""
-
-# To store tweets loaded
-tweets_data = []
-tweets = pd.DataFrame()
-
-class StdOutListener(StreamListener):
-    """
-    Basic listener that just store received tweets to tweets_data.
-    """
-    def on_status(self, data):
-        tweets_data.append(data)
-        print data
-        return True
-
-    def on_error(self, status):
-        print status
-
-def testTweepy(keywords):
-    """
-    Allows to test tweepy library thank's to StdOutListener class -> Print tweets of interest.
-        Parameters:
-            keywords : string array that tweets must contain
-    """
-    # This handles Twitter authetification and the connection to Twitter Streaming API
-    l = StdOutListener()
-    auth = OAuthHandler(consumer_key, consumer_secret)
-    auth.set_access_token(access_token, access_token_secret)
-    stream = Stream(auth, l)
-
-    # Filter Twitter Streams to capture data by the keywords: 'python', 'javascript', 'ruby'
-    stream.filter(track=keywords)
-    
-    
-"""
-TWITTER SEARCH LIBRARY
-"""    
-
-def testTwitterSearch(keywords, language):
+def SearchOnTwitter(keywords, language):
     """
     Allows to test twitter search library -> Print tweets of interest.
         Parameters:
@@ -98,14 +51,3 @@ def testTwitterSearch(keywords, language):
             
     except TwitterSearchException as e: # take care of all those ugly errors if there are some
         print(e)
-    
-    
-        
-if __name__ == "__main__":    
-        
-    tweets = testTwitterSearch(['Inception','movie'],'en')
-    #testTweepy(['python', 'javascript', 'ruby'])
-    
-    print len(tweets)
-    print tweets[1]
-    print tw.preprocessTweet(tweets[1])

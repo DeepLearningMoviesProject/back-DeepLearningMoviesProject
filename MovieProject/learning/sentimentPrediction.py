@@ -13,7 +13,7 @@ from MovieProject.resources import SENTIMENT_ANALYSIS_MODEL
 from MovieProject.preprocessing.tools import opinionDict as od
 from MovieProject.preprocessing.tools import gloveDict
 from MovieProject.preprocessing.tools import apiTMDB as tmdb
-from MovieProject.tests import twitterSearch as ts
+from MovieProject.preprocessing.tools import twitterSearch as ts
 from MovieProject.preprocessing import tweets as tw
 from keras.models import load_model
 
@@ -84,7 +84,7 @@ def classificationMovies(idMovies):
         title = movie.info()['title']
         #title = _preprocessTitle(title)
         print "> Processing for movie title : %s" %(title)
-        tweets = ts.testTwitterSearch([title, 'movie'],'en')
+        tweets = ts.SearchOnTwitter([title, 'movie'],'en')
         popularity[idMovies[m]] = float(len(tweets))
         sentiments[idMovies[m]] = 0.0
 
