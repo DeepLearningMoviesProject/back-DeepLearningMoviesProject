@@ -7,28 +7,62 @@ Created on Fri Feb 17 13:26:55 2017
 @author: elsa
 """
 
-from MovieProject.learning.prediction import *
 import unittest
+from MovieProject.preprocessing import Preprocessor
+from MovieProject.learning import buildModel, predict, suggestNMovies
+import numpy as np
+
+#movies = {"11":1,"18":1,"22":1}
+#ids = [int(key) for key in movies]
+#labels = np.array([movies[key] for key in movies])
+#params = { "titles":False,
+#           "rating":True,
+#           "overviews":True,
+#           "keywords":True,
+#           "genres":True,
+#           "actors":False,
+#           "directors":True,
+#          "compagnies" : False,
+#          "language" : True,
+#          "belongs" : True,
+#          "runtime" : False,
+#          "date" : True }
+
 
 class PredictionTest(unittest.TestCase):
-
     """Test case used to test the module 'learning.prediction'."""
 
     def test_predict(self):
         """Tests 'prediction.predict'."""
-            '''
-            Predicts the class of the movie according to the model
-                parameters : 
-                    - movies : an array of the id of the movie we want to know the class of, the id must exist
-                    - model : the model that matches the taste of the user
-                returns : 
-                    - a boolean to tell if the movie is liked or not
-            '''
-        predict(movies, model, **kwargs)
-
-    def test_pickNMovies(self):
-    	"""Tests 'prediction.pickNMovies'."""
-     
+        movies = {"11":1,"18":1,"22":1}
+        ids = [int(key) for key in movies]
+        labels = np.array([movies[key] for key in movies])    
+        params = { "titles":True,
+                   "rating":True,
+                   "overviews":True,
+                   "keywords":True,
+                   "genres":True,
+                   "actors":True,
+                   "directors":True,
+                  "compagnies" : True,
+                  "language" : True,
+                  "belongs" : True,
+                  "runtime" : True,
+                  "date" : True }
+        pProcessor = Preprocessor(**params)
+        data = pProcessor.preprocess(ids)
+        
+        model = buildModel(data, labels)
+        
+        print "start predict"
+        toPredict = []
+        #Non existant id
+        #No id
+        #Movie with specials characters, empty strings
+#        predictions = suggestNMovies(toPredict, model, **params)
+        
+#        self.assertEqual(predictions, toPredict)
+#        self.assertEqual(toPredict, [])
 
     def test_suggestNMovies(self):
     	"""Tests 'prediction.pickNMovies'."""

@@ -54,18 +54,61 @@ def trainModel():
     
     model = buildModel(data, labels)
     
+    return jsonify({'result': "ok"})
+    
+#    print "Model built, start prediction"
+#    
+#    sugg = suggestNMovies(model, 10, **params)
+#    
+#    print "Movies predicted !"
+#    
+#    return jsonify(sugg)
+
+
+@app.route('/prediction', methods=['GET'])
+def predictMovies():
+    
+    #Here we create a model but in the end we will load it from the DB
+    movies = {"11":1,"18":1,"22":1}
+     
+    ids = [int(key) for key in movies]
+    
+    labels = np.array([movies[key] for key in movies])
+    
+    print "Movies received"
+
+    params = { "titles":True,
+               "rating":True,
+               "overviews":True,
+               "keywords":True,
+               "genres":True,
+               "actors":True,
+               "directors":True,
+              "compagnies" : True,
+              "language" : True,
+              "belongs" : True,
+              "runtime" : True,
+              "date" : True }
+    
+    pProcessor = Preprocessor(**params)
+
+        #preprocess data
+    data = pProcessor.preprocess(ids)
+    
+    print "Movies loaded, building model"
+    
+    model = buildModel(data, labels)
+    
     print "Model built, start prediction"
     
-    movies = suggestNMovies(model, 10, **params)
+    #This is what we will do after we get the model from DB
+    
+    sugg = suggestNMovies(model, 10, **params)
     
     print "Movies predicted !"
-    
-#    return jsonify({'result': "ok"})
-    
-    dico = {"prediction" : movies.tolist()}
-    return jsonify(dico)
+    return jsonify(sugg)
+
 
 if __name__ == '__main__':
     app.run(debug=False, host= '0.0.0.0')
-
 
