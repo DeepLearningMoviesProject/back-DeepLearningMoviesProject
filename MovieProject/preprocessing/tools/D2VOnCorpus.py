@@ -22,8 +22,7 @@ from gensim.models import Doc2Vec
 # numpy
 import numpy
 
-#from MovieProject.resources import TRAIN_TWITTER_NEG_TR_FILE, TRAIN_TWITTER_POS_TR_FILE, TEST_TWITTER_NEG_TR_FILE, TEST_TWITTER_POS_TR_FILE, LABEL_TEST_NEG, LABEL_TEST_POS, LABEL_TRAIN_NEG, LABEL_TRAIN_POS
-from MovieProject.resources import OVERVIEW_MODEL, LABEL_TRAIN_ABTRACTS, OVERVIEWS_TR_FILE
+from MovieProject.resources import OVERVIEW_MODEL, OVERVIEWS_TR_FILE
 
 SIZE_VECTOR = 100
 
@@ -81,12 +80,13 @@ class LabeledLineSentence(object):
         
 
 
-def _buildModel(sources, modelPath) :
+def _buildModel(sources, modelPath, nbEpoch=10) :
     """
     Build the model and store it
         Parameters :
             - sources : dictionnary of sources with files path and labels associated at each file
             - modelPath : path to store the model built
+            - nbEpoch : int the number of epoch for training (default: nbEpoch=10)
     """
     
     sentences = LabeledLineSentence(sources)
@@ -101,13 +101,11 @@ def _buildModel(sources, modelPath) :
     
     model.build_vocab(sentences.to_array())
     
-    i=0
-    for epoch in range(10):
-        print(i)
+    for epoch in range(nbEpoch):
+        print "Building the D2V model : epoch %d / %d" %(epoch,nbEpoch)
         model.train(sentences.sentences_perm())
         model.alpha -= 0.002  # decrease the learning rate
         model.min_alpha = model.alpha  # fix the learning rate, no decay
-        i = i+1
         
     model.save(modelPath) # storing the model to mmap-able files
 
@@ -125,14 +123,21 @@ def loadD2VModel(modelPath):
    
     
     
-if __name__ == "__main__":    
-    
-    print "Training on abstracts database :"
+def createD2VModel():
+    """
+    Create the doc2vec model on abstracts corpus preprocessed
+    """
     sources = {OVERVIEWS_TR_FILE:'TRAIN_ABSTRACTS'}
     modelPath = OVERVIEW_MODEL
  
-    
     _buildModel(sources, modelPath)
+    
+    
+    
+if __name__ == "__main__":    
+    
+    print 'Create the D2V model on the overwiews corpus :'
+    createD2VModel()
     
 
             
