@@ -15,7 +15,7 @@ from jwt import encode, decode, DecodeError, ExpiredSignature
 
 from MovieProject.preprocessing import Preprocessor
 from MovieProject.learning import buildModel, suggestNMovies
-from MovieProject.sql import DatabaseManager
+from MovieProject.sql import *
 
 import numpy as np
 
@@ -156,7 +156,7 @@ def signup():
 
     password = hashpw(data["password"].encode('utf-8'), gensalt())
     
-    dbManager.insertUser(data["name"], email=data["email"], password=password)
+    dbManager.insertUser(User(data["name"], password, data["email"]))
     user = dbManager.getUser(data["name"])
     
     session['logged_in'] = True
