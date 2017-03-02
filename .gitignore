@@ -90,7 +90,10 @@ ENV/
 .ropeproject
 
 \.spyproject/
-MovieProject/resources/persist/*
+MovieProject/resources/persist/*.txt
+MovieProject/resources/persist/*.h5
+MovieProject/resources/persist/*.npy
+MovieProject/resources/persist/*.d2v
 MovieProject/resources/*.txt
 MovieProject/resources/*.h5
 MovieProject/resources/*.npy
