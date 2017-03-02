@@ -10,26 +10,29 @@ Created on Mon Jan 30 15:08:47 2017
 
 # Library to write utf-8 text file
 import codecs
-# Library to remove all stop words
-from nltk.corpus import stopwords
+
 # TMDB simple (TMDB API wrapper)
 import tmdbsimple as tmdb
+
 # To pre-process texte in each abtract
 from MovieProject.preprocessing import texts
+from MovieProject.resources import OVERVIEWS_TR_FILE
+#from nltk.corpus import stopwords # Library to remove all stop words
 
-from os.path import isdir, join
+from os.path import isdir
 from nltk.data import path
+
 
 
 tmdb.API_KEY = 'ff3f07bf3577a496a2f813488eb29980'
 
-def loadResumes(filename, pagesMax):
+def createCorpus(filename, pagesMax=1000):
     """
         Load and store abstracts on TMDB, in text file
         
         Parameters:
             filename -> String, name of the file where resumes will be stored
-            pagesMax -> int, number of page to download from tmdb
+            pagesMax -> int, number of page to download from tmdb (default: pagesMax=1000)
     """
     
     fileAbstracts = codecs.open(filename, "w", 'utf-8')
@@ -49,16 +52,11 @@ def loadResumes(filename, pagesMax):
             abstract = response[u'results'][j][u'overview']
             abstract = texts.preProcessingAbstracts(abstract)
             fileAbstracts.write(abstract+'\n')
-        print i
+        print "Creation of abstracts corpus : page %d / %d" % (i,pagesMax)
     
     fileAbstracts.close()
     
     
 if __name__ == "__main__":
-    from MovieProject.resources import RES_PATH
-    
-    filePath = join(RES_PATH, "train_overviews_treated.txt")
 
-    loadResumes(filePath, 1000)
-    
-
+    createCorpus(OVERVIEWS_TR_FILE)

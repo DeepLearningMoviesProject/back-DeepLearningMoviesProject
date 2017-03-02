@@ -11,44 +11,37 @@ from os.path import dirname, abspath, join
 
 RES_PATH = dirname(abspath(__file__))
 
+RES_PERSIST_PATH = join(RES_PATH,"persist") 
+
+
 
 GENRES_FILE = join(RES_PATH, "genres.npy")
 
 
-GLOVE_CORPUS_FILE = join(RES_PATH, "glove.6B.50d.txt")
+GLOVE_CORPUS_FILE = join(RES_PERSIST_PATH, "glove.6B.50d.txt")
+
 GLOVE_DICT_FILE = join(RES_PATH, "glove_dict.npy")
 
 
-OPINION_FILE = join(RES_PATH, "opinionWords.txt")
+OPINION_FILE = join(RES_PERSIST_PATH, "opinionWords.txt")
 
 OPINION_DICT_FILE = join(RES_PATH, "opinionWordsDict.npy")
 
 
-OVERVIEWS_FILE = join(RES_PATH, "train_overviews.txt")
+OVERVIEWS_TR_FILE = join(RES_PERSIST_PATH, "train_overviews_tr.txt")
 
-TRAIN_TWITTER_NEG_FILE = join(RES_PATH, "train_twitter_neg.txt")
-
-TRAIN_TWITTER_POS_FILE = join(RES_PATH, "train_twitter_pos.txt")
-
-TEST_TWITTER_NEG_FILE = join(RES_PATH, "test_twitter_neg.txt")
-
-TEST_TWITTER_POS_FILE = join(RES_PATH, "test_twitter_pos.txt")
+OVERVIEW_MODEL = join(RES_PERSIST_PATH, "overviewModel.d2v")
 
 
-OVERVIEWS_TR_FILE = join(RES_PATH, "train_overviews_treated.txt")
+TRAIN_TWITTER_NEG_TR_FILE = join(RES_PERSIST_PATH, "train_twitter_neg_tr.txt")
 
-TRAIN_TWITTER_NEG_TR_FILE = join(RES_PATH, "train_twitter_neg_tr.txt")
+TRAIN_TWITTER_POS_TR_FILE = join(RES_PERSIST_PATH, "train_twitter_pos_tr.txt")
 
-TRAIN_TWITTER_POS_TR_FILE = join(RES_PATH, "train_twitter_pos_tr.txt")
+TEST_TWITTER_NEG_TR_FILE = join(RES_PERSIST_PATH, "test_twitter_neg_tr.txt")
 
-TEST_TWITTER_NEG_TR_FILE = join(RES_PATH, "test_twitter_neg_tr.txt")
+TEST_TWITTER_POS_TR_FILE = join(RES_PERSIST_PATH, "test_twitter_pos_tr.txt")
 
-TEST_TWITTER_POS_TR_FILE = join(RES_PATH, "test_twitter_pos_tr.txt")
-
-
-OVERVIEW_MODEL = join(RES_PATH, "overviewModel.d2v")
-
-SENTIMENT_ANALYSIS_MODEL = join(RES_PATH, "sentimentAnalysisModel.h5")
+SENTIMENT_ANALYSIS_MODEL = join(RES_PERSIST_PATH, "sentimentAnalysisModel.h5")
 
 
 LABEL_TRAIN_ABTRACTS = 'TRAIN_ABSTRACTS'

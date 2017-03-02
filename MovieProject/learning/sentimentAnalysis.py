@@ -61,15 +61,15 @@ def preprocessDatasModel():
     
     # Fills training matrices with positives data and labels 1
     for i,line in enumerate(linesTrainPos):
-        if i%1000 == 0 : 
-            print "Build training positive dataset : %d / %d" % (i,trainDataPosNb)
+        if i%100 == 0 : 
+            print "Building the positive dataset for training : %d / %d" % (i,trainDataPosNb)
         train_arrays[i] = tw.tweetToVect(line, dicoGlove)
         train_labels[i] = 1 
 
     # Fills training matrices with negatives data and labels 0
     for i,line in enumerate(linesTrainNeg):
-        if i%1000 == 0 :
-            print "Build training negative dataset : %d / %d" % (i,trainDataNegNb)
+        if i%100 == 0 :
+            print "Building  the negative dataset for training : %d / %d" % (i,trainDataNegNb)
         train_arrays[trainDataPosNb + i] = tw.tweetToVect(line, dicoGlove)
         train_labels[trainDataPosNb + i] = 0 
 
@@ -87,15 +87,15 @@ def preprocessDatasModel():
     
     # Fills testing matrices with positives data and labels 1
     for i,line in enumerate(linesTestPos):
-        if i%1000 == 0 :
-            print "Build testing positive dataset : %d / %d" % (i,testDataPosNb)
+        if i%100 == 0 :
+            print "Building the positive dataset for testing : %d / %d" % (i,testDataPosNb)
         test_arrays[i] = tw.tweetToVect(line, dicoGlove)
         test_labels[i] = 1 
 
     # Fills testing matrices with negatives data and labels 0
     for i,line in enumerate(linesTestNeg):
-        if i%1000 == 0 :
-            print "Build testing negative dataset : %d / %d" % (i,testDataNegNb)
+        if i%100 == 0 :
+            print "Building  the negative dataset for testing : %d / %d" % (i,testDataNegNb)
         test_arrays[testDataPosNb + i] = tw.tweetToVect(line, dicoGlove)
         test_labels[testDataPosNb + i] = 0 
      

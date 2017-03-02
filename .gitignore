@@ -1,3 +1,4 @@
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -89,6 +90,7 @@ ENV/
 .ropeproject
 
 \.spyproject/
+MovieProject/resources/persist/*
 MovieProject/resources/*.txt
 MovieProject/resources/*.h5
 MovieProject/resources/*.npy
