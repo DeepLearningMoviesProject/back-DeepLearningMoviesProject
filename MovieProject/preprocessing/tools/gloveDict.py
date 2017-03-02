@@ -13,7 +13,6 @@ import numpy as np
 from nltk.corpus import stopwords
 from nltk.data import path
 
-
 # Download stopwords if not present
 if not isdir(path[0]):
     from nltk import download
@@ -74,6 +73,14 @@ def loadGloveDicFromFile(filename):
     return np.load(filename)[0]
 
 
+def createGloveDic():
+    """
+        Create dictionary of vectors and save it into file
+    """
+    saveGloveDicIntoFile(_extractGloveVects())
+
+    
+    
 if __name__ == "__main__":
     
     # if the script is run, create dictionary of vectors and save it into file
