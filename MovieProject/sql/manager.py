@@ -6,7 +6,7 @@ Created on Sun Feb 26 16:23:02 2017
 @author: Julian
 """
 
-from models import User, Movie, UserMovie
+from models import User, Movie, UserMovie, Occupation, Region
 from database import initDb, dbSession as db
 from exceptions import RuntimeError
 
@@ -33,44 +33,48 @@ class DatabaseManager():
         return User.query.filter_by(name=username).first()
         
         
-    def insertUser(self, name, email="", tmdbKey="", password=""):
+    def insertUser(self, newUser):
         """
             Insert a new user in database, raise a RunTimeError if already exist
             
             Parameters:
-                name -> String, name of the user
-                email -> String
-                tmdbkey -> String, key of TMDB account (length of 32)
-                password -> String, hashed password
+                newUser -> User object, new user to be insterted into database 
         """
         
-        if self.getUser(name) is not None: 
-            raise RuntimeError("User %s already exist in database" %(name))
+        if self.getUser(newUser.name) is not None: 
+            raise RuntimeError("User %s already exist in database" %(newUser.name))
         
-        newUser = User(name, email, tmdbKey, password)
         db.add(newUser)
         db.commit()
         
         
-    def updateUser(self, name, email=None, tmdbKey=None, password=None):
+    def updateUser(self, updatedUser):
         """
-            Update information for user specified by its name
+            Update information for user
             
             Parameters:
-                name -> String, name of the user
-                email -> String
-                tmdbkey -> String, key of TMDB account (length of 32)
-                password -> String, hashed password
+                updatedUser -> User object created with updated values
         """
         
-        user = self.getUser(name)
+        user = self.getUser(updatedUser.name)
         
         if user is None:
-            raise RuntimeError("User %s is not in the database" %(name))
+            raise RuntimeError("User %s is not in the database" %(updatedUser.name))
             
-        if email is not None: user.email = email
-        if tmdbKey is not None: user.tmdbKey = tmdbKey
-        if password is not None: user.password = password
+        if updatedUser.password and updatedUser.password != user.password: 
+            user.password = updatedUser.password
+        if updatedUser.email and updatedUser.email != user.email: 
+            user.email = updatedUser.email
+        if updatedUser.tmdbKey and updatedUser.tmdbKey != user.tmdbKey: 
+            user.tmdbKey = updatedUser.tmdbKey
+        if updatedUser.birthday and updatedUser.birthday != user.birthday: 
+            user.birthday = updatedUser.birthday
+        if updatedUser.sexe and updatedUser.sexe != user.sexe: 
+            user.sexe = updatedUser.sexe
+        if updatedUser.idCountry and updatedUser.idCountry != user.idCountry:
+            user.idCountry = updatedUser.idCountry
+        if updatedUser.idOccupation and updatedUser.idOccupation != user.idOccupation:
+            user.idOccupation = updatedUser.idOccupation
         
         db.commit()
         
@@ -156,8 +160,6 @@ class DatabaseManager():
                 idMovie -> int, id of movie from TDMB
         """
         
-        print username, idMovie, liked
-        
         user = self.getUser(username)
         
         if user is None:
@@ -168,8 +170,6 @@ class DatabaseManager():
         
         if self.getMovie(idMovie) is None:
             self.insertMovie(idMovie)
-        
-        print user, self.getMovie(idMovie)
         
         usermovie = UserMovie(user.id, idMovie, liked)
         db.add(usermovie)
@@ -229,3 +229,91 @@ class DatabaseManager():
             return user.movies
         else:
             return [ movie for movie in user.movies if movie.liked == liked ]
+        
+    
+    def getOccupation(self, typeOccupation):
+        """
+            Get occupation from database by its type
+            
+            Parameters:
+                typeOccupation -> String, type of an occupation
+            return:
+                Occupation object or None if not exist
+        """
+        
+        return Occupation.query.filter_by(type=typeOccupation).first()
+        
+    
+    def insertOccupation(self, newOccupation):
+        """
+            Insert a new occupation in database, raise a RunTimeError if already exist
+            
+            Parameters:
+                newOccupation -> Occupation object, new occupation to be insterted into database 
+        """
+        
+        if self.getOccupation(newOccupation.type) is not None: 
+            raise RuntimeError("Occupation %s already exist in database" %(newOccupation.type))
+        
+        db.add(newOccupation)
+        db.commit()
+        
+        
+    def removeOccupation(self, typeOccupation):
+        """
+             Remove occupation specified by its id
+        """
+        
+        occupation = self.getOccupation(typeOccupation)
+        
+        if occupation is None:
+            raise RuntimeError("Occupation %d is not present into the database" %(typeOccupation))
+            
+        db.delete(occupation)
+        db.commit()
+        
+       
+    def getRegion(self, country):
+        """
+            Get region from database by its type
+            
+            Parameters:
+                country -> String, type of an region
+            return:
+                Region object or None if not exist
+        """
+        
+        return Region.query.filter_by(country=country).first()
+        
+    
+    def insertRegion(self, newRegion):
+        """
+            Insert a new region in database, raise a RunTimeError if already exist
+            
+            Parameters:
+                newRegion -> Region object, new region to be insterted into database 
+        """
+        
+        if self.getRegion(newRegion.country) is not None: 
+            raise RuntimeError("Region %s already exist in database" %(newRegion.country))
+        
+        db.add(newRegion)
+        db.commit()
+        
+        
+        
+    def removeRegion(self, country):
+        """
+             Remove region specified by its id
+        """
+        
+        region = self.getRegion(country)
+        
+        if region is None:
+            raise RuntimeError("Region %d is not present into the database" %(country))
+            
+        db.delete(region)
+        db.commit()
+        
+    
+        

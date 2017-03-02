@@ -44,7 +44,7 @@ def createToken(user):
     payload = {
         'sub': user.id,
         'iat': datetime.utcnow(),
-        'exp': datetime.utcnow() + timedelta(minutes=1)
+        'exp': datetime.utcnow() + timedelta(days=14)
     }
     token = encode(payload, app.config['TOKEN_SECRET'])
     return token.decode('unicode_escape')
