@@ -17,6 +17,8 @@ from MovieProject.preprocessing import Preprocessor
 from MovieProject.learning import buildModel, suggestNMovies
 from MovieProject.sql import *
 
+from exceptions import Exception
+
 import numpy as np
 
 
@@ -42,7 +44,7 @@ def createToken(user):
         Create a token for a user with an expiration of ...
     """
     payload = {
-        'sub': user.id,
+        'sub': user.name,
         'iat': datetime.utcnow(),
         'exp': datetime.utcnow() + timedelta(days=14)
     }
@@ -87,7 +89,7 @@ def loginRequired(f):
             response.status_code = 401
             return response
 
-        g.user_id = payload['sub']
+        g.user_name = payload['sub']
 
         return f(*args, **kwargs)
 
@@ -102,7 +104,7 @@ def get_tasks():
     return jsonify(movieIds), 200
 
 
-@app.route('/train', methods=['POST'])
+@app.route('/api/train', methods=['POST'])
 @loginRequired
 @cross_origin()
 def trainModel():    
@@ -199,8 +201,20 @@ def signup():
     data = json.loads(request.data)
 
     password = hashpw(data["password"].encode('utf-8'), gensalt())
+    occupation = dbManager.getOccupation(data["occupation"])
+    country = dbManager.getRegion(data["country"])
     
-    dbManager.insertUser(User(data["name"], password, data["email"]))
+    if data["sex"] == "H": sex = True
+    elif data["sex"] == "F": sex = False
+    else: sex = None
+    
+    user = User(data["name"], password, data["email"],
+                birthday=data["birthday"], 
+                sexe=sex, 
+                idOccupation=occupation.id,
+                idCountry=country.id)
+    
+    dbManager.insertUser(user)
     user = dbManager.getUser(data["name"])
     
     session['logged_in'] = True
