@@ -64,11 +64,6 @@ class PredictionTest(unittest.TestCase):
             data = pProcessor.preprocess(ids)
             self.model = buildModel(data, labels)
  
-    # this method will be called AFTER every test
-    def tearDown(self):
-        self.movie1 = {}
-        self.movie1 = {}
-
     def test_predictMovies(self):
         """Tests 'prediction.predictMovies'."""
         
