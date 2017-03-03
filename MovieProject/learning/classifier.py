@@ -74,7 +74,7 @@ def createTrainModelDico(mat, labels, iTest = [], iTrain = [], doTest=False):
     
     if mat is None :
         #TODO : raise an exception
-        print "there is no model to build the model on !"
+        print "there is no data to build the model on !"
 
     dataLen = len(mat[0])
     
