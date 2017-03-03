@@ -37,7 +37,7 @@ def getCredits(movies):
         Parameter:
             movies -> list of TMDB Movie object
         return:
-            array containing movie's credits
+            array containing movies' credits
     """
     
     return [ movie.credits() for movie in movies ]
@@ -51,19 +51,22 @@ def getKeywords(tmdbKeywords={}):
             array of string containing each keyword
     """
     
-    words = []    
-    for keyword in tmdbKeywords["keywords"]:
-        words += _format(keyword["name"]).split()
+    words = []
+    if tmdbKeywords:
+        for keyword in tmdbKeywords["keywords"]:
+            words += _format(keyword["name"]).split()
 
     return words
 
 
 def getGenres(movieInfo):
     """
-        Extract keywords from tmdb keyword's dictionary 
+        Extract genres from tmdb keyword's dictionary 
         
+        Parameter:
+            movieInfo -> dictionary of Movie.info()
         return:
-            array of string containing each keyword
+            array of string containing each genre
     """
     
     return [ _format(genre["name"]) for genre in movieInfo["genres"] ]
@@ -89,10 +92,10 @@ def getTitle(movieInfo):
         return:
             string
     """
-    
-    overview = "".join(c for c in movieInfo["title"] if c not in punctuation)
-    overview = overview.split()
-    return overview
+    #We remove the punctuation
+    title = "".join(c for c in movieInfo["title"] if c not in punctuation)
+    #We return the title as a list of words in the right format
+    return [ _format(w) for w in title.split() ]
 
 def getMovie(id): 
     """
