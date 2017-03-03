@@ -15,7 +15,7 @@ from jwt import encode, decode, DecodeError, ExpiredSignature
 
 from MovieProject.preprocessing import Preprocessor
 from MovieProject.learning import buildModel, suggestNMovies
-from MovieProject.sql import *
+from MovieProject.sql import User, DatabaseManager
 
 from exceptions import Exception
 
@@ -95,6 +95,14 @@ def loginRequired(f):
 
     return decorated_function
 
+
+def getIdFromLikedMovies(username, isLiked):
+    """
+    
+    """
+    
+    movies = dbManager.getMoviesLikedByUser(username,isLiked)
+    return { str(movie.idMovie) : int(movie.liked) for movie in movies}
 
 
 @app.route('/testId', methods=['GET'])
@@ -193,6 +201,32 @@ def predictMovies():
     print "Movies predicted !"
     return jsonify(sugg)
 
+
+
+@app.route('/api/updateMovies', methods=["POST"])
+@cross_origin()
+@loginRequired
+def updateMovies():
+    data = json.loads(request.data)
+    
+    try:
+        dbManager.updateLikedMoviesForUser(g.user_name, data)
+    except Exception as e:
+        return jsonify(error=str(e), movies=getIdFromLikedMovies(g.user_name, None)), 500
+    else:
+        return jsonify(movies=getIdFromLikedMovies(g.user_name, None)), 200
+    
+
+@app.route('/api/likedMovies/<string:opinion>', methods=["GET"])
+@cross_origin()
+@loginRequired
+def likedMovies(opinion):
+    if opinion == "liked": isLiked = True
+    elif opinion == "disliked" : isLiked = False
+    elif opinion == "all" : isLiked = None 
+    else : return jsonify(error="Argument \"%s\" not authorized" %(opinion)), 400
+    
+    return jsonify(movies=getIdFromLikedMovies(g.user_name, isLiked)), 200
 
 
 @app.route('/auth/signup', methods=['POST'])
