@@ -154,7 +154,7 @@ class Preprocessor():
         
         if self.toDo["overviews"]:
             print "Processing Overviews..."
-            matrix["overviews"] = self.overviewProcessingD2V(infos)
+            matrix["overviews"] = self.overviewProcessing(infos)
         
         if self.toDo["titles"]:
             print "Processing titles..."

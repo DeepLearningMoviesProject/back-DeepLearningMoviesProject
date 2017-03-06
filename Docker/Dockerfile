@@ -2,39 +2,21 @@ FROM 	ubuntu:14.04
 MAINTAINER Niogret Edwin <niogret.edwin@live.fr>
 
 WORKDIR /root
-
 #----------------------------------------------------------------------------------------
 
 
-# Update the sources list----------------------------------------------------------------
-RUN apt-get update
+#Utilitaires (Update the sources list)---------------------------------------------------
+RUN apt-get update && apt-get -y install git wget && apt-get install nano tree
 #----------------------------------------------------------------------------------------
 
 
-#Utilitaires-----------------------------------------------------------------------------
-RUN apt-get -qq -y install python2.7
-RUN apt-get -yqq install python-pip
-RUN apt-get -y install python-dev
-RUN python -m pip install --upgrade pip
-RUN pip install numpy 
-RUN pip install nltk
-RUN pip install tmdbsimple
-RUN pip install gensim
-RUN apt-get install tree
-RUN apt-get -yqq install git
-RUN pip install scipy
-RUN pip install scikit-learn
-RUN pip install pillow
-RUN pip install h5py
-RUN pip install flask
-RUN apt-get install nano
-RUN mkdir git
-#----------------------------------------------------------------------------------------
-
-
-#TensorFlow/Keras-----------------------------------------------------------------------------------
-RUN pip install tensorflow
-RUN pip install keras
+#PYTHON 2.7.13 + Librairies --------------------------------------------------------------
+RUN apt-get -y install build-essential checkinstall
+RUN apt-get -y install libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev
+RUN cd /usr/src/ && wget https://www.python.org/ftp/python/2.7.13/Python-2.7.13.tgz && tar xzf Python-2.7.13.tgz && cd /usr/src/Python-2.7.13 && ./configure --prefix=/usr --enable-unicode=ucs4 && make -i install
+COPY get-pip.py /root/get-pip.py
+RUN python get-pip.py
+RUN pip install atlas numpy scipy nltk tmdbsimple scikit-learn h5py enum34 TwitterSearch pandas flask flask-cors && pip install -U gensim
 #----------------------------------------------------------------------------------------
 
 
@@ -82,33 +64,35 @@ RUN pip install keras
 #----------------------------------------------------------------------------------------
 
 
-#Flask-----------------------------------------------------------------------------------
-RUN pip install flask
-
-
 #MySQL-----------------------------------------------------------------------------------
-RUN apt-get -y install mysql-server
-RUN apt-get -y install libmysqlclient-dev
-RUN pip install mysql
-RUN pip install mysql-connector
-RUN pip install pymysql
-RUN pip install sqlalchemy
+RUN apt-get -y install mysql-server libmysqlclient-dev && pip install mysql mysql-connector pymysql sqlalchemy
+#RUN echo mysql-server mysql-server/root_password password $MYSQLTMPROOT | debconf-set-selections 
 #----------------------------------------------------------------------------------------
 
 
 #liblinear-------------------------------------------------------------------------------
-RUN git clone https://github.com/ninjin/liblinear.git
-RUN cd liblinear && make
-RUN cd liblinear/python && make
+RUN git clone https://github.com/ninjin/liblinear.git && cd liblinear && make && cd python && make
 RUN echo "export PYTHONPATH=\$PYTHONPATH:~/liblinear/python/" >> .bashrc
 #----------------------------------------------------------------------------------------
 
 
 #GitProjet------------------------------------------------------------------------------
-RUN git clone https://github.com/DeepLearningMoviesProject/back-DeepLearningMoviesProject.git
-RUN mv back-DeepLearningMoviesProject/ git/back-DeepLearningMoviesProject/
+RUN mkdir git && git clone https://github.com/DeepLearningMoviesProject/back-DeepLearningMoviesProject.git && mv back-DeepLearningMoviesProject/ git/back-DeepLearningMoviesProject/
 RUN echo "export PYTHONPATH=\$PYTHONPATH:~/git/back-DeepLearningMoviesProject/" >> .bashrc
 #COPY glove.6B.50d.txt /root/git/back-DeepLearningMoviesProject/MovieProject/resources/glove.6B.50d.txt
+#----------------------------------------------------------------------------------------
+
+
+#TensorFlow------------------------------------------------------------------------------
+# Install TensorFlow CPU version from central repo
+#RUN pip install --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.11.0-cp27-none-linux_x86_64.whl
+#RUN pip install --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.12.0-cp27-none-linux_x86_64.whl
+RUN pip install tensorflow
+#----------------------------------------------------------------------------------------
+
+
+#Keras-----------------------------------------------------------------------------------
+RUN pip install keras
 #----------------------------------------------------------------------------------------
 
 
@@ -133,6 +117,10 @@ RUN echo "export PYTHONPATH=\$PYTHONPATH:~/git/back-DeepLearningMoviesProject/" 
 #RUN cd mesos/build && make install
 #----------------------------------------------------------------------------------------
 
-RUN apt-get update
+EXPOSE 5000
 
-EXPOSE 80
+
+# Only to test---------------------------------------------------------------------------
+RUN cd git/back-DeepLearningMoviesProject/ && git checkout features/backOnServer
+#RUN cd git/back-DeepLearningMoviesProject/MovieProject/api/
+#CMD python ~/git/back-DeepLearningMoviesProject/MovieProject/api/api.py
