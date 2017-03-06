@@ -8,28 +8,21 @@ Created on Thu Jan 26 14:16:32 2017
 from flask import Flask, jsonify, request, json, session, g
 from flask_cors import CORS, cross_origin
 from bcrypt import gensalt, hashpw
-
 from datetime import datetime, timedelta
 from functools import wraps
 from jwt import encode, decode, DecodeError, ExpiredSignature
 
-# Import Twitter library for python
-from TwitterSearch import TwitterSearchOrder, TwitterSearchException, TwitterSearch
-
-from flask import Flask, jsonify, request, abort, json
-#from testTMDB import searchData, trainData
 from MovieProject.learning import sentimentPrediction as pred
 from MovieProject.preprocessing import Preprocessor
 from MovieProject.sql import User, DatabaseManager
-
-from exceptions import Exception
-
 from MovieProject.preprocessing.tools import createCorpusOfAbtracts, gloveDict, D2VOnCorpus
 from MovieProject.learning import buildModel, suggestNMovies, sentimentAnalysis
-import numpy as np
-
-from os.path import isfile
 from MovieProject.resources import GLOVE_DICT_FILE, OVERVIEWS_TR_FILE, OVERVIEW_MODEL, SENTIMENT_ANALYSIS_MODEL
+
+import numpy as np
+from os.path import isfile
+
+from exceptions import Exception
 
 
 
@@ -170,6 +163,8 @@ def trainModel():
 
 
 @app.route('/prediction', methods=['GET'])
+@cross_origin()
+@loginRequired
 def predictMovies():
     
     #Here we create a model but in the end we will load it from the DB
@@ -294,91 +289,6 @@ def login():
 def logout():
     session.pop('logged_in', None)
     return jsonify({'result': 'success'}), 200
-
-
-
-
-@app.route('/api/updateMovies', methods=["POST"])
-@cross_origin()
-@loginRequired
-def updateMovies():
-    data = json.loads(request.data)
-    
-    try:
-        dbManager.updateLikedMoviesForUser(g.user_name, data)
-    except Exception as e:
-        return jsonify(error=str(e), movies=getIdFromLikedMovies(g.user_name, None)), 500
-    else:
-        return jsonify(movies=getIdFromLikedMovies(g.user_name, None)), 200
-    
-
-@app.route('/api/likedMovies/<string:opinion>', methods=["GET"])
-@cross_origin()
-@loginRequired
-def likedMovies(opinion):
-    if opinion == "liked": isLiked = True
-    elif opinion == "disliked" : isLiked = False
-    elif opinion == "all" : isLiked = None 
-    else : return jsonify(error="Argument \"%s\" not authorized" %(opinion)), 400
-    
-    return jsonify(movies=getIdFromLikedMovies(g.user_name, isLiked)), 200
-
-
-@app.route('/auth/signup', methods=['POST'])
-@cross_origin()
-def signup():
-    data = json.loads(request.data)
-
-    password = hashpw(data["password"].encode('utf-8'), gensalt())
-    occupation = dbManager.getOccupation(data["occupation"])
-    country = dbManager.getRegion(data["country"])
-    
-    if data["sex"] == "H": sex = True
-    elif data["sex"] == "F": sex = False
-    else: sex = None
-    
-    user = User(data["name"], password, data["email"],
-                birthday=data["birthday"], 
-                sexe=sex, 
-                idOccupation=occupation.id,
-                idCountry=country.id)
-    
-    dbManager.insertUser(user)
-    user = dbManager.getUser(data["name"])
-    
-    session['logged_in'] = True
-
-    return jsonify(token=createToken(user)), 200
-
-
-@app.route('/auth/login', methods=['POST'])
-@cross_origin()
-def login():
-    data = json.loads(request.data)
-
-    user = dbManager.getUser(data["name"])
-    if not user:
-        return jsonify(error="No such user"), 404
-    
-    password = data["password"].encode('utf-8')
-
-    if user.password == hashpw(password, user.password):
-        session['logged_in'] = True               
-               
-               
-        return jsonify(movies={umovie.idMovie:int(umovie.liked) for umovie in user.movies},
-                       token=createToken(user)), 200
-    else:
-        return jsonify(error="Wrong name or password"), 400
-
-
-@app.route('/auth/logout')
-@cross_origin()
-@loginRequired
-def logout():
-    session.pop('logged_in', None)
-    return jsonify({'result': 'success'}), 200
-
 
 
     

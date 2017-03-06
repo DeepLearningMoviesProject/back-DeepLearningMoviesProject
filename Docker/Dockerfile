@@ -16,7 +16,7 @@ RUN apt-get -y install libreadline-gplv2-dev libncursesw5-dev libssl-dev libsqli
 RUN cd /usr/src/ && wget https://www.python.org/ftp/python/2.7.13/Python-2.7.13.tgz && tar xzf Python-2.7.13.tgz && cd /usr/src/Python-2.7.13 && ./configure --prefix=/usr --enable-unicode=ucs4 && make -i install
 COPY get-pip.py /root/get-pip.py
 RUN python get-pip.py
-RUN pip install atlas numpy scipy nltk tmdbsimple scikit-learn h5py enum34 TwitterSearch pandas flask flask-cors && pip install -U gensim
+RUN pip install atlas numpy scipy nltk tmdbsimple scikit-learn h5py enum34 TwitterSearch pandas flask flask-cors bcrypt PyJWT && pip install -U gensim
 #----------------------------------------------------------------------------------------
 
 
