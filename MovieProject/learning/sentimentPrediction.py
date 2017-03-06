@@ -13,7 +13,7 @@ from MovieProject.resources import SENTIMENT_ANALYSIS_MODEL
 from MovieProject.preprocessing.tools import opinionDict as od
 from MovieProject.preprocessing.tools import gloveDict
 from MovieProject.preprocessing.tools import apiTMDB as tmdb
-from MovieProject.preprocessing.tools import twitterSearch as ts
+from MovieProject.preprocessing.tools import SearchTweets as ts
 from MovieProject.preprocessing import tweets as tw
 from keras.models import load_model
 

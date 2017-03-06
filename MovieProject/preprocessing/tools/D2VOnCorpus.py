@@ -18,6 +18,7 @@ Created on Mon Jan 30
 from gensim import utils
 from gensim.models.doc2vec import LabeledSentence
 from gensim.models import Doc2Vec
+from gensim import models
 
 # numpy
 import numpy

@@ -5,6 +5,9 @@ Created on Thu Jan 26 14:16:32 2017
 
 @author: Kaito
 """
+# Import Twitter library for python
+from TwitterSearch import TwitterSearchOrder, TwitterSearchException, TwitterSearch
+
 from flask import Flask, jsonify, request, abort, json
 #from testTMDB import searchData, trainData
 from MovieProject.learning import sentimentPrediction as pred
