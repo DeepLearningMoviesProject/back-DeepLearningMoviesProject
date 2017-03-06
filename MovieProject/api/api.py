@@ -110,15 +110,15 @@ def getIdFromLikedMovies(username, isLiked):
 
 
 @app.route('/testId', methods=['GET'])
-@loginRequired
 @cross_origin()
+@loginRequired
 def get_tasks():
     return jsonify(movieIds), 200
 
 
 @app.route('/api/train', methods=['POST'])
-@loginRequired
 @cross_origin()
+@loginRequired
 def trainModel():    
     
     dico = json.loads(request.data)
@@ -162,7 +162,7 @@ def trainModel():
 #    return jsonify(sugg)
 
 
-@app.route('/prediction', methods=['GET'])
+@app.route('api/prediction', methods=['GET'])
 @cross_origin()
 @loginRequired
 def predictMovies():
@@ -292,7 +292,9 @@ def logout():
 
 
     
-@app.route('/popularity', methods=['POST'])
+@app.route('api/popularity', methods=['POST'])
+@cross_origin()
+@loginRequired
 def checkPopularity():   
    
     dico = json.loads(request.data)
