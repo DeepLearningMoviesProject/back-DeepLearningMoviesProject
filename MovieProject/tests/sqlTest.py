@@ -10,17 +10,17 @@ from MovieProject.sql import *
 
 manager = DatabaseManager()
 
-user = User("Kaito", email="test1")
+user = User("Juhn", "toto1234", "test1@gmail.com")
 
 print "Insertion of user %s" %(user)
-manager.insertUser(user.name, email=user.email)
+manager.insertUser(user)
 
 print "Getting user %s..." %(user.name),
 user = manager.getUser(user.name)
 print user
 
 print "Updating user %s with new email..." %(user.name),
-manager.updateUser(user.name, email="test@yahoo.fr")
+manager.updateUser(User(user.name, None, "test@yahoo.fr"))
 
 print manager.getUser(user.name).email
 

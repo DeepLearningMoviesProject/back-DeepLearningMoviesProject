@@ -17,6 +17,7 @@ RES_PERSIST_PATH = join(RES_PATH,"persist")
 
 GENRES_FILE = join(RES_PATH, "genres.npy")
 
+COUNTRIES_FILE = join(RES_PATH, "countries.json")
 
 GLOVE_CORPUS_FILE = join(RES_PERSIST_PATH, "glove.6B.50d.txt")
 
