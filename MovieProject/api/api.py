@@ -245,7 +245,7 @@ def likedMovie(idMovie, isLiked):
         return "", 201
         
     elif request.method == "PUT":
-        dbManager.updateLikedMoviesForUser(g.user_name, {idMovie:bool(isLiked)})
+        dbManager.updateLikedMovieForUser(g.user_name, {idMovie:bool(isLiked)})
         return "", 204
 
 
