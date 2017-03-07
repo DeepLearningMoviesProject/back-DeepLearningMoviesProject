@@ -162,7 +162,7 @@ def trainModel():
 #    return jsonify(sugg)
 
 
-@app.route('api/prediction', methods=['GET'])
+@app.route('/api/prediction', methods=['GET'])
 @cross_origin()
 @loginRequired
 def predictMovies():
@@ -292,7 +292,7 @@ def logout():
 
 
     
-@app.route('api/popularity', methods=['POST'])
+@app.route('/api/popularity', methods=['POST'])
 @cross_origin()
 @loginRequired
 def checkPopularity():   
