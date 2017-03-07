@@ -49,6 +49,7 @@ class TextTest(unittest.TestCase):
         self.assertEquals(infoAlice["id"], self.moviesId[1])
         self.assertEquals(infoNemo["id"], self.moviesId[2])
         #Check that the ids match the movies, otherwise the ids has changed
+        self.assertEquals(infoAlice["title"], "Alice")
         self.assertEquals(infoAlice["genres"], [])
         self.assertEquals(infoAlice["production_countries"], [])
 
@@ -58,6 +59,8 @@ class TextTest(unittest.TestCase):
         self.assertEquals(moviesEmpty, [])
 
     def test_getCredits(self):
+        """ Tests 'apiTMDB.getCredits' """
+
         #This movie has credits
         movies = getMovies(self.moviesId)
         credits = getCredits([movies[2]])
@@ -92,20 +95,33 @@ class TextTest(unittest.TestCase):
         self.assertEquals(noKeywords, [])
 
         #Keywords for empty object
-        noKeywords = getKeywords()
-        self.assertEquals(noKeywords, [])
+        with self.assertRaises(AttributeError):
+            noKeywords = getKeywords({})
+
+        #Keywords for invalid object
+        with self.assertRaises(AttributeError):
+            invalidKeywords = getKeywords({"hello" : True})
 
     def test_getGenres(self):
-        nemo = getMovie(12) #Nemo
-        alice = getMovie(404031) #Alice, no genres
+        """ Tests 'apiTMDB.getGenres' """
 
-        genres = getGenres(nemo.info())
-        noGenres = getGenres(alice.info())
-
-        self.assertEquals(noGenres, [])
+        genres = getGenres({"genres": [{"id": 16,"name": "Animation"},
+                                        {"id": 10751,"name": "Family"}]})
         self.assertGreater(len(genres), 0)
+        self.assertEqual(genres[0], "animation")
+        self.assertEqual(genres[1], "family")
+
+        noGenres = getGenres({"genres" : []})
+        self.assertEquals(noGenres, [])
+
+        with self.assertRaises(AttributeError):
+            invalidGenres = getGenres({"hello" : True})
+        with self.assertRaises(AttributeError):
+            invalidGenres = getGenres({})
+
 
     def test_getRating(self):
+        """ Tests 'apiTMDB.getRating' """
         movieInfoLambda = {"vote_average" : 0}
         movieInfoFake = {"vote_average" : "coucou"}
 
@@ -116,6 +132,7 @@ class TextTest(unittest.TestCase):
         self.assertEquals(movieRatingFake, "coucou") 
     
     def test_getTitle(self):
+        """ Tests 'apiTMDB.getTitle """
         movieInfoLambda = {"title" : "hello there !"}
         movieInfoSpecials = {"title" : "WhAt is thAt ?"}
 
@@ -127,6 +144,7 @@ class TextTest(unittest.TestCase):
 
 
     def test_getMovie(self):
+        """ Tests 'apiTMDB.getMovies' """
         movie1 = getMovie(0)
         movie2 = getMovie(12)
 
@@ -140,6 +158,11 @@ class TextTest(unittest.TestCase):
         #We must not succeed
         self.assertFalse(success)
 
+    def test_getTmdbGenres(self):
+        """ Tests 'apiTMDB.getTmdbGenres' """
+        genres = getTmdbGenres()
+        self.assertEquals(len(genres), 19)
+
     def test_getDirectors(self):
         """ Tests 'apiTMDB.getDirectors' """
         
@@ -150,18 +173,171 @@ class TextTest(unittest.TestCase):
         
         self.assertEqual(len(directors), len(directorsTest))
         self.assertEqual(directorsTest[0], directors[0])
-        
+    
+    def test_getOverview(self):
+        overview = getOverview({"overview" : "Hello!"})
+        self.assertEqual(len(overview), 5)
+        self.assertEqual(overview, "hello")
+
+        #If we call getOverview with a dict that has no attribute overview it must raise an error
+        with self.assertRaises(AttributeError):
+            overviewInvalidValue = getCredits({"hello" : True})
+
+        #If we send an empty info of movies to getOverview, it must raise an error
+        with self.assertRaises(AttributeError):
+            overviewNoMovie = getOverview({})
+
+        overviewEmpty = getOverview({"overview" : ""})
+        self.assertEqual(overviewEmpty, "")
+
     def test_getActors(self):
         """ Tests 'apiTMDB.getActors' """
         
-        movie = getMovie(11)
+        #Test OK
+        cast = [{"name": "Mark Hamill"},{"name": "Harrison Ford"},{"name": "Carrie Fisher"},{"name": "Peter Cushing"},{"name": "Actor Test"}]  
+        actors = ["Mark Hamill", "Harrison Ford", "Carrie Fisher", "Peter Cushing", "Actor Test"]
+        actorsTest = getActors({"cast" : cast})
         
-        actors = ["Mark Hamill", "Harrison Ford", "Carrie Fisher", "Peter Cushing"]
-        actorsTest = getActors(movie.credits())
+        self.assertEqual(len(actors)-1, len(actorsTest))
+        for i in range(len(actorsTest)):
+            self.assertEqual(actors[i], actorsTest[i])
+
+        #Test empty cast
+        actorsEmpty = getActors({"cast" : []})
+        self.assertEqual(actorsEmpty, [])
+
+        #Test invalid attribute
+        with self.assertRaises(AttributeError):
+            actorsInvalidValue = getActors({"hello" : True})
+
+        #Test empty attribute
+        with self.assertRaises(AttributeError):
+            actorsNoValue = getActors({})
+
+    def test_getRuntime(self):
+        """ Tests 'apiTMDB.getRuntime' """
         
-        self.assertEqual(len(actors), len(actorsTest))
-        for i in range(len(actors)):
-            self.assertEqual(actors[i], actors[i])
+        #Test OK
+        runtime = getRuntime({"runtime" : 158})
+        self.assertEqual(runtime, 158)
+
+        #Test None
+        runtimeNone = getRuntime({"runtime" : None})
+        self.assertEqual(runtimeNone, 0)
+
+        #Test invalid attribute
+        with self.assertRaises(AttributeError):
+            runtimeInvalidValue = getRuntime({"hello" : True})
+
+        #Test empty attribute
+        with self.assertRaises(AttributeError):
+            runtimeNoValue = getRuntime({})
+
+
+    def test_getYear(self):
+        """ Tests 'apiTMDB.getYear' """
+        
+        #Test OK
+        runtime = getYear({"release_date" : "2012-09-30"})
+        self.assertEqual(runtime, 2012)
+
+        #Test None - Movie 280632 has no release date
+        movie = getMovie(387773)
+        runtimeNone = getYear(movie.info())
+        self.assertEqual(runtimeNone, 0)
+
+        #Test invalid attribute
+        with self.assertRaises(AttributeError):
+            runtimeInvalidValue = getYear({"hello" : True})
+
+        #Test empty attribute
+        with self.assertRaises(AttributeError):
+            runtimeNoValue = getYear({})
+
+    def test_getBudget(self):
+        """ Tests 'apiTMDB.getBudget' """
+        
+        #Test OK - Nemo has a budget > 0
+        movie1 = getMovie(12)
+        budget = getBudget(movie1.info())
+        self.assertGreater(budget, 0)
+
+        #Test None - Movie 280632 has no budget
+        movie2 = getMovie(387773)
+        budgetNone = getBudget(movie2.info())
+        self.assertEqual(budgetNone, 0)
+
+        #Test invalid attribute
+        with self.assertRaises(AttributeError):
+            budgetInvalidValue = getBudget({"hello" : True})
+
+        #Test empty attribute
+        with self.assertRaises(AttributeError):
+            budgetNoValue = getBudget({})
+
+    def test_getProdCompagnies(self):
+        """ Tests 'apiTMDB.getProdCompagnies' """
+        
+        #Test OK - Nemo has production companies (Disney, Pixar)
+        movie1 = getMovie(12)
+        prodcomp = getProdCompagnies(movie1.info())
+        self.assertGreater(len(prodcomp), 0)
+
+        #Test None - Movie 280632 has no production companies
+        movie2 = getMovie(387773)
+        prodcompNone = getProdCompagnies(movie2.info())
+        self.assertEqual(prodcompNone, [])
+
+        #Test invalid attribute
+        with self.assertRaises(AttributeError):
+            prodcompInvalidValue = getProdCompagnies({"hello" : True})
+
+        #Test empty attribute
+        with self.assertRaises(AttributeError):
+            prodcompNoValue = getProdCompagnies({})
+
+    def test_getLanguage(self):
+        """ Tests 'apiTMDB.getLanguage' """
+        
+        #Test OK - Nemo has language
+        movie1 = getMovie(12)
+        lang = getLanguage(movie1.info())
+        self.assertGreater(len(lang), 0)
+
+        #Test None - Movie that has no language
+        info = {"spoken_languages": []}
+        langNone = getLanguage(info)
+        self.assertEqual(langNone, [])
+
+        #Test invalid attribute
+        with self.assertRaises(AttributeError):
+            langInvalidValue = getLanguage({"hello" : True})
+
+        #Test empty attribute
+        with self.assertRaises(AttributeError):
+            langNoValue = getLanguage({})
+
+    def test_getBelongsTo(self):
+        """ Tests 'apiTMDB.getBelongsTo' """
+        
+        #Test OK - Star Wars has belongs to attribute
+        movie1 = getMovie(11)
+        belongs = getBelongsTo(movie1.info())
+        self.assertTrue(belongs)
+
+        #Test None - Movie that has no belongs to attribute
+        info = {"belongs_to_collection": None}
+        belongsNone = getBelongsTo(info)
+        self.assertFalse(belongsNone)
+
+        #Test invalid attribute
+        with self.assertRaises(AttributeError):
+            belongsInvalidValue = getBelongsTo({"hello" : True})
+
+        #Test empty attribute
+        with self.assertRaises(AttributeError):
+            belongsNoValue = getBelongsTo({})
+
 
 if __name__ == '__main__':
     unittest.main()
