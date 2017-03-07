@@ -175,6 +175,30 @@ class DatabaseManager():
         db.add(usermovie)
         db.commit()
         
+        
+    def updateLikedMovieforUser(self, name, idMovie, liked):
+        """
+            Update on liked movie for a user
+            
+            Paramaters:
+                name -> String, name of a user
+                idMovie -> int, movie's id from TMDB
+                liked -> boolean, True if movie is liked, False otherwise
+        """
+        
+        user = self.getUser(name)
+        
+        if user is None:
+            raise RuntimeError("User %s is not in the database" %(name))
+        
+        userMovie = self.getUserMovie(user.id, idMovie)
+        
+        if not userMovie:
+            self.insertUserMovie(name, idMovie, liked)
+        else:
+            userMovie.liked = liked
+            db.commit()
+    
     
     def updateLikedMoviesForUser(self, username, likedMovies):
         """
@@ -189,6 +213,23 @@ class DatabaseManager():
         for idMovie, liked in likedMovies.items():
             self.insertUserMovie(username, idMovie, liked)
         
+        
+    def removeUserMovieFromUser(self, name, idMovie):
+        """
+        
+        """
+        
+        user = self.getUser(name)
+        
+        if user is None:
+            raise RuntimeError("User %s is not in the database" %(name))
+            
+        userMovie = self.getUserMovie(user.id, idMovie)
+        
+        if userMovie:
+            db.delete(userMovie)
+            db.commit()
+            
         
     def removeAllUserMovieFromUser(self, username):
         """
