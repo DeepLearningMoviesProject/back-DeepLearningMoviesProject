@@ -43,7 +43,7 @@ def getCredits(movies):
     return [ movie.credits() for movie in movies ]
 
 
-def getKeywords(tmdbKeywords={}):
+def getKeywords(tmdbKeywords):
     """
         Extract keywords from tmdb keyword's dictionary 
         
@@ -52,10 +52,11 @@ def getKeywords(tmdbKeywords={}):
     """
     
     words = []
-    if tmdbKeywords:
+    if "keywords" in tmdbKeywords:
         for keyword in tmdbKeywords["keywords"]:
             words += _format(keyword["name"]).split()
-
+    else:
+        raise AttributeError("%s instance has no attribute keywords" % tmdbKeywords)        
     return words
 
 
@@ -68,8 +69,10 @@ def getGenres(movieInfo):
         return:
             array of string containing each genre
     """
-    
-    return [ _format(genre["name"]) for genre in movieInfo["genres"] ]
+    if "genres" in movieInfo:
+        return [ _format(genre["name"]) for genre in movieInfo["genres"] ]
+    else:
+        raise AttributeError("%s instance has no attribute genre" % movieInfo)    
 
 def getRating(movieInfo):
     """
@@ -80,8 +83,10 @@ def getRating(movieInfo):
         return:
             int
     """
-    
-    return movieInfo["vote_average"]
+    if "vote_average" in movieInfo:
+        return movieInfo["vote_average"]        
+    else:
+        raise AttributeError("%s instance has no attribute vote_average (rating)" % movieInfo)    
 
 def getTitle(movieInfo):
     """
@@ -92,10 +97,14 @@ def getTitle(movieInfo):
         return:
             string
     """
-    #We remove the punctuation
-    title = "".join(c for c in movieInfo["title"] if c not in punctuation)
-    #We return the title as a list of words in the right format
-    return [ _format(w) for w in title.split() ]
+    if "title" in movieInfo:
+        #We remove the punctuation
+        title = "".join(c for c in movieInfo["title"] if c not in punctuation)
+        #We return the title as a list of words in the right format
+        return [ _format(w) for w in title.split() ]
+    else:
+        raise AttributeError("%s instance has no attribute title" % movieInfo)    
+
 
 def getMovie(id): 
     """
@@ -144,9 +153,10 @@ def getDirectors(movieCredit):
         return:
             String  array representing the movie's directors
     """
-
-    
-    return [ people["name"] for people in movieCredit["crew"] if people["job"].lower() == "director" ] 
+    if "crew" in movieCredit:
+        return [ people["name"] for people in movieCredit["crew"] if people["job"].lower() == "director" ]
+    else:
+        raise AttributeError("%s instance has no attribute crew" % movieCredit)    
     
 def getOverview(movieInfo):
     """
@@ -155,13 +165,13 @@ def getOverview(movieInfo):
         Parameter:
             movieInfo -> dictionary of Movie.info()
         return:
-            string or None if overview doesn't exist
+            string (empty if overview doesn't exist)
     """
     
-    if movieInfo["overview"] is not None:
+    if "overview" in movieInfo:
         return _format("".join(c for c in movieInfo["overview"] if c not in punctuation))
     else: 
-        return None
+        raise AttributeError("%s instance has no attribute overview" % movieInfo)
     
     
     
@@ -175,11 +185,13 @@ def getActors(movieCredit):
         return:
             String array representing the 4 first movie's actors
     """
-
-    actors = movieCredit["cast"]
-    nbActors = 4 if len(actors) >= 4 else len(actors)
-    
-    return [actor["name"] for actor in actors [:nbActors]]
+    if "cast" in movieCredit:
+        actors = movieCredit["cast"]
+        nbActors = 4 if len(actors) >= 4 else len(actors)
+        
+        return [actor["name"] for actor in actors [:nbActors]]
+    else:
+        raise AttributeError("%s instance has no attribute crew" % movieCredit)    
 
 
 def getRuntime(movieInfo):
@@ -191,8 +203,10 @@ def getRuntime(movieInfo):
         return:
             int
     """
-    
-    return 0 if movieInfo["runtime"] is None else movieInfo["runtime"]
+    if "runtime" in movieInfo:
+        return 0 if movieInfo["runtime"] is None else movieInfo["runtime"]
+    else:
+        raise AttributeError("%s instance has no attribute runtime" % movieInfo)    
 
 
 def getYear(movieInfo):
@@ -204,7 +218,14 @@ def getYear(movieInfo):
         return:
             int 
     """
-    return int(movieInfo["release_date"][:4])
+    if "release_date" in movieInfo:
+        date = movieInfo["release_date"]
+        if (date != '') :
+            return int(date[:4])
+        else:
+            return 0
+    else:
+        raise AttributeError("%s instance has no attribute release_date" % movieInfo)    
 
 def getBudget(movieInfo):
     """
@@ -215,19 +236,25 @@ def getBudget(movieInfo):
         return:
             int 
     """
-    return int(movieInfo["budget"])
+    if "budget" in movieInfo:
+        return int(movieInfo["budget"])
+    else:
+        raise AttributeError("%s instance has no attribute budget" % movieInfo)  
 
 
 def getProdCompagnies(movieInfo):
     """
-        Retrieve production compagnies of the movie
+        Retrieve production companies of the movie
         
         Parameter:
             movieInfo -> dictionary of Movie.info()
         return:
-            array of String of compagnies
+            array of String of companies
     """
-    return [ info["name"] for info in movieInfo["production_companies"] ]
+    if "production_companies" in movieInfo:
+        return [ info["name"] for info in movieInfo["production_companies"] ]
+    else:
+        raise AttributeError("%s instance has no attribute production_companies" % movieInfo)    
 
 
 def getLanguage(movieInfo):
@@ -239,22 +266,26 @@ def getLanguage(movieInfo):
         return:
             array of String
     """
-    return [ _format(language["name"]) for language in movieInfo["spoken_languages"] ]
+    if "spoken_languages" in movieInfo:
+        return [ _format(language["name"]) for language in movieInfo["spoken_languages"] ]
+    else:
+        raise AttributeError("%s instance has no attribute spoken_languages" % movieInfo)  
     
     
 def getBelongsTo(movieInfo):
     """
-        Retrieve the movie's collection
+        Retrieve the fact that a movie belongs to a collection
         
         Parameter:
             movieInfo -> dictionary of Movie.info()
         return:
-            String
+            Boolean that tells whether the movie belongs to a collection
     """
-    
-    belongsTo = movieInfo["belongs_to_collection"]
-    
-    return belongsTo is not None and belongsTo["name"] or belongsTo
+    if "belongs_to_collection" in movieInfo:
+        belongsTo = movieInfo["belongs_to_collection"]
+        return belongsTo is not None and belongsTo["name"] or belongsTo
+    else:
+        raise AttributeError("%s instance has no attribute belongs_to_collection" % movieInfo)  
 
 def _format(text):
     """
@@ -266,37 +297,3 @@ def _format(text):
             text formated
     """
     return text.lower().encode("UTF-8")
-
-if __name__ == "__main__":
-    
-    movie = getMovie(205056)
-    response = movie.info()
-    
-    print movie.reviews()
-    
-    #for people in movie.credits()["crew"]:
-    #   print "Name: %s - %s" %(people["name"], people["job"]) # important: Director
-    
-    print "############################"
-    
-    
-    #for people in movie.credits()["cast"]: print "%s" %(people["name"])
-    
-    print "############################"
-    
-    print "Title: %s" %(response["title"])
-    print "Keywords: %s" %(" ".join(getKeywords(movie.keywords())))
-    print "Genres: %s" %(" ".join(getGenres(response)))
-    print "Overview: %s" %(response["overview"])
-    print "Vote: %s" %(response["vote_average"])
-    print "Budget: %s" %(response["budget"])
-    
-    print "runtime: {}".format(getRuntime(response))
-    
-    print "------------------------------"
-    
-    #for key in response.keys(): print "%s: %s" %(key, response[key])
-        
-    print "------------------------------"
-    
-    #for key in response.keys(): print key,
