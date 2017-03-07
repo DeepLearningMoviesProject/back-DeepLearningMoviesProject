@@ -238,7 +238,7 @@ def likedMovie(idMovie, isLiked):
         return "", 201
         
     elif request.method == "PUT":
-        dbManager.updateLikedMoviesForUser(g.user_name, {idMovie:bool(isLiked)})
+        dbManager.updateLikedMovieForUser(g.user_name, idMovie, bool(isLiked))
         return "", 204
 
 @app.route('/api/likedMovie/<int:idMovie>', methods=["DELETE"])
@@ -246,7 +246,7 @@ def likedMovie(idMovie, isLiked):
 @loginRequired
 def removeLikedMovie(idMovie):
     dbManager.removeUserMovieFromUser(g.user_name, idMovie)
-    return "", 204
+    return jsonify({"id":idMovie}), 200
 
 
 @app.route('/auth/signup', methods=['POST'])
