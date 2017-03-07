@@ -176,7 +176,7 @@ class DatabaseManager():
         db.commit()
         
         
-    def updateLikedMovieforUser(self, name, idMovie, liked):
+    def updateLikedMovieForUser(self, name, idMovie, liked):
         """
             Update on liked movie for a user
             
