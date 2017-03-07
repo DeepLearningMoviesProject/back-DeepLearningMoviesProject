@@ -235,60 +235,17 @@ def likedMovies(opinion):
     return jsonify(movies=getIdFromLikedMovies(g.user_name, isLiked)), 200
 
 
-@app.route('/auth/signup', methods=['POST'])
-@cross_origin()
-def signup():
-    data = json.loads(request.data)
-
-    password = hashpw(data["password"].encode('utf-8'), gensalt())
-    occupation = dbManager.getOccupation(data["occupation"])
-    country = dbManager.getRegion(data["country"])
-    
-    if data["sex"] == "H": sex = True
-    elif data["sex"] == "F": sex = False
-    else: sex = None
-    
-    user = User(data["name"], password, data["email"],
-                birthday=data["birthday"], 
-                sexe=sex, 
-                idOccupation=occupation.id,
-                idCountry=country.id)
-    
-    dbManager.insertUser(user)
-    user = dbManager.getUser(data["name"])
-    
-    session['logged_in'] = True
-
-    return jsonify(token=createToken(user)), 200
-
-
-@app.route('/auth/login', methods=['POST'])
-@cross_origin()
-def login():
-    data = json.loads(request.data)
-
-    user = dbManager.getUser(data["name"])
-    if not user:
-        return jsonify(error="No such user"), 404
-    
-    password = data["password"].encode('utf-8')
-
-    if user.password == hashpw(password, user.password):
-        session['logged_in'] = True               
-               
-               
-        return jsonify(movies={umovie.idMovie:int(umovie.liked) for umovie in user.movies},
-                       token=createToken(user)), 200
-    else:
-        return jsonify(error="Wrong name or password"), 400
-
-
-@app.route('/auth/logout')
+@app.route('/api/likedMovie/<int:idMovie>/<int:isLiked>', methods=["POST", "PUT"])
 @cross_origin()
 @loginRequired
-def logout():
-    session.pop('logged_in', None)
-    return jsonify({'result': 'success'}), 200
+def likedMovie(idMovie, isLiked):
+    if request.method == "POST":
+        dbManager.insertUserMovie(g.user_name, idMovie, bool(isLiked))
+        return "", 201
+        
+    elif request.method == "PUT":
+        dbManager.updateLikedMoviesForUser(g.user_name, {idMovie:bool(isLiked)})
+        return "", 204
 
 
     
