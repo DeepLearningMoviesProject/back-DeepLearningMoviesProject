@@ -297,9 +297,8 @@ def logout():
 @loginRequired
 def checkPopularity():   
    
-    dico = json.loads(request.data)
-    ids = [int(key) for key in dico]
-    popularity, sentiments = pred.classificationMovies(ids) 
+    data = json.loads(request.data)
+    popularity, sentiments = pred.classificationMovies(data['movies']) 
     return jsonify({"popularity" : popularity, "sentiments" : sentiments})
 
     
