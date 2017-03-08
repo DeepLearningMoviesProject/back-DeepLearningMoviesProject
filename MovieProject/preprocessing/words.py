@@ -21,6 +21,9 @@ def wordsToGlove(words, gloveDic):
         return:
             (ndarray, int). Tuple of GloVe descriptors of each word and size of descriptors
     """
+    
+    SIZE_VECTOR = gloveDic[gloveDic.keys()[0]].shape[0]
+    
     gloveWords = []
     for w in words:
         wg = gloveDic.get(w.lower()) # return None if key is not present
@@ -28,9 +31,9 @@ def wordsToGlove(words, gloveDic):
             gloveWords.append(wg)
     
     if len(gloveWords) == 0:
-        return np.array([np.zeros(gloveDic[gloveDic.keys()[0]].shape[0])]), gloveDic[gloveDic.keys()[0]].shape[0]
+        return np.zeros((1, SIZE_VECTOR)), SIZE_VECTOR
 
-    return np.asarray(gloveWords), gloveDic[gloveDic.keys()[0]].shape[0]
+    return np.asarray(gloveWords), SIZE_VECTOR
 
 
 def meanWords(gWords, size):

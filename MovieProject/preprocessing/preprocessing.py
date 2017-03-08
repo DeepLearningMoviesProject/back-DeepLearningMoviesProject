@@ -295,12 +295,8 @@ class Preprocessor():
         meanMatrixTitles = np.empty([len(infos), self.sizeGloveVector]) 
         
         for i, info in enumerate(infos):            
-            overview = getTitle(info)
-            words = []
-                
-            for w in overview:
-                words += w.lower().encode('UTF-8')
-                
+            words = [ w.lower().encode('UTF-8') for w in getTitle(info)]
+            
             gArray, wSize = wordsToGlove(words, self.dicoGlove)
             
             meanMatrixTitles[i] = meanWords(gArray, wSize)
@@ -375,7 +371,7 @@ class Preprocessor():
             
             words = []
             for name in names:
-                words += name.lower().encode('UTF-8').split()
+                words += name.split()
             
             gArray, wSize = wordsToGlove(words, self.dicoGlove)     
             meanMatrixPeople[i] = meanWords(gArray, wSize)
@@ -395,7 +391,7 @@ class Preprocessor():
         
             words = []
             for comp in comps:
-                words += comp.lower().encode('UTF-8').split()
+                words += comp.split()
             
             gArray, wSize = wordsToGlove(words, self.dicoGlove)     
             meanMatrixCompagnies[i] = meanWords(gArray, wSize)

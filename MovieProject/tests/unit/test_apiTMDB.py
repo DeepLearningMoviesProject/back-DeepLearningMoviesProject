@@ -168,7 +168,7 @@ class TextTest(unittest.TestCase):
         
         movie = getMovie(11)
         
-        directors = ["George Lucas"]
+        directors = ["george lucas"]
         directorsTest = getDirectors(movie.credits())
         
         self.assertEqual(len(directors), len(directorsTest))
@@ -200,7 +200,7 @@ class TextTest(unittest.TestCase):
         
         self.assertEqual(len(actors)-1, len(actorsTest))
         for i in range(len(actorsTest)):
-            self.assertEqual(actors[i], actorsTest[i])
+            self.assertEqual(actors[i].lower(), actorsTest[i])
 
         #Test empty cast
         actorsEmpty = getActors({"cast" : []})

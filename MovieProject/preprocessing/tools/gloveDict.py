@@ -36,7 +36,7 @@ def _extractGloveVects():
     with open(GLOVE_CORPUS_FILE) as f:
         for line in f:
             values = line.split()
-            word = values[0]
+            word = values[0].lower()
             if word not in _cachedStopWords:
                 coefs = np.asarray(values[1:], dtype='float32')
                 embeddings_index[word] = coefs

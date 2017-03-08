@@ -9,6 +9,7 @@ Created on Fri Jan 27 14:32:28 2017
 import numpy as np
 import tmdbsimple as tmdb
 from string import punctuation
+from datetime import datetime
 
 from os.path import isfile
 from MovieProject.resources import GENRES_FILE
@@ -154,7 +155,7 @@ def getDirectors(movieCredit):
             String  array representing the movie's directors
     """
     if "crew" in movieCredit:
-        return [ people["name"] for people in movieCredit["crew"] if people["job"].lower() == "director" ]
+        return [ _format(people["name"]) for people in movieCredit["crew"] if people["job"].lower() == "director" ]
     else:
         raise AttributeError("%s instance has no attribute crew" % movieCredit)    
     
@@ -189,7 +190,7 @@ def getActors(movieCredit):
         actors = movieCredit["cast"]
         nbActors = 4 if len(actors) >= 4 else len(actors)
         
-        return [actor["name"] for actor in actors [:nbActors]]
+        return [ _format(actor["name"]) for actor in actors [:nbActors]]
     else:
         raise AttributeError("%s instance has no attribute crew" % movieCredit)    
 
@@ -221,7 +222,7 @@ def getYear(movieInfo):
     if "release_date" in movieInfo:
         date = movieInfo["release_date"]
         if (date != '') :
-            return int(date[:4])
+            return datetime.strptime(date, "%Y-%m-%d").year
         else:
             return 0
     else:
@@ -252,7 +253,7 @@ def getProdCompagnies(movieInfo):
             array of String of companies
     """
     if "production_companies" in movieInfo:
-        return [ info["name"] for info in movieInfo["production_companies"] ]
+        return [ _format(info["name"]) for info in movieInfo["production_companies"] ]
     else:
         raise AttributeError("%s instance has no attribute production_companies" % movieInfo)    
 
@@ -296,4 +297,8 @@ def _format(text):
         return:
             text formated
     """
-    return text.lower().encode("UTF-8")
+    
+    if isinstance(text, unicode):
+        return text.lower().encode("UTF-8")
+    elif isinstance(text, str):
+        return text.lower() 
