@@ -128,6 +128,36 @@ class WordsTest(unittest.TestCase):
         self.assertEquals(resultMean.shape, expectedArray.shape )
         self.assertEquals(expectedSize, size)
         
+    def test_unicode(self):
+        """Tests 'words.wordsToGlove'."""
+        gloveDic = gloveDict.loadGloveDicFromFile()
+        word = [u'scat']
+        resultArray, expectedSize = w.wordsToGlove(word, gloveDic)
+        size = resultArray.shape[1]
+        expectedArray = np.array([[0.026201, -0.037278, -0.58936, -0.28615, -0.47301, 0.69033, -0.22468, 0.029743, 0.2246, 0.94357,
+                      -0.054357, 0.48323, 0.9538, 0.38345, -0.69918, -0.64195, -0.088268, 0.48621, 0.42364, -0.51704,
+                      -0.44851, -0.21705, 0.25903, -0.088207, 0.59777, 0.54634, -0.99789, 0.2576, -0.256, -1.7088,
+                      0.19006, 0.19731, 0.13614, 1.2829, 0.41883, 0.027112, 0.45165, -0.48737, 0.31797, 0.14142,
+                      -0.30245, -0.33968, -0.85194, 0.015752, 0.75979, -1.0888, 0.64471, -0.33908, -0.022592, 0.33961]],dtype="float32")
+        self.assertEquals(resultArray.tolist(), expectedArray.tolist())
+        self.assertEquals(resultArray.shape, expectedArray.shape)
+        self.assertEquals(expectedSize, size)
+        
+    def test_acsii(self):
+        """Tests 'words.wordsToGlove'."""
+        gloveDic = gloveDict.loadGloveDicFromFile()
+        word = [u'scat'.encode('ascii')]
+        resultArray, expectedSize = w.wordsToGlove(word, gloveDic)
+        size = resultArray.shape[1]
+        expectedArray = np.array([[0.026201, -0.037278, -0.58936, -0.28615, -0.47301, 0.69033, -0.22468, 0.029743, 0.2246, 0.94357,
+                      -0.054357, 0.48323, 0.9538, 0.38345, -0.69918, -0.64195, -0.088268, 0.48621, 0.42364, -0.51704,
+                      -0.44851, -0.21705, 0.25903, -0.088207, 0.59777, 0.54634, -0.99789, 0.2576, -0.256, -1.7088,
+                      0.19006, 0.19731, 0.13614, 1.2829, 0.41883, 0.027112, 0.45165, -0.48737, 0.31797, 0.14142,
+                      -0.30245, -0.33968, -0.85194, 0.015752, 0.75979, -1.0888, 0.64471, -0.33908, -0.022592, 0.33961]],dtype="float32")
+        self.assertEquals(resultArray.tolist(), expectedArray.tolist())
+        self.assertEquals(resultArray.shape, expectedArray.shape)
+        self.assertEquals(expectedSize, size)
+        
         
         
 if __name__ == '__main__':
