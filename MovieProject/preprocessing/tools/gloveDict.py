@@ -55,7 +55,7 @@ def saveGloveDicIntoFile(gloveDic):
     np.save(GLOVE_DICT_FILE, np.asarray([gloveDic]))
     
     
-def loadGloveDicFromFile(filename):
+def loadGloveDicFromFile():
     """
         Create an memory Object of GloVe dictionary from binary file
         
@@ -70,7 +70,7 @@ def loadGloveDicFromFile(filename):
         saveGloveDicIntoFile(vects)
         return vects
     
-    return np.load(filename)[0]
+    return np.load(GLOVE_DICT_FILE)[0]
 
 
 def createGloveDic():

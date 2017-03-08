@@ -79,7 +79,7 @@ class Preprocessor():
         
                 
         if self.toDo["keywords"] or self.toDo["actors"] or self.toDo["directors"] or self.toDo["titles"]:
-            self.dicoGlove = loadGloveDicFromFile(GLOVE_DICT_FILE)
+            self.dicoGlove = loadGloveDicFromFile()
             self.sizeGloveVector = self.dicoGlove[self.dicoGlove.keys()[0]].shape[0]
         
         if self.toDo["overviews"]:
