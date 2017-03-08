@@ -7,7 +7,7 @@ Created on Tue Feb  7 10:09 2017
 @author: elsa
 """
 
-from MovieProject.preprocessing.texts import *
+from MovieProject.preprocessing import texts
 import unittest
 
 class TextTest(unittest.TestCase):
@@ -18,13 +18,17 @@ class TextTest(unittest.TestCase):
         """Tests 'text.withoutAccents'."""
         wordInit = "àAâäO0jkfåçsgqéhgèêhëjîjïkôöùkûèoüÿxcğ"
         wordFinal = "aAaaO0jkfacsgqehgeehejijikooukueouyxcg"
-        word = withoutAccents(wordInit)
+        word = texts.withoutAccents(wordInit)
         self.assertEquals(word, wordFinal)
 
     def test_preProcessingAbstracts(self):
     	"""Tests 'text.preProcessingAbstracts'."""
         abstractInit = "Hello here! J'ai demandé un café noir... C'est pour demain ?"
         abstractFinal = "hello here j'ai demande un cafe noir c'est pour demain "
-        abstract = preProcessingAbstracts(abstractInit)
+        abstract = texts.preProcessingAbstracts(abstractInit)
         self.assertEquals(abstract, abstractFinal)
 
+        
+if __name__ == '__main__':
+    
+    unittest.main()    
