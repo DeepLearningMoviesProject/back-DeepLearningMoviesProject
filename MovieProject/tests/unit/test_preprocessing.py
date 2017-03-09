@@ -253,12 +253,7 @@ class PreprocessingTest(unittest.TestCase):
         
         res1 = self.p.belongsToProcessing([self.infos[0]])
         self.assertEqual(final1.shape, res1.shape)
-        self.assertEqual(final1.tolist(), res1.tolist())
-        
-        print self.infos[1]
-        print
-        print self.infos[2]
-        
+        self.assertEqual(final1.tolist(), res1.tolist())        
         
         belong2 = getBelongsTo(self.infos[1])
         self.assertEqual(belong2, None)
@@ -270,6 +265,66 @@ class PreprocessingTest(unittest.TestCase):
         self.assertEqual(final2[0].shape, res2[1].shape)
         self.assertEqual(final2[0].tolist(), res2[1].tolist())
         
+        
+    def test_runtimeProcessing(self):
+        self.assertEqual(np.array([]).tolist(), self.p.runtimeProcessing([]).tolist())
+        
+        runtime1 = getRuntime(self.infos[0])
+        self.assertNotEqual(runtime1, 0)
+        final1 = np.array([runtime1]).reshape((1,1))
+        
+        res1 = self.p.runtimeProcessing([self.infos[0]])
+        self.assertEqual(final1.shape, res1.shape)
+        self.assertEqual(final1.tolist(), res1.tolist())        
+        
+        runtime2 = getRuntime(self.infos[1])
+        self.assertEqual(runtime2, 0)
+        final2 = np.array([runtime2]).reshape((1,1))
+        
+        res2 = self.p.runtimeProcessing([ i for i in self.infos[:2]])
+        self.assertEqual((2,1), res2.shape)
+        self.assertEqual(final2[0].shape, res2[1].shape)
+        self.assertEqual(final2[0].tolist(), res2[1].tolist())
+
+
+    def test_dateProcessing(self):
+        self.assertEqual(np.array([]).tolist(), self.p.dateProcessing([]).tolist())
+        
+        date1 = getYear(self.infos[0])
+        self.assertNotEqual(date1, 0)
+        final1 = np.array([date1]).reshape((1,1))
+        
+        res1 = self.p.dateProcessing([self.infos[0]])
+        self.assertEqual(final1.shape, res1.shape)
+        self.assertEqual(final1.tolist(), res1.tolist())        
+        
+        date2 = getYear(self.infos[1])
+        self.assertEqual(date2, 1988)
+        final2 = np.array([date2]).reshape((1,1))
+        
+        res2 = self.p.dateProcessing([ i for i in self.infos[:2]])
+        self.assertEqual((2,1), res2.shape)
+        self.assertEqual(final2[0].shape, res2[1].shape)
+        self.assertEqual(final2[0].tolist(), res2[1].tolist())
+
+
+    def test_budgetProcessing(self):
+        self.assertEqual(np.array([]).tolist(), self.p.budgetProcessing([]).tolist())
+        
+        budget1 = getBudget(self.infos[0])
+        final1 = np.array([0, 0, 0, 0, 1]).reshape((1,5))
+        
+        res1 = self.p.budgetProcessing([self.infos[0]])
+        self.assertEqual(final1.shape, res1.shape)
+        self.assertEqual(final1.tolist(), res1.tolist())        
+        
+        budget2 = getBudget(self.infos[1])
+        final2 = np.array([1, 0, 0, 0, 0]).reshape((1,5))
+        
+        res2 = self.p.budgetProcessing([ i for i in self.infos[:2]])
+        self.assertEqual((2,5), res2.shape)
+        self.assertEqual(final2[0].shape, res2[1].shape)
+        self.assertEqual(final2[0].tolist(), res2[1].tolist())
         
         
 if __name__ == "__main__":

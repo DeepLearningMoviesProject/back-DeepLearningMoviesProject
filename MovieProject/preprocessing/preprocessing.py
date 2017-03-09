@@ -466,10 +466,20 @@ class Preprocessor():
                 - a ndarray of budget values. One line by movie.
         """
         
-        meanMatrixBudget = np.empty([len(moviesInfo), 1])
+        SIZE_VECT_BUDGET = 5
+        meanMatrixBudget = np.empty([len(moviesInfo), SIZE_VECT_BUDGET])
         
         for i, info in enumerate(moviesInfo):
-            meanMatrixBudget[i] = 1. / (1 + exp(-getBudget(info)))
+            mBudget = np.zeros(SIZE_VECT_BUDGET)
+            budget = getBudget(info)
+            
+            if budget < 1e6: mBudget[0] = 1
+            elif budget >= 1e6 and budget < 5e6: mBudget[1] = 1
+            elif budget >= 5e6 and budget < 20e6 : mBudget[2] = 1
+            elif budget >= 20e6 and budget < 50e6 : mBudget[3] = 1
+            else : mBudget[4] = 1
+                          
+            meanMatrixBudget[i] = mBudget
             
         return meanMatrixBudget
 
