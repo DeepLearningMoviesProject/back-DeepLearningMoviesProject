@@ -36,7 +36,7 @@ def _extractGloveVects():
     with open(GLOVE_CORPUS_FILE) as f:
         for line in f:
             values = line.split()
-            word = values[0]
+            word = values[0].lower()
             if word not in _cachedStopWords:
                 coefs = np.asarray(values[1:], dtype='float32')
                 embeddings_index[word] = coefs
@@ -55,7 +55,7 @@ def saveGloveDicIntoFile(gloveDic):
     np.save(GLOVE_DICT_FILE, np.asarray([gloveDic]))
     
     
-def loadGloveDicFromFile(filename):
+def loadGloveDicFromFile():
     """
         Create an memory Object of GloVe dictionary from binary file
         
@@ -70,7 +70,7 @@ def loadGloveDicFromFile(filename):
         saveGloveDicIntoFile(vects)
         return vects
     
-    return np.load(filename)[0]
+    return np.load(GLOVE_DICT_FILE)[0]
 
 
 def createGloveDic():

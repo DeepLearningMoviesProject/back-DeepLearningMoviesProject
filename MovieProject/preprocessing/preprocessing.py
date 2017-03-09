@@ -79,7 +79,7 @@ class Preprocessor():
         
                 
         if self.toDo["keywords"] or self.toDo["actors"] or self.toDo["directors"] or self.toDo["titles"]:
-            self.dicoGlove = loadGloveDicFromFile(GLOVE_DICT_FILE)
+            self.dicoGlove = loadGloveDicFromFile()
             self.sizeGloveVector = self.dicoGlove[self.dicoGlove.keys()[0]].shape[0]
         
         if self.toDo["overviews"]:
@@ -231,7 +231,7 @@ class Preprocessor():
         for i, info in enumerate(infos):            
             overview = getOverview(info)
             
-            if overview is None: 
+            if overview == "": 
                 meanMatrixOverview[i] = np.zeros(SIZE_VECTOR)
             else:
                 meanMatrixOverview[i] = textToVect(overview, self.modelD2V)
@@ -253,7 +253,7 @@ class Preprocessor():
         for i, info in enumerate(infos):            
             overview = getOverview(info) 
             
-            if overview is None:
+            if overview == "":
                 meanMatrixOverview[i] = np.zeros(self.sizeGloveVector)
             
             else:             
@@ -295,12 +295,8 @@ class Preprocessor():
         meanMatrixTitles = np.empty([len(infos), self.sizeGloveVector]) 
         
         for i, info in enumerate(infos):            
-            overview = getTitle(info)
-            words = []
-                
-            for w in overview:
-                words += w.lower().encode('UTF-8')
-                
+            words = [ w.lower().encode('UTF-8') for w in getTitle(info)]
+            
             gArray, wSize = wordsToGlove(words, self.dicoGlove)
             
             meanMatrixTitles[i] = meanWords(gArray, wSize)
@@ -375,7 +371,7 @@ class Preprocessor():
             
             words = []
             for name in names:
-                words += name.lower().encode('UTF-8').split()
+                words += name.split()
             
             gArray, wSize = wordsToGlove(words, self.dicoGlove)     
             meanMatrixPeople[i] = meanWords(gArray, wSize)
@@ -395,7 +391,7 @@ class Preprocessor():
         
             words = []
             for comp in comps:
-                words += comp.lower().encode('UTF-8').split()
+                words += comp.split()
             
             gArray, wSize = wordsToGlove(words, self.dicoGlove)     
             meanMatrixCompagnies[i] = meanWords(gArray, wSize)
@@ -431,7 +427,7 @@ class Preprocessor():
         meanMatrixBelongs = np.empty([len(moviesInfo), 1])
         
         for i, info in enumerate(moviesInfo):
-            meanMatrixBelongs[i] = getBelongsTo(info) is None and 0 or 1
+            meanMatrixBelongs[i] = int( not (getBelongsTo(info) is None or getBelongsTo(info) == ""))
         
         return meanMatrixBelongs
     
@@ -470,10 +466,20 @@ class Preprocessor():
                 - a ndarray of budget values. One line by movie.
         """
         
-        meanMatrixBudget = np.empty([len(moviesInfo), 1])
+        SIZE_VECT_BUDGET = 5
+        meanMatrixBudget = np.empty([len(moviesInfo), SIZE_VECT_BUDGET])
         
         for i, info in enumerate(moviesInfo):
-            meanMatrixBudget[i] = 1. / (1 + exp(-getBudget(info)))
+            mBudget = np.zeros(SIZE_VECT_BUDGET)
+            budget = getBudget(info)
+            
+            if budget < 1e6: mBudget[0] = 1
+            elif budget >= 1e6 and budget < 5e6: mBudget[1] = 1
+            elif budget >= 5e6 and budget < 20e6 : mBudget[2] = 1
+            elif budget >= 20e6 and budget < 50e6 : mBudget[3] = 1
+            else : mBudget[4] = 1
+                          
+            meanMatrixBudget[i] = mBudget
             
         return meanMatrixBudget
 

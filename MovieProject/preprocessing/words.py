@@ -21,13 +21,19 @@ def wordsToGlove(words, gloveDic):
         return:
             (ndarray, int). Tuple of GloVe descriptors of each word and size of descriptors
     """
+    
+    SIZE_VECTOR = gloveDic[gloveDic.keys()[0]].shape[0]
+    
     gloveWords = []
     for w in words:
         wg = gloveDic.get(w.lower()) # return None if key is not present
         if wg is not None:
             gloveWords.append(wg)
-            
-    return np.asarray(gloveWords), gloveDic[gloveDic.keys()[0]].shape[0]
+    
+    if len(gloveWords) == 0:
+        return np.zeros((1, SIZE_VECTOR)), SIZE_VECTOR
+
+    return np.asarray(gloveWords), SIZE_VECTOR
 
 
 def meanWords(gWords, size):
@@ -43,5 +49,16 @@ def meanWords(gWords, size):
     """
     if gWords.shape[0] == 0:
         return np.zeros(size)
+    if gWords.shape[0] == 1:
+        return gWords[0]
     else:
         return sum(gWords) / gWords.shape[0]
+
+
+if __name__ == '__main__':
+    from MovieProject.preprocessing.tools import gloveDict
+    gloveDic = gloveDict.loadGloveDicFromFile()
+    resultArray,size = wordsToGlove(["dad","sgergergrezgerzgre","cat"], gloveDic)
+    print resultArray
+    
+    

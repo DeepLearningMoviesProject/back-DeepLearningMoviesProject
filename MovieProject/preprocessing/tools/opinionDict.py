@@ -48,7 +48,7 @@ def extractOpinionWords():
     return opinionDict
 
 
-def saveGloveDicIntoFile(opinionDic):
+def saveDicIntoFile(opinionDic):
     """
     Save the opinion dictionary memory Object into binary file    
         Parameters:
@@ -58,7 +58,7 @@ def saveGloveDicIntoFile(opinionDic):
     np.save(OPINION_DICT_FILE, np.asarray([opinionDic]))
     
     
-def loadGloveDicFromFile(filename):
+def loadDicFromFile():
     """
     Create an memory Object of opinion dictionary from binary file
         Parameters:
@@ -68,14 +68,14 @@ def loadGloveDicFromFile(filename):
     #if the resource file is not present, creates the file containing all vectors and return vectors
     if not isfile(OPINION_DICT_FILE):
         dic = extractOpinionWords()
-        saveGloveDicIntoFile(dic)
+        saveDicIntoFile(dic)
         return dic
     
-    return np.load(filename)[0]
+    return np.load(OPINION_DICT_FILE)[0]
 
 
 if __name__ == "__main__":
     
     # if the script is run, create dictionary and save it into file
     print "Creating and saving the opinion dictionary"
-    saveGloveDicIntoFile(extractOpinionWords())
+    saveDicIntoFile(extractOpinionWords())
