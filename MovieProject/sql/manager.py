@@ -19,7 +19,16 @@ class DatabaseManager():
         """
         initDb()
         
+    def getAllUsers(self):
+        """
+            Get all users from database
+            
+            return:
+                list of User objects or None if not exist
+        """
         
+        return User.query.all()
+    
     def getUser(self, username):
         """
             Get user from database by its username
@@ -92,6 +101,15 @@ class DatabaseManager():
         db.delete(user)
         db.commit()
         
+    def getAllMovies(self):
+        """
+            Get all movies from database
+            
+            return:
+                list of Movie objects or None if not exist
+        """
+        
+        return Movie.query.all()
         
     def getMovie(self, idMovie):
         """
@@ -135,7 +153,16 @@ class DatabaseManager():
         db.delete(movie)
         db.commit()
     
-    
+    def getAllUsersMovies(self):
+        """
+            Get all usermovies from database 
+
+            return:
+                list of UserMovie objects or None if not exist
+        """
+        
+        return UserMovie.query.all()
+ 
     def getUserMovie(self, idUser, idMovie):
         """
             Get usermovie from database by its idUser and idMovie
@@ -151,7 +178,7 @@ class DatabaseManager():
         
         
     
-    def insertUserMovie(self, username, idMovie, liked=None):
+    def insertUserMovie(self, username, idMovie, liked):
         """
             Insert a new usermovie in database, raise a RunTimeError if already exist
             
@@ -159,7 +186,9 @@ class DatabaseManager():
                 username -> String, name of user 
                 idMovie -> int, id of movie from TDMB
         """
-        
+        if (liked is not bool) and (liked != 0) and (liked != 1):
+            raise RuntimeError("Var %s is not a boolean" %(liked)) 
+            
         user = self.getUser(username)
         
         if user is None:
@@ -174,31 +203,33 @@ class DatabaseManager():
         usermovie = UserMovie(user.id, idMovie, liked)
         db.add(usermovie)
         db.commit()
-        
-        
-    def updateLikedMovieForUser(self, name, idMovie, liked):
-        """
-            Update on liked movie for a user
-            
-            Paramaters:
-                name -> String, name of a user
-                idMovie -> int, movie's id from TMDB
-                liked -> boolean, True if movie is liked, False otherwise
-        """
-        
-        user = self.getUser(name)
-        
-        if user is None:
-            raise RuntimeError("User %s is not in the database" %(name))
-        
-        userMovie = self.getUserMovie(user.id, idMovie)
-        
-        if not userMovie:
-            self.insertUserMovie(name, idMovie, liked)
-        else:
-            userMovie.liked = liked
-            db.commit()
-    
+
+    def updateLikedMovieForUser(self, name, idMovie, liked): 
+        """ 
+            Update on liked movie for a user 
+             
+            Paramaters: 
+                name -> String, name of a user 
++
+                idMovie -> int, movie's id from TMDB 
+                liked -> boolean, True if movie is liked, False otherwise 
+        """ 
+         
+        if (liked is not bool) and (liked != 0) and (liked != 1):
+            raise RuntimeError("Var %s is not a boolean" %(liked)) 
+
+        user = self.getUser(name) 
+         
+        if user is None: 
+            raise RuntimeError("User %s is not in the database" %(name)) 
+         
+        userMovie = self.getUserMovie(user.id, idMovie) 
+         
+        if not userMovie: 
+            self.insertUserMovie(name, idMovie, liked) 
+        else: 
+            userMovie.liked = liked 
+            db.commit()    
     
     def updateLikedMoviesForUser(self, username, likedMovies):
         """
@@ -213,23 +244,6 @@ class DatabaseManager():
         for idMovie, liked in likedMovies.items():
             self.insertUserMovie(username, idMovie, liked)
         
-        
-    def removeUserMovieFromUser(self, name, idMovie):
-        """
-        
-        """
-        
-        user = self.getUser(name)
-        
-        if user is None:
-            raise RuntimeError("User %s is not in the database" %(name))
-            
-        userMovie = self.getUserMovie(user.id, idMovie)
-        
-        if userMovie:
-            db.delete(userMovie)
-            db.commit()
-            
         
     def removeAllUserMovieFromUser(self, username):
         """
@@ -261,6 +275,9 @@ class DatabaseManager():
                 array of Movie object 
         """
         
+        if (liked is not bool) and (liked != 0) and (liked != 1) and (liked is not None):
+            raise RuntimeError("Var %s is not a boolean" %(liked)) 
+            
         user = self.getUser(username)
         
         if user is None:
@@ -271,7 +288,16 @@ class DatabaseManager():
         else:
             return [ movie for movie in user.movies if movie.liked == liked ]
         
-    
+    def getAllOccupations(self):
+        """
+            Get all occupations from database 
+
+            return:
+                list of Occupation objects or None if not exsist
+        """
+        
+        return Occupation.query.all()
+ 
     def getOccupation(self, typeOccupation):
         """
             Get occupation from database by its type
@@ -313,13 +339,22 @@ class DatabaseManager():
         db.delete(occupation)
         db.commit()
         
-       
+    def getAllRegions(self):
+        """
+            Get all regions from database
+            
+            return:
+                list of Region objects or None if not exist
+        """
+        
+        return Region.query.all()
+    
     def getRegion(self, country):
         """
-            Get region from database by its type
+            Get all regions from database
             
-            Parameters:
-                country -> String, type of an region
+            Parameter:
+                country -> String, country name           
             return:
                 Region object or None if not exist
         """

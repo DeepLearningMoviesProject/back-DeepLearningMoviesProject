@@ -265,7 +265,7 @@ def checkPopularity():
 @loginRequired
 def removeLikedMovie(idMovie):
     dbManager.removeUserMovieFromUser(g.user_name, idMovie)
-    return jsonify({"id": idMovie}), 200
+    return jsonify({"id":idMovie}), 200
 
 
 @app.route('/auth/signup', methods=['POST'])
