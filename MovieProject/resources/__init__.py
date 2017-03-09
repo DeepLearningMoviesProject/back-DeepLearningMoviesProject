@@ -12,6 +12,7 @@ from os.path import dirname, abspath, join
 RES_PATH = dirname(abspath(__file__))
 
 RES_PERSIST_PATH = join(RES_PATH,"persist") 
+RES_MODEL_PATH = join(RES_PERSIST_PATH,"model") 
 
 
 
