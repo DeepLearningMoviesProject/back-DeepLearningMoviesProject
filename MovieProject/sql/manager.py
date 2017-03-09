@@ -243,7 +243,24 @@ class DatabaseManager():
         self.removeAllUserMovieFromUser(username)
         for idMovie, liked in likedMovies.items():
             self.insertUserMovie(username, idMovie, liked)
-        
+    
+            
+    def removeUserMovieFromUser(self, name, idMovie): 
+        """ 
+         
+        """ 
+         
+        user = self.getUser(name) 
+         
+        if user is None: 
+            raise RuntimeError("User %s is not in the database" %(name)) 
+             
+        userMovie = self.getUserMovie(user.id, idMovie) 
+         
+        if userMovie: 
+            db.delete(userMovie) 
+            db.commit() 
+            
         
     def removeAllUserMovieFromUser(self, username):
         """
