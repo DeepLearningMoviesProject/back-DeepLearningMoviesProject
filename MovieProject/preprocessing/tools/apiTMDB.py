@@ -170,9 +170,10 @@ def getOverview(movieInfo):
     """
     
     if "overview" in movieInfo:
-        return _format("".join(c for c in movieInfo["overview"] if c not in punctuation))
+        overview = "" if movieInfo["overview"] is None else movieInfo["overview"]
+        return _format("".join(c for c in overview if c not in punctuation))
     else: 
-        raise AttributeError("%s instance has no attribute overview" % movieInfo)
+        raise AttributeError("The parameter has no attribute 'overview'")
     
     
     
