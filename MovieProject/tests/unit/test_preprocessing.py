@@ -18,7 +18,7 @@ class PreprocessingTest(unittest.TestCase):
     
     glove = loadGloveDicFromFile()
     d2vModel = loadD2VModel(OVERVIEW_MODEL)
-    movies = getMovies([415, 280632])#, 387773, 404301])
+    movies = getMovies([415, 280632, 404301])#, 387773])
     infos = [ m.info() for m in movies]
     keywords = [ m.keywords() for m in movies]
     credits = [ m.credits() for m in movies]
@@ -185,8 +185,7 @@ class PreprocessingTest(unittest.TestCase):
 #        overview1 = getOverview(self.infos[0])
 #        self.assertNotEqual(overview1, "")
 #        
-#        wG, size = wordsToGlove(overview1.split(), self.glove)
-#        final1 = meanWords(wG, size)
+#        final1 = meanWords(*wordsToGlove(overview1.split(), self.glove))
 #        final1 = final1.reshape((1,final1.shape[0]))
 #        
 #        res1 = self.p.overviewProcessing([self.infos[0]])
@@ -194,7 +193,7 @@ class PreprocessingTest(unittest.TestCase):
 #        
 #        overview2 = getOverview(self.infos[1])
 #        self.assertEqual(overview2, "")
-#        final2 = np.zeros((1, size))
+#        final2 = np.zeros((1, final1.shape[1]))
 #        
 #        res2 = self.p.overviewProcessing([ i for i in self.infos[:2] ])
 #        self.assertEqual((final1.shape[0] + final2.shape[0], final1.shape[1]), res2.shape)
@@ -219,6 +218,56 @@ class PreprocessingTest(unittest.TestCase):
         
         res2 = self.p.overviewProcessingD2V([ i for i in self.infos[:2] ])
         self.assertEqual((final1.shape[0] + final2.shape[0], final1.shape[1]), res2.shape)
+        self.assertEqual(final2[0].tolist(), res2[1].tolist())
+        
+        
+    def test_languageProcessing(self):
+        self.assertEqual(np.array([]).tolist(), self.p.languageProcessing([]).tolist())
+        
+        langs1 = [ lang for langs in getLanguage(self.infos[0]) for lang in langs.split() ]
+        self.assertNotEqual(langs1, [])
+        
+        final1 = meanWords(*wordsToGlove(langs1, self.glove))
+        final1 = final1.reshape((1,final1.shape[0]))
+        
+        res1 = self.p.languageProcessing([self.infos[0]])
+        self.assertEqual(final1.shape, res1.shape)
+        self.assertEqual(final1.tolist(), res1.tolist())
+        
+        langs1 = [ lang for langs in getLanguage(self.infos[2]) for lang in langs.split() ]
+        self.assertEqual(langs1, [])
+        final2 = np.zeros((1, final1.shape[1]))
+        
+        res2 = self.p.languageProcessing([self.infos[2]])
+        self.assertEqual(final2.shape, res2.shape)
+        self.assertEqual(final2.tolist(), res2.tolist())
+
+
+    def test_belongsToProcessing(self):
+        self.assertEqual(np.array([]).tolist(), self.p.belongsToProcessing([]).tolist())
+        
+        belong1 = getBelongsTo(self.infos[0])
+        self.assertNotEqual(belong1, None)
+        isBelong1 = int(belong1 is not None)
+        final1 = np.array([isBelong1]).reshape((1,1))
+        
+        res1 = self.p.belongsToProcessing([self.infos[0]])
+        self.assertEqual(final1.shape, res1.shape)
+        self.assertEqual(final1.tolist(), res1.tolist())
+        
+        print self.infos[1]
+        print
+        print self.infos[2]
+        
+        
+        belong2 = getBelongsTo(self.infos[1])
+        self.assertEqual(belong2, None)
+        isBelong2 = int(belong2 is not None)
+        final2 = np.array([isBelong2]).reshape((1,1))
+        
+        res2 = self.p.belongsToProcessing([ i for i in self.infos[:2]])
+        self.assertEqual((2,1), res2.shape)
+        self.assertEqual(final2[0].shape, res2[1].shape)
         self.assertEqual(final2[0].tolist(), res2[1].tolist())
         
         

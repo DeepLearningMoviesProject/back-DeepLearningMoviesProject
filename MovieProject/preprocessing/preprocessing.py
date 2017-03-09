@@ -427,7 +427,7 @@ class Preprocessor():
         meanMatrixBelongs = np.empty([len(moviesInfo), 1])
         
         for i, info in enumerate(moviesInfo):
-            meanMatrixBelongs[i] = getBelongsTo(info) is None and 0 or 1
+            meanMatrixBelongs[i] = int( not (getBelongsTo(info) is None or getBelongsTo(info) == ""))
         
         return meanMatrixBelongs
     
