@@ -10,9 +10,10 @@ Created on Wed Feb 15 17:09:59 2017
 from MovieProject.resources import GLOVE_DICT_FILE
 from MovieProject.resources import SENTIMENT_ANALYSIS_MODEL
 
-from MovieProject.preprocessing.tools import gloveDict
 from MovieProject.preprocessing.tools import opinionDict as od
-from MovieProject.tests import twitterSearch as ts
+from MovieProject.preprocessing.tools import gloveDict
+from MovieProject.preprocessing.tools import apiTMDB as tmdb
+from MovieProject.preprocessing.tools import SearchTweets as ts
 from MovieProject.preprocessing import tweets as tw
 from keras.models import load_model
 
@@ -21,7 +22,8 @@ modelPath = SENTIMENT_ANALYSIS_MODEL
 
 batch = 500
 
-
+dicoGlove = gloveDict.loadGloveDicFromFile(GLOVE_DICT_FILE)
+    
 def predict(tweet, model, dico): 
     '''
     Predicts the sentiment class of the tweet according to the model
@@ -34,9 +36,7 @@ def predict(tweet, model, dico):
     '''    
     
     # Tweet preprocessing thank's to glove dictionnary
-    dicoGlove = gloveDict.loadGloveDicFromFile(GLOVE_DICT_FILE)
     tweet = tw.preprocessTweet(tweet,dico)
-    #print tweet
     
     # Predict classe and return it when probability is hight
     if tweet :
@@ -49,20 +49,21 @@ def predict(tweet, model, dico):
         # Reshape if the model is LSTM or Convolutional    
         tweet = tweet.reshape(tweet.shape[0], 1, tweet.shape[1])
         # Predict the tweet classe
-        pred = model.predict_classes(tweet, batch_size=batch, verbose=0)
-        pred = -1 if pred == 0 else 1
         result = model.predict_proba(tweet, batch_size=batch, verbose=0)
-        print "Predicted classe %d with probability %f " %(pred,result)
         # Return classe only for hight probabilities
-        if result <=0.10 or result >= 0.90 :
-            return pred
-
-    # Return neutral classe in others cases    
+        if result <=0.10 :
+            #print "Predicted classe -1 with probability %f " %(result)
+            return -1
+        if result >=0.90 :
+            #print "Predicted classe 1 with probability %f " %(result)
+            return 1
+    # Return neutral classe in others cases  
+    #print "Predicted classe 0 "
     return 0 
     
 
     
-def classificationMovies(titles):
+def classificationMovies(idMovies):
     """
     Ranks movies based on their popularity on twitter and reviews on twitter.
         Parameters:
@@ -75,26 +76,36 @@ def classificationMovies(titles):
     dico = od.extractOpinionWords()
     popularity = {}
     sentiments = {} 
+    maxPopularity = 0
     
-    for title in titles :
-        title = _preprocessTitle(title)
-        print "> Movie title : %s" %(title)
-        tweets = ts.testTwitterSearch([title, 'movie'],'en')
-        popularity[title] = len(tweets)
-        sentiments[title] = 0.0
+    movies = tmdb.getMovies(idMovies)
+    
+    for m,movie in enumerate(movies) :
+        title = movie.info()['title']
+        #title = _preprocessTitle(title)
+        print "> Processing for movie title : %s" %(title)
+        tweets = ts.SearchOnTwitter([title, 'movie'],'en')
+        popularity[idMovies[m]] = float(len(tweets))
+        sentiments[idMovies[m]] = 0.0
+
+        maxPopularity = popularity[idMovies[m]] if popularity[idMovies[m]] > maxPopularity else maxPopularity
 
         for i,tweet in enumerate(tweets) :
-            print "%d / %d" %(i,len(tweets))
-            print "> Original tweet : %s" %(tweet)
+            #print "%d / %d" %(i,len(tweets))
+            #print "> Original tweet : %s" %(tweet)
             tweet = tw.removeMovie(tweet, title)
             p = predict(tweet, model, dico)
-            sentiments[title] = sentiments[title] - 1 if p==-1 else sentiments[title] + p
+            sentiments[idMovies[m]] = sentiments[idMovies[m]] - 1 if p==-1 else sentiments[idMovies[m]] + p
 
-        sentiments[title] = sentiments[title] / len(tweets) if len(tweets)>0 else 0
-
+        sentiments[idMovies[m]] = sentiments[idMovies[m]] / len(tweets) if len(tweets)>0 else 0
+    
+    if maxPopularity > 0 :
+        for key,val in popularity.items():
+            popularity[key] = val / maxPopularity
+    
     popularity = sorted(popularity.items(), key=lambda t: t[1], reverse=True)
     sentiments = sorted(sentiments.items(), key=lambda t: t[1], reverse=True)
-    
+
     return (popularity, sentiments) 
     
     
