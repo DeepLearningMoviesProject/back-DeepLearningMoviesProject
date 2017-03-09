@@ -231,7 +231,7 @@ class Preprocessor():
         for i, info in enumerate(infos):            
             overview = getOverview(info)
             
-            if overview is None: 
+            if overview == "": 
                 meanMatrixOverview[i] = np.zeros(SIZE_VECTOR)
             else:
                 meanMatrixOverview[i] = textToVect(overview, self.modelD2V)
@@ -253,7 +253,7 @@ class Preprocessor():
         for i, info in enumerate(infos):            
             overview = getOverview(info) 
             
-            if overview is None:
+            if overview == "":
                 meanMatrixOverview[i] = np.zeros(self.sizeGloveVector)
             
             else:             
