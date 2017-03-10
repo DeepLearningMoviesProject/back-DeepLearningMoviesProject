@@ -10,7 +10,7 @@ To operate the back-end, the working environment must be installed. To do this, 
 ### How use Docker ?
 
 The Dockerfile provided in "Docker" folder how to install all necessary environment on a docker container.
-You can find more information about Docker [here](https://www.docker.com/)
+You can find more informations about Docker [here](https://www.docker.com/)
 
 First at all, [install docker on your machine](https://docs.docker.com/engine/installation/) and download the Dockerfile, allowed to build the Docker image.
 
@@ -24,7 +24,7 @@ docker ps -a
 ```
 
 The back-end API uses port 5000. The easiest way is to link port 80 of your machine to port 5000 of the docker container using the command line below.
-Furthermore, some files aren't provided in our git project, but must be present for its operation. You will find these files [here](). Copy them into a folder on your computer, which you will bind to the docker container, thanks to the command line below :
+Furthermore, some files aren't provided in our git project, but must be present for its operation. You will find these files [here](https://www.dropbox.com/s/mmk74zzl0fjd2cx/persist.zip?dl=0). Copy them into a folder on your computer, which you will bind to the docker container, thanks to the command line below :
 ```
 docker run -ti -p 80:5000 -v [PathHote]:/root/git/back-DeepLearningMoviesProject/MovieProject/resources/persist/ [ImageID]
 ```
@@ -74,6 +74,7 @@ And add project's root folder to the $PYTHONPATH:
 cd back-DeepLearningMoviesProject
 export PYTHONPATH="$PYTHONPATH:$(pwd)"
 ```
+Some files aren't provided in our git project, but must be present for its operation. You will find these files [here](https://www.dropbox.com/s/mmk74zzl0fjd2cx/persist.zip?dl=0). Copy them into the folder "back-DeepLearningMoviesProject/MovieProject/resources/persist/" of our project.
 
 ### MySQL Server
 To run the MySQL Server, refer to the "README.md" into the "mysql" folder
