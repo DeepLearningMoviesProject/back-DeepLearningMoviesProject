@@ -11,8 +11,11 @@ import pickle
 import os
 from MovieProject.preprocessing import concatData, Preprocessor
 from MovieProject.learning import buildTestModel, LinearSVM, perceptron
+from MovieProject.resources import RES_PATH
 from flask import json
 from os.path import isfile, join
+import matplotlib.pyplot as plt
+from string import maketrans
 
 
 path = '../../resources/evaluations/'
@@ -114,65 +117,118 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
 
     if(not (doKeras or doPerceptron or doSVM)):
         raise ValueError('You must specify at least one classifier to test!!!')
-    
+    result = {}
     params = {"titles" : True,
               "rating" : True,
               "overviews" : True,
-              "keywords" : True,
-              "genres" : True,
-              "actors" : True,
-              "directors" : True,
-              "compagnies" : True,
-              "language" : True,
-              "belongs" : True,
-              "runtime" : True,
-              "date" : True }
+              "keywords" : True}
+#              "genres" : True,
+#              "actors" : True}
+#              "directors" : True,
+#              "compagnies" : True,
+#              "language" : True,
+#              "belongs" : True,
+#              "runtime" : True,
+#              "date" : True }
     
-    meanMax = 0
-    meanScoreKeras = 0
-    meanScorePerceptron = 0
-    meanScoreSVM = 0
 
-    maxP = []
+    meanScoreKeras = 0.
+    meanScorePerceptron = 0.
+    meanScoreSVM = 0.
+    totalScores = 0.
+
 
     #Get all files from PATH, and get the score of the classifier on these files        
     for file in ['moviesEvaluatedCoralie.json']:
         if file.endswith(".json") and ("simple" not in file):
             dico, labels = preprocessFileGeneric(file.replace(".json", ""), **params)
-            
+                        
             for i, p in enumerate(combinaison(params.keys())):
                 
                 for key in params: params[key] = key in p
                 
                 data = Preprocessor(**params).prepareDico({ key: dico[key] for key in params if params[key]})                     
                 
-                print "#### {}, {} ####".format(i, p)   
-                
-                scoreKeras = 0
-                scorePerceptron = 0
-                scoreSVM = 0
-                
+                print "#### {} ####".format(p)   
+                name = str(p).translate(maketrans("[]\'","   "))
+                scoreKeras = 0.0
+                scorePerceptron = 0.0
+                scoreSVM = 0.0
+                result[name] = {}
                 if(doKeras):
                     #Prepare the dico that the model takes as parameter
                     _, scoreKeras = buildTestModel(data, labels, folds=5)
+                    result[name]["Keras"] = scoreKeras
                 if(doPerceptron):
                     #data = concatData([ dico[key] for key in dico ])
                     scorePerceptron = perceptron.evaluatePerceptron(data, labels)
+                    result[name]["Perceptron"] = scorePerceptron
                 if(doSVM):
                     #data = concatData([ dico[key] for key in dico ])
-                    trainInd = int(0.8*len(data) )
-                    
+                    trainInd = int(0.8*len(data) )                    
                     svm = LinearSVM()
                     svm.train( data[:trainInd], labels[:trainInd])
                     scoreSVM = svm.evaluate(data[trainInd:], labels[trainInd:])
-        
-                meanMax = max([meanMax,scorePerceptron])
-                maxP = meanMax == scorePerceptron and p or maxP
-                
-                print "accuracy: %f" %(scorePerceptron)
-                print "max: {} -> {}".format(meanMax, maxP)
-    return meanScoreKeras, meanScorePerceptron, meanScoreSVM
+                    result[name]["SVM"] = scoreSVM
 
+                meanScoreKeras += scoreKeras
+                meanScorePerceptron += scorePerceptron
+                meanScoreSVM += scoreSVM
+                totalScores += 1
+    
+    #Compute the mean score for the classifier
+    meanScoreKeras /= totalScores
+    meanScorePerceptron /= totalScores
+    meanScoreSVM /= totalScores
+                
+    return meanScoreKeras, meanScorePerceptron, meanScoreSVM, result
+
+def graphique(result, sortBy="SVM", nbValue=None, minAverage=0):
+    if type(result) != dict:        #on s'assure ici que la donnee est bien un dico pour le reste du programme
+        return
+    
+    if nbValue >= len(result.keys()):
+        return
+    
+    invalide = 0
+    nbGraph = 0.5
+    legende = 99.
+    origine = 0.
+    for cat, value in sorted(result.iteritems(), key=lambda (k,v):(v[sortBy],k), reverse=True)[:nbValue]:
+        origine = nbGraph-0.25        
+        valide = 0        
+        
+        for test in value: #Pour chaque resultat on fait un graphique droit, de cette manière nous pourrons
+            if result[cat][test]>minAverage:
+                abscisse = [nbGraph, nbGraph]               #avoir plusieurs couleurs différentes. A noter quue plt.hist peut faire un histogramme beaucoup plus facilement.
+                ordonne = [0, result[cat][test]]
+                plt.plot(abscisse, ordonne, linewidth = 3)
+                plt.text(nbGraph, result[cat][test], str(test))
+                nbGraph += 0.5
+                valide = 1
+            else: 
+                invalide += 1
+        
+        if valide == 1:
+            legende -= 1.5
+            plt.text(origine, legende, str(cat))
+            plt.plot([origine, origine], [50, 100])
+
+        if nbGraph >= 5:
+            plt.title("Resultats")
+            plt.ylabel("Reussite")
+            plt.axis([0, nbGraph, 50, 100])            
+            plt.show()
+            plt.figure()
+            nbGraph = 0.5
+            legende = 99.
+    
+    plt.title("Resultats")
+    plt.ylabel("Reussite")
+    plt.xlabel("Essais")
+    plt.axis([0, nbGraph, 50, 100])
+    plt.show()
+    print "il y a " +str(invalide) +" resultats inferieurs a 60%"
 
     
 if __name__ == '__main__':
@@ -191,8 +247,16 @@ if __name__ == '__main__':
         _, scoreK = buildTestModel(mat, labels, folds=2)
     else:
         #All movies
-        scoreK, scoreP , scoreSVM = testClassifier(doKeras=False, doSVM=False, doPerceptron=True)
+        scoreK, scoreP , scoreSVM, resultat = testClassifier(doKeras=False, doSVM=True, doPerceptron=True)
+        
+        print "The classifier keras has an average accuracy of ", scoreK 
+        print "The classifier perceptron has an average accuracy of ", scoreP 
+        print "The classifier SVM has an average accuracy of ", scoreSVM
+        
+        with open(join(RES_PATH, "evaluation.data"), 'w') as f:
+            pickle.dump(resultat, f)
+                    
+        with open(join(RES_PATH, "evaluation.data")) as res:    
+            resultat = pickle.load(res)
+        graphique(resultat, minAverage=60, nbValue=5)
     
-    print "The classifier keras has an average accuracy of ", scoreK
-    print "The classifier perceptron has an average accuracy of ", scoreP
-    print "The classifier SVM has an average accuracy of ", scoreSVM
