@@ -23,7 +23,8 @@ from MovieProject.resources import GLOVE_DICT_FILE, OVERVIEWS_TR_FILE, OVERVIEW_
 from keras.models import model_from_json
 
 import numpy as np
-from os.path import isfile
+from os.path import isfile, exists
+from os import makedirs
 
 from exceptions import Exception
 
@@ -132,8 +133,9 @@ def saveModel(username, model):
     model_json = model.to_json()
     model_filepath = RES_MODEL_PATH + '/' + username + '_model'
     
-    print RES_MODEL_PATH
-    print model_filepath
+    #If the model directory doesn't exists, we create it
+    if not exists(RES_MODEL_PATH):
+        makedirs(RES_MODEL_PATH)
 
     with open(model_filepath + '.json', "w") as json_file:
         json_file.write(model_json)
@@ -153,21 +155,25 @@ def loadModel(username):
     # serialize model to JSON
    # model_json = model.to_json()
     model_filepath = RES_MODEL_PATH + '/' + username + '_model'
-
-    # load json and create model
-    json_file = open(model_filepath + '.json', 'r')
-    loaded_model_json = json_file.read()
-    json_file.close()
-    loaded_model = model_from_json(loaded_model_json)
-    # load weights into new model
-    loaded_model.load_weights(model_filepath + '.h5')
-    print("Loaded model from disk")
     
-    return loaded_model
+    #If file doesn't exists, we return None
+    if(isfile(model_filepath + '.json') and isfile(model_filepath + '.h5')):
+        # load json and create model
+        json_file = open(model_filepath + '.json', 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        loaded_model = model_from_json(loaded_model_json)
+        # load weights into new model
+        loaded_model.load_weights(model_filepath + '.h5')
+        print("Loaded model from disk")
+        
+        return loaded_model
     # evaluate loaded model on test data
     # loaded_model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
     # score = loaded_model.evaluate(X, Y, verbose=0)
-
+    else :
+        print "The model doesn't exists"
+        return None
 
 
 
@@ -185,7 +191,7 @@ def trainModel():
 
     #Retrieve the user movies
     username = g.user_name
-  #  username = 'User1'
+#    username = 'User1'
     userMovies = getIdFromLikedMovies(username, None)
 
     #extract the ids and the labels of each movie
@@ -218,17 +224,21 @@ def predictMovies():
     
     #Here we load the model for the user
     username = g.user_name
-  #  username = 'User1'
+#    username = 'User1'
     
     model = loadModel(username)
     
     print "Model retrieved !"
     
-    #Here we suggest 10 movies
-    sugg = suggestNMovies(model, 10, **params)
+    if model is not None :
+        #Here we suggest 10 movies
+        sugg = suggestNMovies(model, 10, **params)
     
-    print "Movies predicted !"
-    return jsonify(sugg)
+        print "Movies predicted !"
+        return jsonify(sugg)
+    else:
+        return jsonify({'error': "There is no existing model for this user."})
+    
 
 
 
@@ -371,4 +381,3 @@ if __name__ == '__main__':
     _initAPI()
     
     app.run(debug=False, host= '0.0.0.0')
-
