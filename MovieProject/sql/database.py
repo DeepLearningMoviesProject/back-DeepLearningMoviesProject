@@ -21,7 +21,7 @@ DB_CONFIG_DICT = { "database" : DB_NAME,
                    "host" : "deepmoviesdb.cz8sn0m4yqrw.eu-west-1.rds.amazonaws.com",
                    "port" : "3306" }
 
-DB_CONN_FORMAT = "mysql://{user}:{password}@{host}:{port}/{database}"
+DB_CONN_FORMAT = "mysql+pymysql://{user}:{password}@{host}:{port}/{database}"
 
 DB_OPTIONS = "?charset=utf8&use_unicode=0"                     
 
