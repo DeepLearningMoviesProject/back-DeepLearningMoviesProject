@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Jan 31 16:33:30 2017
+Module allows to create a user model, and also to train it if needed
 
+Created on Tue Jan 31 16:33:30 2017
 @author: elsa
 """
 

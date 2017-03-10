@@ -1,8 +1,9 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Created on Fri Feb 10 11:24:39 2017
+Evaluation of the linear SVM algorithm 
 
+Created on Fri Feb 10 11:24:39 2017
 @author: Julian
 """
 

@@ -18,9 +18,9 @@ batch = 500
 
 def predictMovies(movies, model, **kwargs):
     '''
-    Predicts the class of the movie according to the model
+    Predicts the classes of the movies according to the model
         parameters : 
-            - movies : an array of the id of the movie we want to know the class of, the id must exist
+            - movies : an array of the movie's id we want to know the class of, the id must exist
             - model : the model that matches the taste of the user, it must not be None
         returns : 
             - a np.array of values between 0 and 1, that show how much a movie is likely to be loved
@@ -42,7 +42,7 @@ def suggestNMovies(model, n, **kwargs):
     """
     Suggests n movies for the person that has this model
         parameters :
-            - model : the model that the suggestion fits
+            - model : the model that the suggestion fits, must not be None
             - n : the amount of suggestions to return
             - kwargs : the arguments necessary to preprocess the data
         return : 
