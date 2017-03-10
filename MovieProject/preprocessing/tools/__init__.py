@@ -10,5 +10,6 @@ from .gloveDict import *
 from .createCorpusOfAbtracts import * 
 from .D2VOnCorpus import * 
 from .apiTMDB import * 
+from dbPreprocessingTools import dbPreprocessingTools
  
 __all__ = [s for s in dir() if not s.startswith('_')]
