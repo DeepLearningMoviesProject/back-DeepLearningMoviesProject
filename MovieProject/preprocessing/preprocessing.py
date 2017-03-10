@@ -353,8 +353,7 @@ class Preprocessor():
         Pre-process actors and directors
             parameters:
                 - moviesCredits -> array of movie's moviesCredits you want to process people
-                - dicoGlove: GloVe dictionary (dicoGlove)
-                - kindOfPeople: People enum type, indicating is Directors or Actors 
+                - kindOfPeople -> People enum type, indicating is Directors or Actors 
             return:
                 - a ndarray of people values calculated by Glove. One line by movie.
         """
@@ -381,7 +380,11 @@ class Preprocessor():
     
     def compagniesProcessing(self, moviesInfo):
         """
-        
+            Pre-process production companies thanks to Glove model.
+            parameters : 
+                - infos: array of movies' informations you want to process production companie with
+            return : 
+                - a ndarray of production companies values calculated by Glove. One line by movie.
         """
         
         meanMatrixCompagnies = np.empty([len(moviesInfo), self.sizeGloveVector])
@@ -401,7 +404,11 @@ class Preprocessor():
     
     def languageProcessing(self, moviesInfo):
         """
-        
+            Pre-process languages thanks to Glove model.
+            parameters : 
+                - infos: array of movies's informations you want to process language with
+            return : 
+                - a ndarray of languages values calculated by Glove. One line by movie.
         """
         
         meanMatrixLanguage = np.empty([len(moviesInfo), self.sizeGloveVector])
@@ -421,7 +428,11 @@ class Preprocessor():
 
     def belongsToProcessing(self, moviesInfo):
         """
-        
+            Pre-process the belonging to a series of a movie
+            parameters : 
+                - infos: array of movies's informations you want to process titles with
+            return : 
+                - a ndarray with shape (n, 1) where each line containing a boolean that indicate the belonging.
         """
         
         meanMatrixBelongs = np.empty([len(moviesInfo), 1])
@@ -434,7 +445,11 @@ class Preprocessor():
     
     def runtimeProcessing(self, moviesInfo):
         """
-        
+            Pre-process runtime of a movie.
+            parameters : 
+                - infos: array of movies's informations you want to process runtime with
+            return : 
+                - a ndarray with shape (n, 1) where each contain the movie's runtime.
         """
         
         meanMatrixRuntime = np.empty([len(moviesInfo), 1])
@@ -447,7 +462,11 @@ class Preprocessor():
     
     def dateProcessing(self, moviesInfo):
         """
-        
+            Pre-process the release of movies
+            parameters : 
+                - infos: array of movies's informations you want to process language with
+            return : 
+                - a ndarray with shape (n, 1) where each element is the year where the movie has been released.
         """
         
         meanMatrixDate = np.empty([len(moviesInfo), 1])
@@ -459,11 +478,13 @@ class Preprocessor():
     
     def budgetProcessing(self, moviesInfo):
         """
-        Pre-process budget.
+            Pre-process budget.
             parameters : 
-                - infos:  array of movies you want to process rating with
+                - infos:  array of movies's informations you want to process language with
             return : 
-                - a ndarray of budget values. One line by movie.
+                - a ndarray with shape (n, 5). One row is an array indicate the budget interval.
+                 [ 0<=budget<1e6, 1e6<=budget<5e6, 5<=budget<20e6, 20e6<=budget<50e6, budget<=50e6 ]
+                 example: [0,1,0,0,0], indicates that budget is between 1 million and 5 million dollars
         """
         
         SIZE_VECT_BUDGET = 5
