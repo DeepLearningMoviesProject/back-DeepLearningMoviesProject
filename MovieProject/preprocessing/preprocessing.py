@@ -299,7 +299,7 @@ class Preprocessor():
         meanMatrixTitles = np.empty([len(infos), self.sizeGloveVector]) 
         
         for i, info in enumerate(infos):            
-            words = [ w.lower().encode('UTF-8') for w in getTitle(info)]
+            words = getTitle(info)
             
             gArray, wSize = wordsToGlove(words, self.dicoGlove)
             
