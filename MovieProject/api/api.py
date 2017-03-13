@@ -288,8 +288,8 @@ def likedMovie(idMovie, isLiked):
 def checkPopularity():   
    
     data = json.loads(request.data)
-    popularity, sentiments = pred.classificationMovies(data['movies']) 
-    return jsonify({"popularity" : popularity, "sentiments" : sentiments})
+    popularity = pred.classificationMovies(data['movies']) 
+    return jsonify(popularity)
 
     
 @app.route('/api/likedMovie/<int:idMovie>', methods=["DELETE"])
