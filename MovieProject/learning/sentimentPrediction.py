@@ -75,7 +75,6 @@ def classificationMovies(idMovies):
     model = load_model(modelPath)
     dico = od.extractOpinionWords()
     popularity = {}
-    sentiments = {} 
     maxPopularity = 0
     
     movies = tmdb.getMovies(idMovies)
@@ -85,28 +84,27 @@ def classificationMovies(idMovies):
         #title = _preprocessTitle(title)
         print "> Processing for movie title : %s" %(title)
         tweets = ts.SearchOnTwitter([title, 'movie'],'en')
-        popularity[idMovies[m]] = float(len(tweets))
-        sentiments[idMovies[m]] = 0.0
+        pop = float(len(tweets))
+        sentiments = 0.0
 
-        maxPopularity = popularity[idMovies[m]] if popularity[idMovies[m]] > maxPopularity else maxPopularity
+        maxPopularity = pop if pop > maxPopularity else maxPopularity
 
         for i,tweet in enumerate(tweets) :
             #print "%d / %d" %(i,len(tweets))
             #print "> Original tweet : %s" %(tweet)
             tweet = tw.removeMovie(tweet, title)
             p = predict(tweet, model, dico)
-            sentiments[idMovies[m]] = sentiments[idMovies[m]] - 1 if p==-1 else sentiments[idMovies[m]] + p
+            sentiments = sentiments - 1 if p==-1 else sentiments + p
 
-        sentiments[idMovies[m]] = sentiments[idMovies[m]] / len(tweets) if len(tweets)>0 else 0
+        sentiments = sentiments / len(tweets) if len(tweets)>0 else 0
     
+        popularity[idMovies[m]] = {"pop":pop, "sentiment":sentiments}
+
     if maxPopularity > 0 :
         for key,val in popularity.items():
-            popularity[key] = val / maxPopularity
-    
-    popularity = sorted(popularity.items(), key=lambda t: t[1], reverse=True)
-    sentiments = sorted(sentiments.items(), key=lambda t: t[1], reverse=True)
+            popularity[key]["pop"] = popularity[key]["pop"] / maxPopularity
 
-    return (popularity, sentiments) 
+    return popularity
     
     
     
