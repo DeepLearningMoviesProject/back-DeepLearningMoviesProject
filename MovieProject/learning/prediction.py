@@ -13,9 +13,22 @@ from MovieProject.preprocessing import Preprocessor
 #from flask import json, jsonify
 #from MovieProject.preprocessing.tools import getMovie
 import tmdbsimple as tmdb
-from MovieProject.sql import *
 
 batch = 500
+
+params = { "titles":True,
+           "rating":True,
+           "overviews":True,
+           "keywords":True,
+           "genres":True,
+           "actors":True,
+           "directors":True,
+          "compagnies" : True,
+          "language" : True,
+          "belongs" : True,
+          "runtime" : True,
+          "date" : True }
+    
 
 def predictMovies(movies, model, **kwargs):
     '''
@@ -103,34 +116,4 @@ def suggestNMovies(model, n, **kwargs):
             i += 1
         toFind -= added
 
-    return suggestion    
-
-
-def suggestMoviesSaveNBest(model, user, n, **kwargs):
-    
-            #Prédictions
-    
-    manager = DatabaseManager()
-    
-#    usersDb = manager.getAllUsers()
-#    testUser = users[0].item()
-#    testUser = 2
-    
-#    print testUser, " is user ", usersDb[0]
-#    print type(testUser)
-    
-    moviesList = manager.getNotRatedMoviesfromUser(user)
-    
-    print len(moviesList), "movies to predict"
-    
-    user_predictions = []  #{'movies' : [], 'predictions' : []}
-    
-    for m in moviesList :
-        p = model.rate(user, m)
-        movie = {'movie' : m, 'accuracy' : p}
-        user_predictions.append(movie)
-    
-#    user_predictions.sort_values(by='predictions', 
-#                             ascending=False)
-    # TODO : save n best ?
-    return user_predictions
+    return suggestion
