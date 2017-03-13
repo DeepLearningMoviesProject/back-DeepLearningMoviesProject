@@ -75,7 +75,7 @@ def classificationMovies(idMovies):
     model = load_model(modelPath)
     dico = od.extractOpinionWords()
     popularity = {}
-    maxPopularity = 0
+    #maxPopularity = 0
     
     movies = tmdb.getMovies(idMovies)
     
@@ -87,7 +87,7 @@ def classificationMovies(idMovies):
         pop = float(len(tweets))
         sentiments = 0.0
 
-        maxPopularity = pop if pop > maxPopularity else maxPopularity
+        #maxPopularity = pop if pop > maxPopularity else maxPopularity
 
         for i,tweet in enumerate(tweets) :
             #print "%d / %d" %(i,len(tweets))
@@ -100,10 +100,12 @@ def classificationMovies(idMovies):
     
         popularity[idMovies[m]] = {"pop":pop, "sentiment":sentiments}
 
+    """
     if maxPopularity > 0 :
         for key,val in popularity.items():
             popularity[key]["pop"] = popularity[key]["pop"] / maxPopularity
-
+    """
+    
     return popularity
     
     
