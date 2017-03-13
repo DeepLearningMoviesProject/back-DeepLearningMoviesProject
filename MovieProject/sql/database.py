@@ -1,8 +1,10 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Created on Fri Feb 24 22:44:09 2017
+Initializes the connection with the remote database, creates tables if necessary
+and generates the session.
 
+Created on Fri Feb 24 22:44:09 2017
 @author: Julian
 """
 
