@@ -44,18 +44,18 @@ dbManager = DatabaseManager()
 movieIds = {"415":1, "9320":0, "26914":1, "11059":1}
 
 
-params = { "titles":True,
-           "rating":True,
-           "overviews":True,
-           "keywords":True,
-           "genres":True,
-           "actors":True,
-           "directors":True,
+params = {"titles" : False,
+          "rating" : True,
+          "overviews" : True,
+          "keywords" : False,
+          "genres" : True,
+          "actors" : False,
+          "directors" : True,
           "compagnies" : True,
-          "language" : True,
+          "language" : False,
           "belongs" : True,
           "runtime" : True,
-          "date" : True }
+          "date" : False }
 
 def createToken(user):
     """
@@ -175,6 +175,26 @@ def loadModel(username):
         print "The model doesn't exists"
         return None
 
+def extractDataTrainModel(username):
+    
+    userMovies = getIdFromLikedMovies(username, None)
+
+    #extract the ids and the labels of each movie
+    ids = [int(key) for key in userMovies]
+    labels = np.array([userMovies[key] for key in userMovies])
+    
+    print "Movies extracted"
+    
+    pProcessor = Preprocessor(**params)
+
+    #preprocess data
+    data = pProcessor.preprocess(ids)
+    
+    print "Movies loaded, building model"
+    
+    model = buildModel(data, labels)
+    
+    return model
 
 
 @app.route('/testId', methods=['GET'])
@@ -192,22 +212,7 @@ def trainModel():
     #Retrieve the user movies
     username = g.user_name
 #    username = 'User1'
-    userMovies = getIdFromLikedMovies(username, None)
-
-    #extract the ids and the labels of each movie
-    ids = [int(key) for key in userMovies]
-    labels = np.array([userMovies[key] for key in userMovies])
-    
-    print "Movies extracted"
-    
-    pProcessor = Preprocessor(**params)
-
-    #preprocess data
-    data = pProcessor.preprocess(ids)
-    
-    print "Movies loaded, building model"
-    
-    model = buildModel(data, labels)
+    model = extractDataTrainModel(username)
 
     print "Saving model to file ..."
     
@@ -230,6 +235,9 @@ def predictMovies():
     
     print "Model retrieved !"
     
+    if model is None :
+        model = extractDataTrainModel(username)
+    
     if model is not None :
         #Here we suggest 10 movies
         sugg = suggestNMovies(model, 10, **params)
@@ -237,11 +245,8 @@ def predictMovies():
         print "Movies predicted !"
         return jsonify(sugg)
     else:
-        return jsonify({'error': "There is no existing model for this user."})
+        return jsonify({'error': "Failed to create model for this user."})
     
-
-
-
 @app.route('/api/updateMovies', methods=["POST"])
 @cross_origin()
 @loginRequired

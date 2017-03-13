@@ -52,10 +52,11 @@ def suggestNMovies(model, n, **kwargs):
     checkedIds = []
     toFind = n
     nTry = 0
-    tryMax = 5
+    tryMax = 3
     
     #While we haven't found all of the movies
     while(toFind > 0 and nTry < tryMax):
+        initSuggLen = len(suggestion)
         
         #Get the amount of pages from tmdb that suits our criteria
         pages = tmdb.Discover().movie(vote_count_gte=20)
@@ -105,6 +106,10 @@ def suggestNMovies(model, n, **kwargs):
                 added += 1
             i += 1
         toFind -= added
-        nTry += 1
+        #If we added at least movie in suggestion we reset the amount of try
+        if(initSuggLen < len(suggestion)):
+            nTry += 0
+        else:
+            nTry += 1
 
     return suggestion    
