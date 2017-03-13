@@ -1,6 +1,9 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
+ORM representation of tables user, movie, usermovie, occupation, region
+
+
 Created on Fri Feb 24 22:44:09 2017
 
 @author: Julian
@@ -78,6 +81,9 @@ class Occupation(Base):
     def __init__(self, type):
         self.type = type
         
+    def __repr__(self):
+        return "<Occupation %s>" %(self.type)
+        
 
 class Region(Base):
     __tablename__ = "region"
@@ -87,6 +93,9 @@ class Region(Base):
     
     def __init__(self, country):
         self.country = country
+    
+    def __repr__(self):
+        return "<Region %s>" %(self.country)
         
         
         

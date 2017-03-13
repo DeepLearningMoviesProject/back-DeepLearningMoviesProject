@@ -1,8 +1,9 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Created on Sun Feb 26 16:23:02 2017
+Manager to interact with the database
 
+Created on Sun Feb 26 16:23:02 2017
 @author: Julian
 """
 
@@ -210,13 +211,12 @@ class DatabaseManager():
              
             Paramaters: 
                 name -> String, name of a user 
-+
                 idMovie -> int, movie's id from TMDB 
                 liked -> boolean, True if movie is liked, False otherwise 
         """ 
          
         if (liked is not bool) and (liked != 0) and (liked != 1):
-            raise RuntimeError("Var %s is not a boolean" %(liked)) 
+            raise RuntimeError("Var liked with value %s is not a boolean" %(liked)) 
 
         user = self.getUser(name) 
          
@@ -243,7 +243,28 @@ class DatabaseManager():
         self.removeAllUserMovieFromUser(username)
         for idMovie, liked in likedMovies.items():
             self.insertUserMovie(username, idMovie, liked)
-        
+    
+            
+    def removeUserMovieFromUser(self, name, idMovie): 
+        """ 
+            Delete one usermovie from username and idMovie
+            
+            Parameters:
+                name -> String, name of the user
+                idMovie -> int, movie's id from TMDB
+        """ 
+         
+        user = self.getUser(name) 
+         
+        if user is None: 
+            raise RuntimeError("User %s is not in the database" %(name)) 
+             
+        userMovie = self.getUserMovie(user.id, idMovie) 
+         
+        if userMovie: 
+            db.delete(userMovie) 
+            db.commit() 
+            
         
     def removeAllUserMovieFromUser(self, username):
         """

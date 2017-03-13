@@ -22,7 +22,7 @@ modelPath = SENTIMENT_ANALYSIS_MODEL
 
 batch = 500
 
-dicoGlove = gloveDict.loadGloveDicFromFile(GLOVE_DICT_FILE)
+dicoGlove = gloveDict.loadGloveDicFromFile()
     
 def predict(tweet, model, dico): 
     '''

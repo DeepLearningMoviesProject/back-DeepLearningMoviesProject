@@ -46,8 +46,8 @@ def SearchOnTwitter(keywords, language):
         # this is where the fun actually starts :)
         for tweet in ts.search_tweets_iterable(tso):
             tweets.append(tweet['text'])
-
-        return tweets
             
     except TwitterSearchException as e: # take care of all those ugly errors if there are some
         print(e)
+        
+    return tweets

@@ -6,5 +6,5 @@ Created on Mon Jan 30 11:09:56 2017
 @author: Julian
 """
 
-from models import User, Movie, UserMovie
+from models import User, Movie, UserMovie, Region, Occupation
 from manager import DatabaseManager

@@ -29,6 +29,7 @@ params = { "titles":True,
 
 
 class PredictionTest(unittest.TestCase):
+    
     """Test case used to test the module 'learning.prediction'."""
 
     model = None
@@ -99,3 +100,5 @@ class PredictionTest(unittest.TestCase):
         self.assertEqual(len(suggested20), 20)
         self.assertEqual(type(suggested20), type([]))
      
+if __name__ == '__main__':
+    unittest.main()

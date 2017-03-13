@@ -1,9 +1,10 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Created on Thu Mar  2 15:36:28 2017
+Module to populate the database with countries and occupations.
 
-@author: Kaito
+Created on Thu Mar  2 15:36:28 2017
+@author: Julian
 """
 
 from manager import DatabaseManager
