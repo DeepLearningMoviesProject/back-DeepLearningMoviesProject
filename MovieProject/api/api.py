@@ -41,6 +41,19 @@ dbManager = DatabaseManager()
 
 movieIds = {"415":1, "9320":0, "26914":1, "11059":1}
 
+params = { "titles":True,
+           "rating":True,
+           "overviews":True,
+           "keywords":True,
+           "genres":True,
+           "actors":True,
+           "directors":True,
+          "compagnies" : True,
+          "language" : True,
+          "belongs" : True,
+          "runtime" : True,
+          "date" : True }
+    
 
 
 
@@ -130,19 +143,6 @@ def trainModel():
     
     print "Movies received"
 
-    params = { "titles":True,
-               "rating":True,
-               "overviews":True,
-               "keywords":True,
-               "genres":True,
-               "actors":True,
-               "directors":True,
-              "compagnies" : True,
-              "language" : True,
-              "belongs" : True,
-              "runtime" : True,
-              "date" : True }
-    
     pProcessor = Preprocessor(**params)
 
     #preprocess data
@@ -176,19 +176,6 @@ def predictMovies():
     labels = np.array([movies[key] for key in movies])
     
     print "Movies received"
-
-    params = { "titles":True,
-               "rating":True,
-               "overviews":True,
-               "keywords":True,
-               "genres":True,
-               "actors":True,
-               "directors":True,
-              "compagnies" : True,
-              "language" : True,
-              "belongs" : True,
-              "runtime" : True,
-              "date" : True }
     
     pProcessor = Preprocessor(**params)
 
