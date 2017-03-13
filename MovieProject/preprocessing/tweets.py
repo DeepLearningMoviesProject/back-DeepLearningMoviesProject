@@ -24,6 +24,7 @@ def preprocessTweet(tweet, dico, encod='utf-8'):
         Parameters :  
             - tweet : a single tweet 
             - dico : dictionnary of opinion words
+            - encod : text encoding, default UTF-8
         Return : 
             - the tweet preprocessed 
     """ 
@@ -57,6 +58,7 @@ def _removeRepetitions(s, encod='utf-8'):
     Remove also additional white spaces and replace by only one white space.
         Parameters : 
             - s : string   
+            - encod : text encoding, default UTF-8
         Return :  
             - the string without any 3 or more caracters repetitions and without additional white spaces
     """ 
@@ -77,6 +79,7 @@ def _convertUselessWords(s, encod='utf-8'):
     Convert #word to word
         Parameters : 
             - s : string 
+            - encod : text encoding, default UTF-8
         Return :  
             - the string without any useless words 
     """ 
@@ -99,6 +102,9 @@ def removeMovie(tweet, title, encod='utf-8'):
         Parameters :
             - tweet : string of the tweet
             - title : title of the movie
+            - encod : text encoding, default UTF-8
+        return:
+            String, tweet without movie's title
     """
     if not isinstance(tweet, unicode):
         tweet = unicode(tweet, encod,'replace')

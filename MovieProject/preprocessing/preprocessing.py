@@ -56,7 +56,11 @@ class Preprocessor():
     
     def __init__(self, **kwargs):
         """
-        
+            Constructor of Preprocessor object. Contains methods to generate matrix of values from TMDB's datas 
+            
+            Parameters:
+               The variable's name is the name of movie descriptor from the list below and the associated value is boolean,
+               that indicates if descriptor will be handle or not. 
         """
         
         self.toDo = { "titles" : False,

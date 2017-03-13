@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """ 
+Module to handle GloVe representation of words.
+
 Created on Tue Jan 31 22:19:45 2017
 @author: darke
 """

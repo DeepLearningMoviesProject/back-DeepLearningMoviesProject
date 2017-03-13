@@ -1,6 +1,8 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
+Module to handle the creation and the retrievement of GloVe model 
+
 Created on Wed Feb  1 10:14:35 2017
 @author: Julian
 """

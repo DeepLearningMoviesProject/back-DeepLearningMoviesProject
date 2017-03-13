@@ -1,9 +1,10 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Created on Fri Jan 27 14:32:28 2017
+Module to get specifics movies' informations from TMDB's requests.
 
-@author: Kaito
+Created on Fri Jan 27 14:32:28 2017
+@author: Julian
 """
 
 import numpy as np
