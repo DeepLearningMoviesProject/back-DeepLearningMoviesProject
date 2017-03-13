@@ -339,5 +339,15 @@ class TextTest(unittest.TestCase):
             belongsNoValue = getBelongsTo({})
 
 
+    def test_requests(self):
+        ids = [415, 11, 374080]
+        
+        infos, keywords, credits = requests(ids)
+        
+        self.assertEqual(len(infos), 2)
+        self.assertEqual(len(keywords), 2)
+        self.assertEqual(len(credits), 2)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -9,14 +9,60 @@ Created on Fri Jan 27 14:32:28 2017
 
 import numpy as np
 import tmdbsimple as tmdb
+
 from string import punctuation
 from datetime import datetime
+from requests.exceptions import HTTPError
+from sys import stderr
 
 from os.path import isfile
 from MovieProject.resources import GENRES_FILE
 
+import threading, time
+
 
 tmdb.API_KEY = 'ff3f07bf3577a496a2f813488eb29980'
+
+
+class RunRequest(threading.Thread):
+    
+    def __init__(self, result, target, *args):
+        """
+            Run request from TMDB into another thread and assure that less 40 requests
+            are send in 10 seconds
+       
+            Parameters:
+                result -> mutable who will contain the result of method target
+                target -> method to run in another thread
+                args -> param of the function target
+        """
+        self._target = target
+        self._args = args
+        self.res = result
+        self.maxTime = 0.8
+        threading.Thread.__init__(self)
+ 
+    def run(self):
+        start = time.time()
+        try:
+            self.res.append(self._target(*self._args))
+        except HTTPError as e:
+            pass
+        else:
+            timeResquest = time.time() - start
+            
+            if self.maxTime - timeResquest > 0 : time.sleep(self.maxTime - timeResquest)
+        
+
+def getMovie(id): 
+    """
+        Parameters:
+            ids: movie's id
+        return:
+            movie object
+    """
+    
+    return tmdb.Movies(id)
 
     
 def getMovies(idMovies):
@@ -31,6 +77,50 @@ def getMovies(idMovies):
 
     return [ getMovie(idMovie) for idMovie in idMovies ]
 
+
+def requests(idMovies):
+    """
+        Do requests to TMDB to retrieve informations, keywords and credits for a list of TMDB's movie id
+        
+        Parameters:
+            idMovies -> int list
+        return:
+            infos, keywords, credits -> tuple of list containing results for each id request.
+    """ 
+    
+    infos = []
+    keywords = []
+    credits = []
+
+    print "Loading data from TMDB"
+    cpt = 0
+    print "0% requests loaded..."
+    for i, movie in enumerate(getMovies(idMovies)):
+        info, keyword, credit = [], [], []
+        threads = []
+        
+        # If those requests failed, results are not append to arrays
+        threads.append(RunRequest(info, movie.info))
+        threads.append(RunRequest(keyword, movie.keywords))
+        threads.append(RunRequest(credit, movie.credits))
+                                
+        for t in threads: t.start()
+        for t in threads: t.join()
+        
+        if len(info) == 1 and len(keyword) == 1 and len(credit) == 1:
+            infos.append(info[0])
+            keywords.append(keyword[0])
+            credits.append(credit[0])
+        else:
+            print >>stderr, "ERROR, movie n°%d not found" %(movie.id)
+            
+        cpt += 1
+        if(cpt > len(idMovies)/20.) or i == (len(idMovies)-1):
+            print "%.0f%% requests loaded..." %(100*(i+1)/(1.0*len(idMovies)))
+            cpt = 0
+            
+    return infos, keywords, credits
+            
 
 def getCredits(movies):
     """
@@ -107,16 +197,6 @@ def getTitle(movieInfo):
     else:
         raise AttributeError("%s instance has no attribute title" % movieInfo)    
 
-
-def getMovie(id): 
-    """
-        Parameters:
-            ids: movie's id
-        return:
-            movie object
-    """
-    
-    return tmdb.Movies(id)
 
 def saveTmdbGenres():
     """
