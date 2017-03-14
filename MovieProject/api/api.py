@@ -329,7 +329,8 @@ def signup():
     
     session['logged_in'] = True
 
-    return jsonify(token=createToken(user)), 200
+    return jsonify(name=user.name, email=user.email,
+                   token=createToken(user)), 200
 
 
 @app.route('/auth/login', methods=['POST'])
@@ -347,7 +348,8 @@ def login():
         session['logged_in'] = True               
                
                
-        return jsonify(movies={umovie.idMovie:int(umovie.liked) for umovie in user.movies},
+        return jsonify(name=user.name, email=user.email,
+                       movies={umovie.idMovie:int(umovie.liked) for umovie in user.movies},
                        token=createToken(user)), 200
     else:
         return jsonify(error="Wrong name or password"), 400
