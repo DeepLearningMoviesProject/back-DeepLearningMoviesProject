@@ -14,17 +14,13 @@ from functools import wraps
 from jwt import encode, decode, DecodeError, ExpiredSignature
 
 from MovieProject.learning import sentimentPrediction as pred
-from MovieProject.preprocessing import Preprocessor
 from MovieProject.sql import User, DatabaseManager
 from MovieProject.preprocessing.tools import createCorpusOfAbtracts, gloveDict, D2VOnCorpus
-from MovieProject.learning import buildModel, suggestNMovies, sentimentAnalysis
-from MovieProject.resources import GLOVE_DICT_FILE, OVERVIEWS_TR_FILE, OVERVIEW_MODEL, RES_MODEL_PATH, SENTIMENT_ANALYSIS_MODEL
+from MovieProject.learning import saveModel, loadModel, preprocessDataTrainModel, suggestNMovies, sentimentAnalysis
+from MovieProject.resources import GLOVE_DICT_FILE, OVERVIEWS_TR_FILE, OVERVIEW_MODEL, SENTIMENT_ANALYSIS_MODEL
 
-from keras.models import model_from_json
-
-import numpy as np
-from os.path import isfile, exists
-from os import makedirs
+#import numpy as np
+from os.path import isfile
 
 from exceptions import Exception
 
@@ -42,20 +38,6 @@ dbManager = DatabaseManager()
 
 
 movieIds = {"415":1, "9320":0, "26914":1, "11059":1}
-
-params = { "titles":True,
-           "rating":True,
-           "overviews":True,
-           "keywords":True,
-           "genres":True,
-           "actors":True,
-           "directors":True,
-          "compagnies" : True,
-          "language" : True,
-          "belongs" : True,
-          "runtime" : True,
-          "date" : True }
-    
 
 params = {"titles" : False,
           "rating" : True,
@@ -127,89 +109,6 @@ def loginRequired(f):
     return decorated_function
 
 
-def getIdFromLikedMovies(username, isLiked):
-    """
-    
-    """
-    
-    movies = dbManager.getMoviesLikedByUser(username,isLiked)
-    return { str(movie.idMovie) : int(movie.liked) for movie in movies}
-
-def saveModel(username, model):
-    """
-        Save model on resource/persist/model/username_model.json
-
-        username : unique key for a user, and a model is unique for a user
-        model : the keras model for the user
-    """
-    # serialize model to JSON
-    model_json = model.to_json()
-    model_filepath = RES_MODEL_PATH + '/' + username + '_model'
-    
-    #If the model directory doesn't exists, we create it
-    if not exists(RES_MODEL_PATH):
-        makedirs(RES_MODEL_PATH)
-
-    with open(model_filepath + '.json', "w") as json_file:
-        json_file.write(model_json)
-
-    # serialize weights to HDF5
-    model.save_weights(model_filepath + '.h5')
-
-    print("Saved model to disk")
-
-def loadModel(username):
-    """
-        Save model on resource/persist/model/username_model.json
-
-        username : unique key for a user, and a model is unique for a user
-        model : the keras model for the user
-    """
-    # serialize model to JSON
-   # model_json = model.to_json()
-    model_filepath = RES_MODEL_PATH + '/' + username + '_model'
-    
-    #If file doesn't exists, we return None
-    if(isfile(model_filepath + '.json') and isfile(model_filepath + '.h5')):
-        # load json and create model
-        json_file = open(model_filepath + '.json', 'r')
-        loaded_model_json = json_file.read()
-        json_file.close()
-        loaded_model = model_from_json(loaded_model_json)
-        # load weights into new model
-        loaded_model.load_weights(model_filepath + '.h5')
-        print("Loaded model from disk")
-        
-        return loaded_model
-    # evaluate loaded model on test data
-    # loaded_model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
-    # score = loaded_model.evaluate(X, Y, verbose=0)
-    else :
-        print "The model doesn't exists"
-        return None
-
-def extractDataTrainModel(username):
-    
-    userMovies = getIdFromLikedMovies(username, None)
-
-    #extract the ids and the labels of each movie
-    ids = [int(key) for key in userMovies]
-    labels = np.array([userMovies[key] for key in userMovies])
-    
-    print "Movies extracted"
-    
-    pProcessor = Preprocessor(**params)
-
-    #preprocess data
-    data = pProcessor.preprocess(ids)
-    
-    print "Movies loaded, building model"
-    
-    model = buildModel(data, labels)
-    
-    return model
-
-
 @app.route('/testId', methods=['GET'])
 @cross_origin()
 @loginRequired
@@ -225,7 +124,8 @@ def trainModel():
     #Retrieve the user movies
     username = g.user_name
 #    username = 'User1'
-    model = extractDataTrainModel(username)
+    userMovies = dbManager.getIdFromLikedMovies(username, None)
+    model = preprocessDataTrainModel(userMovies, **params)
 
     print "Saving model to file ..."
     
@@ -249,7 +149,8 @@ def predictMovies():
     print "Model retrieved !"
     
     if model is None :
-        model = extractDataTrainModel(username)
+        userMovies = dbManager.getIdFromLikedMovies(username, None)
+        model = preprocessDataTrainModel(userMovies, **params)
     
     if model is not None :
         #Here we suggest 10 movies
@@ -269,9 +170,9 @@ def updateMovies():
     try:
         dbManager.updateLikedMoviesForUser(g.user_name, data)
     except Exception as e:
-        return jsonify(error=str(e), movies=getIdFromLikedMovies(g.user_name, None)), 500
+        return jsonify(error=str(e), movies=dbManager.getIdFromLikedMovies(g.user_name, None)), 500
     else:
-        return jsonify(movies=getIdFromLikedMovies(g.user_name, None)), 200
+        return jsonify(movies=dbManager.getIdFromLikedMovies(g.user_name, None)), 200
     
 
 @app.route('/api/likedMovies/<string:opinion>', methods=["GET"])
@@ -283,7 +184,7 @@ def likedMovies(opinion):
     elif opinion == "all" : isLiked = None 
     else : return jsonify(error="Argument \"%s\" not authorized" %(opinion)), 400
     
-    return jsonify(movies=getIdFromLikedMovies(g.user_name, isLiked)), 200
+    return jsonify(movies=dbManager.getIdFromLikedMovies(g.user_name, isLiked)), 200
 
 
 @app.route('/api/likedMovie/<int:idMovie>/<int:isLiked>', methods=["POST", "PUT"])

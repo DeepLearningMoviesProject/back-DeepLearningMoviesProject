@@ -10,17 +10,24 @@
 """
 import math
 import numpy as np
-from keras.callbacks import Callback, EarlyStopping, ModelCheckpoint
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.layers import Embedding, Reshape, Merge, Dropout, Dense
 from keras.models import Sequential
 from MovieProject.sql import *
+from os.path import exists
+import pickle
 
 from MovieProject.preprocessing.tools import dbPreprocessingTools
+from MovieProject.resources import GLOBAL_MODEL_FILE, RES_PREDICTIONS_PATH, RES_GLOBAL_PATH
+
 
 K_FACTORS = 50
 RNG_SEED = 1446557
-#File where the model weighs are saved
-MODEL_WEIGHTS_FILE = '../resources/persist/model/global/model_weights.h5'
+
+path = RES_GLOBAL_PATH
+filename = GLOBAL_MODEL_FILE.replace(path, '')
+filename = filename.replace('.h5', '')
+
 
 #Copy from CFModel
 
@@ -70,7 +77,7 @@ class DeepModel(Sequential):
     def rate(self, user_id, item_id):
         return self.predict([np.array([user_id]), np.array([item_id])])[0][0]
     
-def createModelUniq():
+def buildModelUniq():
     '''
         Creates the global model and saves it into a file
         Returns : the keras model
@@ -82,7 +89,7 @@ def createModelUniq():
     
     max_userid = np.amax(users)
     max_movieid = np.amax(movies)
-    print len(ratings), 'ratings loaded.'
+    print len(ratings), ' ratings loaded.'
     print "max user id :", max_userid
     print "max movie id :", max_movieid
     
@@ -90,12 +97,17 @@ def createModelUniq():
     print 'Movies:', movies, ', shape =', len(movies)
     print 'Ratings:', ratings, ', shape =', len(ratings)
     
-    	#Faire le modèle
+    	#Create the model
     model = DeepModel(max_userid + 1, max_movieid + 1, K_FACTORS)
     model.compile(loss='mse', optimizer='adamax')
     
+    #Save max_userid and max_movieid
+#    maxids_filepath = RES_GLOBAL_PATH + '/max_ids.json'
+#    with open(movies_filepath, 'w') as f:
+#        json.dump(nBest, f, ensure_ascii=False)
+    
     callbacks = [EarlyStopping('val_loss', patience=5), 
-    	             ModelCheckpoint(MODEL_WEIGHTS_FILE, save_best_only=True)]
+    	             ModelCheckpoint(GLOBAL_MODEL_FILE, save_best_only=True)]
     history = model.fit([users, movies], ratings, nb_epoch=50, validation_split=.1, verbose=2, callbacks=callbacks)
         
     min_val_loss, idx = min((val, idx) for (idx, val) in enumerate(history.history['val_loss']))
@@ -103,63 +115,108 @@ def createModelUniq():
     
     return model
 
-def suggestMoviesSaveNBest(model, user, n=0, **kwargs):
+def suggestMoviesSaveNBest(username, n=0):
     '''
         Returns the suggestion for the user according to the global model (saved in a file)
-        TODO : Save the n best movies suggested
         The suggestion is based on the movies that are in our database (already added by the other users).
         
         Parameters :
             user : (int) a user id
             n : (int) the amount of movies we want to save (0 by default)
-            model : (keras model) the model used for the prediction, will be removed from the parameters in the future
-        
+            
         Returns : the list of all the movies in the database witht their rating prediciton
     '''
-    #TODO Get model from file
+    #Get the model from file
+    model = getModel()
+    
+    if model is None :
+        print "the model doesn't exists !"
+        raise
+        #TODO : raise an error
     
     #Get movies the user didn't rate from DB
     manager = DatabaseManager()
-    moviesList = manager.getNotRatedMoviesfromUser(user)
+    moviesList = manager.getNotRatedMoviesfromUser(username)
     
     print len(moviesList), "movies to predict"
     
-    user_predictions = []
+    user_predictions = {}
     
     for m in moviesList :
-        p = _predict_rating(user, m, model)
-        movie = {'movie' : m, 'accuracy' : p}
-        user_predictions.append(movie)
+        user_predictions[str(m)] = _predict_rating(username, m, model)
     
-#    user_predictions.sort_values(by='predictions', 
-#                             ascending=False)
-    # TODO : save n best ?
-    return user_predictions
+    saved = 0
+    nBest = {}
+    #Iterate over dict in order 
+    for key, value in sorted(user_predictions.iteritems(), key=lambda (k,v): (v,k),reverse=True):  
+        if(saved > n):
+            break
+        nBest[key] = value
+        saved += 1
+    
+    #Save nBest to file
+    movies_filepath = RES_PREDICTIONS_PATH + '/' + str(username) + '_predictions.json'
+        
+    with open(movies_filepath, 'w') as f:
+        pickle.dump(nBest, f)
+    
+    return user_predictions, nBest
+
+def getNBestMovies(username, n=0):
+    '''
+        Retrieves the best movies for a user that has been saved in a file
+        If the file doesn't exists, we do the suggestion
+        
+        Params :
+            username : string of the user name
+            
+        Returns : a dict of movies (key) and their prediction (value)
+    '''
+    # load json
+    movies_filepath = RES_PREDICTIONS_PATH + '/' + str(username) + '_predictions.json'
+    n_best = {}
+    
+#    with open(movies_filepath) as json_predictions:
+#        predictions = json.load(json_predictions)
+
+    if not exists(movies_filepath):
+        all_pred, n_best = suggestMoviesSaveNBest(username, n)
+    
+    else:
+        with open(movies_filepath, 'r') as f:
+            n_best = pickle.load(f)
+    
+    if(len(n_best) < n):
+        all_pred, n_best = suggestMoviesSaveNBest(username, n)
+        
+    return n_best
+
+def getModel(redoModel = False):
+    '''
+        Retrieves the model in the file system or builds it if necessary.       
+        
+        Params :
+            redoModel : boolean to tell if the model MUST be done again
+            
+        Returns :
+            the model of the the new classifier
+    '''
+    model = None
+    
+    if (not exists(GLOBAL_MODEL_FILE)) or redoModel:
+        model = buildModelUniq()
+    else:
+        t = dbPreprocessingTools()
+        users, movies, ratings = t.preprocessingUserMovies()
+        max_userid = np.amax(users) + 1
+        max_movieid = np.amax(movies) + 1
+        print max_movieid
+        print max_userid
+        model = DeepModel(max_userid, max_movieid, K_FACTORS)
+        model.load_weights(GLOBAL_MODEL_FILE)
+        
+    return model
 
 if __name__ == '__main__':
-        
-    params = { "titles":True,
-               "rating":True,
-               "overviews":True,
-               "keywords":True,
-               "genres":True,
-               "actors":True,
-               "directors":True,
-              "compagnies" : True,
-              "language" : True,
-              "belongs" : True,
-              "runtime" : True,
-              "date" : True }
-        
-    
-    model = createModelUniq()
-    
-    #Prédictions
-    testUser = 2
-    
-    print testUser
-    print type(testUser)
-    
-    predictions = suggestMoviesSaveNBest(model, testUser)
-    
-    print predictions
+    # Creates and save the model if doesn't exists
+    model = getModel(redoModel = True)

@@ -179,6 +179,20 @@ class DatabaseManager():
         
         return UserMovie.query.filter_by(idUser=idUser, idMovie=idMovie).first()
         
+    def getIdFromLikedMovies(self, username, isLiked):
+        """
+            Get all movies liked or not by user
+            
+            Parameters:
+                username -> String, name of user
+                isLiked -> Boolean, True to get all movies liked by user, False not liked
+                         None for all movies
+            return 
+                dict with the movie (key) and its like label (value)
+        """
+        movies = self.getMoviesLikedByUser(username,isLiked)
+        return { str(movie.idMovie) : int(movie.liked) for movie in movies}
+    
     def getNotRatedMoviesfromUser(self,idU):  
         """
             Get list of movies not rated for an user            
