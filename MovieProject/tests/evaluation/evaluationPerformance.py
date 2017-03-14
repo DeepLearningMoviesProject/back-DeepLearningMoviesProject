@@ -17,8 +17,10 @@ from os.path import isfile, join
 import matplotlib.pyplot as plt
 from string import maketrans
 
+from MovieProject.resources import RES_PATH
 
-path = '../../resources/evaluations/'
+
+path = join(RES_PATH, 'evaluations/')
 
 preprocessingChanged = False #Set to true if the processing has changed
 
@@ -121,15 +123,15 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
     params = {"titles" : True,
               "rating" : True,
               "overviews" : True,
-              "keywords" : True}
-#              "genres" : True,
-#              "actors" : True}
-#              "directors" : True,
-#              "compagnies" : True,
-#              "language" : True,
-#              "belongs" : True,
-#              "runtime" : True,
-#              "date" : True }
+              "keywords" : True,
+              "genres" : True,
+              "actors" : True,
+              "directors" : True,
+              "compagnies" : True,
+              "language" : True,
+              "belongs" : True,
+              "runtime" : True,
+              "date" : True }
     
 
     meanScoreKeras = 0.
@@ -139,7 +141,7 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
 
 
     #Get all files from PATH, and get the score of the classifier on these files        
-    for file in ['moviesEvaluatedCoralie.json']:
+    for file in os.listdir(path):
         if file.endswith(".json") and ("simple" not in file):
             dico, labels = preprocessFileGeneric(file.replace(".json", ""), **params)
                         
@@ -183,7 +185,99 @@ def testClassifier(doKeras=False, doPerceptron=False, doSVM=False):
                 
     return meanScoreKeras, meanScorePerceptron, meanScoreSVM, result
 
-def graphique(result, sortBy="SVM", nbValue=None, minAverage=0):
+
+def testClassifier2(doKeras=False, doPerceptron=False, doSVM=False):
+    """
+    Tests model accuracy.
+        parameters : 
+            -doKeras, doPerceptron, doSVM : booleans that tells the classifiers you want to test
+        returns : 
+            - the mean scores for the classifiers selected
+    """
+
+    if(not (doKeras or doPerceptron or doSVM)):
+        raise ValueError('You must specify at least one classifier to test!!!')
+        
+    result = {}
+    params = {"titles" : True,
+              "rating" : True,
+              "overviews" : True}
+#              "keywords" : True,
+#              "genres" : True,
+#              "actors" : True,
+#              "directors" : True,
+#              "compagnies" : True,
+#              "language" : True,
+#              "belongs" : True,
+#              "runtime" : True,
+#              "date" : True }
+    
+    paramsIn = dict(params)
+    paramsOut = {}
+
+    while len(paramsIn.keys()) > 0:
+
+        pData = { p:True for p in paramsOut.keys() }
+        resDescriptor = {}
+        
+        for p in paramsIn.keys(): 
+            pProcessor = dict(pData)
+            pProcessor[p] = True
+                 
+            scoreKeras = 0.0
+            scorePerceptron = 0.0
+            scoreSVM = 0.0
+            nbFile = 0.0
+            
+            resDescriptor[p] = {}
+#            for file in os.listdir(path)  :
+            for file in ['moviesEvaluated-test.json']: 
+                if file.endswith(".json") and ("simple" not in file):
+                    dico, labels = preprocessFileGeneric(file.replace(".json", ""), **params)
+                    data = Preprocessor(**pProcessor).prepareDico(dico)  
+                    
+                    nbFile += 1
+                    
+                    if data.shape[1] == 1 : continue
+                    
+                    print "#### {} ####".format(pProcessor.keys())   
+
+                    if(doKeras):
+                        #Prepare the dico that the model takes as parameter
+                        _, score = buildTestModel(data, labels, folds=5)
+                        scoreKeras += score
+                        
+                    if(doPerceptron):
+                        #data = concatData([ dico[key] for key in dico ])
+                        scorePerceptron += perceptron.evaluatePerceptron(data, labels)
+                        
+                    if(doSVM):
+                        #data = concatData([ dico[key] for key in dico ])
+                        trainInd = int(0.8*len(data) )                    
+                        svm = LinearSVM()
+                        svm.train( data[:trainInd], labels[:trainInd])
+                        scoreSVM += svm.evaluate(data[trainInd:], labels[trainInd:])
+                        
+            
+            if doKeras: resDescriptor[p]["Keras"] = scoreKeras / nbFile
+            if doPerceptron: resDescriptor[p]["Perceptron"] = scorePerceptron / nbFile
+            if doSVM: resDescriptor[p]["SVM"] = scoreSVM / nbFile 
+
+        maxIndex, valueModels = sorted(resDescriptor.iteritems(), key=lambda (k,v):(v["Keras"],k), reverse=True)[0]
+        pData[maxIndex] = True
+        
+        name = str(pData.keys()).translate(maketrans("[]\'","   "))
+        result[name] = resDescriptor[maxIndex]
+         
+        paramsIn.pop(maxIndex)
+        paramsOut[maxIndex] = True
+                  
+    return result
+                
+                              
+            
+
+def graphique(result, sortBy, nbValue=None, minAverage=0):
     if type(result) != dict:        #on s'assure ici que la donnee est bien un dico pour le reste du programme
         return
     
@@ -247,7 +341,8 @@ if __name__ == '__main__':
         _, scoreK = buildTestModel(mat, labels, folds=2)
     else:
         #All movies
-        scoreK, scoreP , scoreSVM, resultat = testClassifier(doKeras=False, doSVM=True, doPerceptron=True)
+#        scoreK, scoreP , scoreSVM, resultat = testClassifier(doKeras=False, doSVM=True, doPerceptron=True)
+        resultat = testClassifier2(doKeras=True, doSVM=True, doPerceptron=False)
         
         print "The classifier keras has an average accuracy of ", scoreK 
         print "The classifier perceptron has an average accuracy of ", scoreP 
@@ -258,5 +353,5 @@ if __name__ == '__main__':
                     
         with open(join(RES_PATH, "evaluation.data")) as res:    
             resultat = pickle.load(res)
-        graphique(resultat, minAverage=60, nbValue=5)
+            graphique(resultat, "Keras", minAverage=60)
     
