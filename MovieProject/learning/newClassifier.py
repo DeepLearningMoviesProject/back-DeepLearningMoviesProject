@@ -14,7 +14,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.layers import Embedding, Reshape, Merge, Dropout, Dense
 from keras.models import Sequential
 from MovieProject.sql import *
-from os.path import exists
+from os.path import exists, join
 from os import makedirs
 import pickle
 
@@ -32,7 +32,7 @@ filename = filename.replace('.h5', '')
 
 #Copy from CFModel
 
-def _predict_rating(userid, movieid, model):
+def _predictRating(userid, movieid, model):
     '''
         Predicts the rating a user will give to a movie
     '''
@@ -88,18 +88,18 @@ def buildModelUniq():
     t = dbPreprocessingTools()
     users, movies, ratings = t.preprocessingUserMovies()
     
-    max_userid = np.amax(users)
-    max_movieid = np.amax(movies)
+    maxUserid = np.amax(users)
+    maxMovieid = np.amax(movies)
     print len(ratings), ' ratings loaded.'
-    print "max user id :", max_userid
-    print "max movie id :", max_movieid
+    print "max user id :", maxUserid
+    print "max movie id :", maxMovieid
     
     print 'Users:', users, ', shape =', len(users)
     print 'Movies:', movies, ', shape =', len(movies)
     print 'Ratings:', ratings, ', shape =', len(ratings)
     
     	#Create the model
-    model = DeepModel(max_userid + 1, max_movieid + 1, K_FACTORS)
+    model = DeepModel(maxUserid + 1, maxMovieid + 1, K_FACTORS)
     model.compile(loss='mse', optimizer='adamax')
     
     #Save max_userid and max_movieid
@@ -141,31 +141,31 @@ def suggestMoviesSaveNBest(user, n=0):
     
     print len(moviesList), "movies to predict"
     
-    user_predictions = {}
+    userPredictions = {}
     
     for m in moviesList :
-        user_predictions[str(m)] = _predict_rating(user, m, model).item()
+        userPredictions[str(m)] = _predictRating(user, m, model).item()
     
     saved = 0
     nBest = {}
     #Iterate over dict in order 
-    for key, value in sorted(user_predictions.iteritems(), key=lambda (k,v): (v,k),reverse=True):  
+    for key, value in sorted(userPredictions.iteritems(), key=lambda (k,v): (v,k),reverse=True):  
         if(saved > n):
             break
         nBest[key] = value
         saved += 1
     
     #Save nBest to file
-    movies_filepath = RES_PREDICTIONS_PATH + '/' + str(user) + '_predictions.json'
+    moviesFilepath = join(RES_PREDICTIONS_PATH, str(user) + '_predictions.json')
     
     #If the predictions directory doesn't exists, we create it
     if not exists(RES_PREDICTIONS_PATH):
         makedirs(RES_PREDICTIONS_PATH)
         
-    with open(movies_filepath, 'w') as f:
+    with open(moviesFilepath, 'w') as f:
         pickle.dump(nBest, f)
     
-    return user_predictions, nBest
+    return userPredictions, nBest
 
 def getNBestMovies(user, n=0):
     '''
@@ -178,24 +178,22 @@ def getNBestMovies(user, n=0):
         Returns : a dict of movies (key) and their prediction (value)
     '''
     # load json
-    movies_filepath = RES_PREDICTIONS_PATH + '/' + str(user) + '_predictions.json'
-    n_best = {}
+    moviesFilepath = join(RES_PREDICTIONS_PATH, str(user) + '_predictions.json')
+    nBest = {}
     
 #    with open(movies_filepath) as json_predictions:
 #        predictions = json.load(json_predictions)
 
-    if not exists(movies_filepath):
-        all_pred, n_best = suggestMoviesSaveNBest(user, n)
+    if not exists(moviesFilepath):
+        allPred, nBest = suggestMoviesSaveNBest(user, n)
     else:
-        with open(movies_filepath, 'r') as f:
+        with open(moviesFilepath, 'r') as f:
             n_best = pickle.load(f)
     
     if(len(n_best) < n):
-        all_pred, n_best = suggestMoviesSaveNBest(user, n)
+        allPred, nBest = suggestMoviesSaveNBest(user, n)
         
-    
-        
-    return n_best
+    return nBest
 
 def getModel(redoModel = False):
     '''
@@ -214,7 +212,8 @@ def getModel(redoModel = False):
     else:
         t = dbPreprocessingTools()
         users, movies, ratings = t.preprocessingUserMovies()
-        #TODO : Warning, max_userid and max_movie_id might not be retrieve like that
+        #TODO : Warning, max_userid and max_movie_id might have to be retrieve differently
+        
         max_userid = np.amax(users) + 1
         max_movieid = np.amax(movies) + 1
 
