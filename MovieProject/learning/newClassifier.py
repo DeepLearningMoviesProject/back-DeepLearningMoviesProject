@@ -15,6 +15,7 @@ from keras.layers import Embedding, Reshape, Merge, Dropout, Dense
 from keras.models import Sequential
 from MovieProject.sql import *
 from os.path import exists
+from os import makedirs
 import pickle
 
 from MovieProject.preprocessing.tools import dbPreprocessingTools
@@ -115,7 +116,7 @@ def buildModelUniq():
     
     return model
 
-def suggestMoviesSaveNBest(username, n=0):
+def suggestMoviesSaveNBest(user, n=0):
     '''
         Returns the suggestion for the user according to the global model (saved in a file)
         The suggestion is based on the movies that are in our database (already added by the other users).
@@ -136,14 +137,14 @@ def suggestMoviesSaveNBest(username, n=0):
     
     #Get movies the user didn't rate from DB
     manager = DatabaseManager()
-    moviesList = manager.getNotRatedMoviesfromUser(username)
+    moviesList = manager.getNotRatedMoviesfromUser(user)
     
     print len(moviesList), "movies to predict"
     
     user_predictions = {}
     
     for m in moviesList :
-        user_predictions[str(m)] = _predict_rating(username, m, model)
+        user_predictions[str(m)] = _predict_rating(user, m, model).item()
     
     saved = 0
     nBest = {}
@@ -155,39 +156,44 @@ def suggestMoviesSaveNBest(username, n=0):
         saved += 1
     
     #Save nBest to file
-    movies_filepath = RES_PREDICTIONS_PATH + '/' + str(username) + '_predictions.json'
+    movies_filepath = RES_PREDICTIONS_PATH + '/' + str(user) + '_predictions.json'
+    
+    #If the predictions directory doesn't exists, we create it
+    if not exists(RES_PREDICTIONS_PATH):
+        makedirs(RES_PREDICTIONS_PATH)
         
     with open(movies_filepath, 'w') as f:
         pickle.dump(nBest, f)
     
     return user_predictions, nBest
 
-def getNBestMovies(username, n=0):
+def getNBestMovies(user, n=0):
     '''
         Retrieves the best movies for a user that has been saved in a file
         If the file doesn't exists, we do the suggestion
         
         Params :
-            username : string of the user name
+            user : (int) user id
             
         Returns : a dict of movies (key) and their prediction (value)
     '''
     # load json
-    movies_filepath = RES_PREDICTIONS_PATH + '/' + str(username) + '_predictions.json'
+    movies_filepath = RES_PREDICTIONS_PATH + '/' + str(user) + '_predictions.json'
     n_best = {}
     
 #    with open(movies_filepath) as json_predictions:
 #        predictions = json.load(json_predictions)
 
     if not exists(movies_filepath):
-        all_pred, n_best = suggestMoviesSaveNBest(username, n)
-    
+        all_pred, n_best = suggestMoviesSaveNBest(user, n)
     else:
         with open(movies_filepath, 'r') as f:
             n_best = pickle.load(f)
     
     if(len(n_best) < n):
-        all_pred, n_best = suggestMoviesSaveNBest(username, n)
+        all_pred, n_best = suggestMoviesSaveNBest(user, n)
+        
+    
         
     return n_best
 
@@ -208,10 +214,10 @@ def getModel(redoModel = False):
     else:
         t = dbPreprocessingTools()
         users, movies, ratings = t.preprocessingUserMovies()
+        #TODO : Warning, max_userid and max_movie_id might not be retrieve like that
         max_userid = np.amax(users) + 1
         max_movieid = np.amax(movies) + 1
-        print max_movieid
-        print max_userid
+
         model = DeepModel(max_userid, max_movieid, K_FACTORS)
         model.load_weights(GLOBAL_MODEL_FILE)
         

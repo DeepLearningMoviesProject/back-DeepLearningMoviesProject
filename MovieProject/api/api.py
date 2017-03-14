@@ -16,7 +16,7 @@ from jwt import encode, decode, DecodeError, ExpiredSignature
 from MovieProject.learning import sentimentPrediction as pred
 from MovieProject.sql import User, DatabaseManager
 from MovieProject.preprocessing.tools import createCorpusOfAbtracts, gloveDict, D2VOnCorpus
-from MovieProject.learning import saveModel, loadModel, preprocessDataTrainModel, suggestNMovies, sentimentAnalysis
+from MovieProject.learning import getNBestMovies, saveModel, loadModel, preprocessDataTrainModel, suggestNMovies, sentimentAnalysis
 from MovieProject.resources import GLOVE_DICT_FILE, OVERVIEWS_TR_FILE, OVERVIEW_MODEL, SENTIMENT_ANALYSIS_MODEL
 
 #import numpy as np
@@ -160,6 +160,20 @@ def predictMovies():
         return jsonify(sugg)
     else:
         return jsonify({'error': "Failed to create model for this user."})
+    
+
+@app.route('/api/predictionFM', methods=['GET'])
+@cross_origin()
+@loginRequired
+def predictMoviesFM():
+    
+    #Here we load the model for the user
+    username = g.user_name
+    userID = dbManager.getUser(username).id
+    
+    movies = getNBestMovies(userID, n=10)
+    
+    return jsonify(movies)
     
 @app.route('/api/updateMovies', methods=["POST"])
 @cross_origin()
