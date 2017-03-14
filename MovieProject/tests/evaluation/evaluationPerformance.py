@@ -288,6 +288,9 @@ def graphique(result, sortBy, nbValue=None, minAverage=0):
     nbGraph = 0.5
     legende = 99.
     origine = 0.
+    
+    colors = {"Keras":"Red","SVM":"Blue","Perceptron":"Green"}
+    
     for cat, value in sorted(result.iteritems(), key=lambda (k,v):(v[sortBy],k), reverse=True)[:nbValue]:
         origine = nbGraph-0.25        
         valide = 0        
@@ -296,7 +299,8 @@ def graphique(result, sortBy, nbValue=None, minAverage=0):
             if result[cat][test]>minAverage:
                 abscisse = [nbGraph, nbGraph]               #avoir plusieurs couleurs différentes. A noter quue plt.hist peut faire un histogramme beaucoup plus facilement.
                 ordonne = [0, result[cat][test]]
-                plt.plot(abscisse, ordonne, linewidth = 3)
+                print(str(test))
+                plt.plot(abscisse, ordonne, linewidth = 3, color=colors[test])
                 plt.text(nbGraph, result[cat][test], str(test))
                 nbGraph += 0.5
                 valide = 1
@@ -306,7 +310,7 @@ def graphique(result, sortBy, nbValue=None, minAverage=0):
         if valide == 1:
             legende -= 1.5
             plt.text(origine, legende, str(cat))
-            plt.plot([origine, origine], [50, 100])
+            plt.plot([origine, origine], [50, 100], color="black")
 
         if nbGraph >= 5:
             plt.title("Resultats")
@@ -316,13 +320,6 @@ def graphique(result, sortBy, nbValue=None, minAverage=0):
             plt.figure()
             nbGraph = 0.5
             legende = 99.
-    
-    plt.title("Resultats")
-    plt.ylabel("Reussite")
-    plt.xlabel("Essais")
-    plt.axis([0, nbGraph, 50, 100])
-    plt.show()
-    print "il y a " +str(invalide) +" resultats inferieurs a 60%"
 
     
 if __name__ == '__main__':
