@@ -18,13 +18,15 @@ from MovieProject.preprocessing import Preprocessor
 from MovieProject.sql import User, DatabaseManager
 from MovieProject.preprocessing.tools import createCorpusOfAbtracts, gloveDict, D2VOnCorpus
 from MovieProject.learning import buildModel, suggestNMovies, sentimentAnalysis
-from MovieProject.resources import GLOVE_DICT_FILE, OVERVIEWS_TR_FILE, OVERVIEW_MODEL, SENTIMENT_ANALYSIS_MODEL
+from MovieProject.resources import GLOVE_DICT_FILE, OVERVIEWS_TR_FILE, OVERVIEW_MODEL, RES_MODEL_PATH, SENTIMENT_ANALYSIS_MODEL
+
+from keras.models import model_from_json
 
 import numpy as np
-from os.path import isfile
+from os.path import isfile, exists
+from os import makedirs
 
 from exceptions import Exception
-
 
 
 app = Flask(__name__)
@@ -55,7 +57,18 @@ params = { "titles":True,
           "date" : True }
     
 
-
+params = {"titles" : False,
+          "rating" : True,
+          "overviews" : True,
+          "keywords" : False,
+          "genres" : True,
+          "actors" : False,
+          "directors" : True,
+          "compagnies" : True,
+          "language" : False,
+          "belongs" : True,
+          "runtime" : True,
+          "date" : False }
 
 def createToken(user):
     """
@@ -122,6 +135,80 @@ def getIdFromLikedMovies(username, isLiked):
     movies = dbManager.getMoviesLikedByUser(username,isLiked)
     return { str(movie.idMovie) : int(movie.liked) for movie in movies}
 
+def saveModel(username, model):
+    """
+        Save model on resource/persist/model/username_model.json
+
+        username : unique key for a user, and a model is unique for a user
+        model : the keras model for the user
+    """
+    # serialize model to JSON
+    model_json = model.to_json()
+    model_filepath = RES_MODEL_PATH + '/' + username + '_model'
+    
+    #If the model directory doesn't exists, we create it
+    if not exists(RES_MODEL_PATH):
+        makedirs(RES_MODEL_PATH)
+
+    with open(model_filepath + '.json', "w") as json_file:
+        json_file.write(model_json)
+
+    # serialize weights to HDF5
+    model.save_weights(model_filepath + '.h5')
+
+    print("Saved model to disk")
+
+def loadModel(username):
+    """
+        Save model on resource/persist/model/username_model.json
+
+        username : unique key for a user, and a model is unique for a user
+        model : the keras model for the user
+    """
+    # serialize model to JSON
+   # model_json = model.to_json()
+    model_filepath = RES_MODEL_PATH + '/' + username + '_model'
+    
+    #If file doesn't exists, we return None
+    if(isfile(model_filepath + '.json') and isfile(model_filepath + '.h5')):
+        # load json and create model
+        json_file = open(model_filepath + '.json', 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        loaded_model = model_from_json(loaded_model_json)
+        # load weights into new model
+        loaded_model.load_weights(model_filepath + '.h5')
+        print("Loaded model from disk")
+        
+        return loaded_model
+    # evaluate loaded model on test data
+    # loaded_model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
+    # score = loaded_model.evaluate(X, Y, verbose=0)
+    else :
+        print "The model doesn't exists"
+        return None
+
+def extractDataTrainModel(username):
+    
+    userMovies = getIdFromLikedMovies(username, None)
+
+    #extract the ids and the labels of each movie
+    ids = [int(key) for key in userMovies]
+    labels = np.array([userMovies[key] for key in userMovies])
+    
+    print "Movies extracted"
+    
+    pProcessor = Preprocessor(**params)
+
+    #preprocess data
+    data = pProcessor.preprocess(ids)
+    
+    print "Movies loaded, building model"
+    
+    model = buildModel(data, labels)
+    
+    return model
+
 
 @app.route('/testId', methods=['GET'])
 @cross_origin()
@@ -133,34 +220,19 @@ def get_tasks():
 @app.route('/api/train', methods=['POST'])
 @cross_origin()
 @loginRequired
-def trainModel():    
-    
-    dico = json.loads(request.data)
-    ids = [int(key) for key in dico]
-    
-    #X_train = searchData(ids)
-    labels = np.array([dico[key] for key in dico])
-    
-    print "Movies received"
+def trainModel():
 
-    pProcessor = Preprocessor(**params)
+    #Retrieve the user movies
+    username = g.user_name
+#    username = 'User1'
+    model = extractDataTrainModel(username)
 
-    #preprocess data
-    data = pProcessor.preprocess(ids)
+    print "Saving model to file ..."
     
-    print "Movies loaded, building model"
-    
-    model = buildModel(data, labels)
-    
+    saveModel(username, model)
+
+    #Tell to the front that the model is ready
     return jsonify({'result': "ok"})
-    
-#    print "Model built, start prediction"
-#    
-#    sugg = suggestNMovies(model, 10, **params)
-#    
-#    print "Movies predicted !"
-#    
-#    return jsonify(sugg)
 
 
 @app.route('/api/prediction', methods=['GET'])
@@ -168,35 +240,26 @@ def trainModel():
 @loginRequired
 def predictMovies():
     
-    #Here we create a model but in the end we will load it from the DB
-    movies = {"11":1,"18":1,"22":1}
-     
-    ids = [int(key) for key in movies]
+    #Here we load the model for the user
+    username = g.user_name
+#    username = 'User1'
     
-    labels = np.array([movies[key] for key in movies])
+    model = loadModel(username)
     
-    print "Movies received"
+    print "Model retrieved !"
     
-    pProcessor = Preprocessor(**params)
-
-        #preprocess data
-    data = pProcessor.preprocess(ids)
+    if model is None :
+        model = extractDataTrainModel(username)
     
-    print "Movies loaded, building model"
+    if model is not None :
+        #Here we suggest 10 movies
+        sugg = suggestNMovies(model, 10, **params)
     
-    model = buildModel(data, labels)
+        print "Movies predicted !"
+        return jsonify(sugg)
+    else:
+        return jsonify({'error': "Failed to create model for this user."})
     
-    print "Model built, start prediction"
-    
-    #This is what we will do after we get the model from DB
-    
-    sugg = suggestNMovies(model, 10, **params)
-    
-    print "Movies predicted !"
-    return jsonify(sugg)
-
-
-
 @app.route('/api/updateMovies', methods=["POST"])
 @cross_origin()
 @loginRequired
@@ -243,8 +306,8 @@ def likedMovie(idMovie, isLiked):
 def checkPopularity():   
    
     data = json.loads(request.data)
-    popularity, sentiments = pred.classificationMovies(data['movies']) 
-    return jsonify({"popularity" : popularity, "sentiments" : sentiments})
+    popularity = pred.classificationMovies(data['movies']) 
+    return jsonify(popularity)
 
     
 @app.route('/api/likedMovie/<int:idMovie>', methods=["DELETE"])
@@ -279,7 +342,8 @@ def signup():
     
     session['logged_in'] = True
 
-    return jsonify(token=createToken(user)), 200
+    return jsonify(name=user.name, email=user.email,
+                   token=createToken(user)), 200
 
 
 @app.route('/auth/login', methods=['POST'])
@@ -297,7 +361,8 @@ def login():
         session['logged_in'] = True               
                
                
-        return jsonify(movies={umovie.idMovie:int(umovie.liked) for umovie in user.movies},
+        return jsonify(name=user.name, email=user.email,
+                       movies={umovie.idMovie:int(umovie.liked) for umovie in user.movies},
                        token=createToken(user)), 200
     else:
         return jsonify(error="Wrong name or password"), 400
@@ -336,4 +401,3 @@ if __name__ == '__main__':
     _initAPI()
     
     app.run(debug=False, host= '0.0.0.0')
-

@@ -325,6 +325,12 @@ class PreprocessingTest(unittest.TestCase):
         self.assertEqual((2,5), res2.shape)
         self.assertEqual(final2[0].shape, res2[1].shape)
         self.assertEqual(final2[0].tolist(), res2[1].tolist())
+
+
+    def test_processMatrix(self):
+        matrix = self.p.preprocessMatrix([415,11,374080])
+        
+        self.assertEqual(len(matrix.keys()),13)
         
         
 if __name__ == "__main__":

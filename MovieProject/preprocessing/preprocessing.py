@@ -7,7 +7,7 @@ Created on Wed Feb 01 17:09:54 2017
 """
 
 
-from MovieProject.preprocessing.tools import (getMovies, getKeywords, getDirectors, getActors, getCredits, getRating,
+from MovieProject.preprocessing.tools import (getMovies, getKeywords, getDirectors, getActors, getCredits, getRating, requests,
                                               getProdCompagnies, getBudget, getRuntime, getYear, getBelongsTo, getLanguage, getOverview, getTitle,
                                               loadGloveDicFromFile, getGenres, getTmdbGenres, loadD2VModel, SIZE_VECTOR)
 from MovieProject.resources import GLOVE_DICT_FILE, OVERVIEW_MODEL
@@ -17,34 +17,6 @@ from math import exp
 import numpy as np
 from enum import Enum
 
-import threading, time
-
-
-
-class _RunRequest(threading.Thread):
-    
-    def __init__(self, result, target, *args):
-        """
-            Run request from TMDB into another thread and assure that less 40 requests
-            are send in 10 seconds
-       
-            Parameters:
-                result -> mutable who will contain the result of method target
-                target -> method to run in another thread
-                args -> param of the function target
-        """
-        self._target = target
-        self._args = args
-        self.res = result
-        self.maxTime = 0.8
-        threading.Thread.__init__(self)
- 
-    def run(self):
-        start = time.time()
-        self.res.append(self._target(*self._args))
-        timeResquest = time.time() - start
-        
-        if self.maxTime - timeResquest > 0 : time.sleep(self.maxTime - timeResquest)
         
 
 class People(Enum):
@@ -114,43 +86,8 @@ class Preprocessor():
         """
     
         matrix = {}
-        
-        movies = getMovies(idMovies)    
-        
-        infos = []
-        keywords = []
-        credits = []
-    
-        print "Loading data from TMDB"
-        cpt = 0
-        for i in range(len(movies)):
-            movie = movies[i]
-            info, keyword, credit = [], [], []
-            threads = []
-            
-            try:
-                # If those request failed, doesn't append results to arrays
-                if self.toDo["overviews"] or self.toDo["titles"] or self.toDo["rating"] or self.toDo["genres"]: 
-                    threads.append(_RunRequest(info, movie.info))
-                if self.toDo["keywords"]: 
-                    threads.append(_RunRequest(keyword, movie.keywords))
-                if self.toDo["actors"] or self.toDo["directors"]: 
-                    threads.append(_RunRequest(credit, movie.credits))
-                                        
-                for t in threads: t.start()
-                for t in threads: t.join()
-                
-                if self.toDo["overviews"] or self.toDo["titles"] or self.toDo["rating"] or self.toDo["genres"]:infos.append(info[0])
-                if self.toDo["keywords"]: keywords.append(keyword[0])
-                if self.toDo["actors"] or self.toDo["directors"]: credits.append(credit[0])
-                
-            except:
-                print "Error, movie " + str (movie) + " NOT FOUND"
-                
-            cpt += 1
-            if(cpt > len(movies)/20.):
-                print "%.0f%% requests loaded..." %(100*i/(1.0*len(movies)))
-                cpt = 0
+
+        infos, keywords, credits = requests(idMovies)
     
         if self.toDo["keywords"]:
             print "Processing Keywords"
@@ -299,9 +236,7 @@ class Preprocessor():
         meanMatrixTitles = np.empty([len(infos), self.sizeGloveVector]) 
         
         for i, info in enumerate(infos):            
-            words = [ w.lower().encode('UTF-8') for w in getTitle(info)]
-            
-            gArray, wSize = wordsToGlove(words, self.dicoGlove)
+            gArray, wSize = wordsToGlove(getTitle(info), self.dicoGlove)
             
             meanMatrixTitles[i] = meanWords(gArray, wSize)
     
