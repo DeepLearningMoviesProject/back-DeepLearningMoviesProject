@@ -362,6 +362,14 @@ def logout():
     session.pop('logged_in', None)
     return jsonify({'result': 'success'}), 200    
 
+
+@app.route('/api/user',methods=['GET'])
+@cross_origin()
+@loginRequired
+def get_user_info():
+    user = dbManager.getUser(g.user_name)
+    dico = {"name": g.user_name, "email": user.email}
+    return jsonify(dico), 200
     
     
 def _initAPI():
