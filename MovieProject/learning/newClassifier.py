@@ -188,9 +188,9 @@ def getNBestMovies(user, n=0):
         allPred, nBest = suggestMoviesSaveNBest(user, n)
     else:
         with open(moviesFilepath, 'r') as f:
-            n_best = pickle.load(f)
+            nBest = pickle.load(f)
     
-    if(len(n_best) < n):
+    if(len(nBest) < n):
         allPred, nBest = suggestMoviesSaveNBest(user, n)
         
     return nBest
