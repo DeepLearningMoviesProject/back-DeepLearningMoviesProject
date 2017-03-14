@@ -1,0 +1,17 @@
+# Routes de l'API
+
+Pour utiliser pleinement l'API, il faut que l'utilisateur soit connecté car les données enregistrées en BD sont associées à l'id de l'utilisateur. Ceci permet à chaque utilisateur d'avoir ses données propres et de les conserver entre deux connexions. 
+
+| Requête| Route                                    | Description                                                                      | Permission          |
+| :----- | :--------------------------------------- | :------------------------------------------------------------------------------- | :------------------ |
+| POST   | /auth/signup                             | Création d'un compte utilisateur                                                 |                     |
+| POST   | /auth/login                              | Connexion d'un utilisateur                                                       |                     |
+|        | /auth/logout                             | Déconnexion d'un utilisateur                                                     | utilisateur connecté| 
+| POST   | /api/updateMovies                        | Met à jours la liste des films annotés par l'utilisateur                         | utilisateur connecté|
+| GET    | /api/likedMovies/string:opinion          | Récupère en base de données, la liste des films que l'utilisateur à aimé si opinion="liked", pas aimé si opinion="disliked" ou alors tous les films si opinion="all".                                                                           | utilisateur connecté|
+| POST   | /api/likedMovie/int:idMovie/int:isLiked  | Ajoute en base de données, le film d'idMovie=idTMDB avec isLiked=0 si le film n'a pas été apprécié ou isLiked=1 si le film à été apprécié                                                                                                                    | utilisateur connecté|
+| PUT    | /api/likedMovie/int:idMovie/int:isLiked  | Met à jours en base de données, le film d'idMovie=idTMDB avec isLiked=0 si le film n'a pas été apprécié ou isLiked=1 si le film à été apprécié                                                                                                                 | utilisateur connecté|
+| DELETE | /api/likedMovie/int:idMovie              | Supprime de la base de données, le film d'idMovie=idTMDB associé à l'utilisateur | utilisateur connecté|
+| POST   | /api/train                               | Lance l'entrainement du modèle avec les films annotés par l'utilisateur, présents en base de données.                                                                                                                               | utilisateur connecté|
+| GET    | /api/prediction                          | Lance une prédiction à partir du modèle de l'utilisateur et retourne une liste de recommandation de films.                                                                                                                                 | utilisateur connecté|
+| POST   | /api/popularity                          | Lance la recherche de popularité sur Twitter et retourne une liste de films ordonnée par popularité décroissante et une seconde liste ordonnée par avis décroissant                                                                                            | utilisateur connecté|   
