@@ -10,11 +10,25 @@ from __future__ import unicode_literals
 import numpy as np
 from random import randint
 from MovieProject.preprocessing import Preprocessor
-from flask import json, jsonify
+#from flask import json, jsonify
 #from MovieProject.preprocessing.tools import getMovie
 import tmdbsimple as tmdb
 
 batch = 500
+
+params = { "titles":True,
+           "rating":True,
+           "overviews":True,
+           "keywords":True,
+           "genres":True,
+           "actors":True,
+           "directors":True,
+          "compagnies" : True,
+          "language" : True,
+          "belongs" : True,
+          "runtime" : True,
+          "date" : True }
+    
 
 def predictMovies(movies, model, **kwargs):
     '''

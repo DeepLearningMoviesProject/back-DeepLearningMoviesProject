@@ -13,8 +13,11 @@ RES_PATH = dirname(abspath(__file__))
 
 RES_PERSIST_PATH = join(RES_PATH,"persist") 
 RES_MODEL_PATH = join(RES_PERSIST_PATH,"model") 
+RES_GLOBAL_PATH = join(RES_MODEL_PATH,"global") 
+RES_PREDICTIONS_PATH = join(RES_GLOBAL_PATH,"predictions") 
 
 
+GLOBAL_MODEL_FILE = join(RES_GLOBAL_PATH, "model_weighs.h5")
 
 GENRES_FILE = join(RES_PATH, "genres.npy")
 

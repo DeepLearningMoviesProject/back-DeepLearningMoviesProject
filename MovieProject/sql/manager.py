@@ -9,6 +9,8 @@ Created on Sun Feb 26 16:23:02 2017
 
 from models import User, Movie, UserMovie, Occupation, Region
 from database import initDb, dbSession as db
+from sqlalchemy.orm import join
+
 from exceptions import RuntimeError
 
 
@@ -177,7 +179,35 @@ class DatabaseManager():
         
         return UserMovie.query.filter_by(idUser=idUser, idMovie=idMovie).first()
         
-        
+    def getIdFromLikedMovies(self, username, isLiked):
+        """
+            Get all movies liked or not by user
+            
+            Parameters:
+                username -> String, name of user
+                isLiked -> Boolean, True to get all movies liked by user, False not liked
+                         None for all movies
+            return 
+                dict with the movie (key) and its like label (value)
+        """
+        movies = self.getMoviesLikedByUser(username,isLiked)
+        return { str(movie.idMovie) : int(movie.liked) for movie in movies}
+    
+    def getNotRatedMoviesfromUser(self,idU):  
+        """
+            Get list of movies not rated for an user            
+            Parameters:
+                idUser -> int, id of user
+            return:
+                list of idMovies
+        """
+       
+        t = db.query(Movie.idMovie).select_from(join(Movie, UserMovie)).filter(UserMovie.idUser==idU)
+        result = Movie.query.filter(~Movie.idMovie.in_(t)).all()    
+        listId = []
+        for r in result:
+            listId.append(r.idMovie)
+        return listId
     
     def insertUserMovie(self, username, idMovie, liked):
         """

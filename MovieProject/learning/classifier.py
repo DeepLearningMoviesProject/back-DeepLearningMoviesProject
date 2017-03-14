@@ -10,13 +10,15 @@ Created on Tue Jan 31 16:33:30 2017
 
 import numpy as np
 from keras.models import Sequential
-from keras.layers import Dense, Merge, BatchNormalization, Embedding, Flatten, Dropout
-from keras.optimizers import SGD, Adam
+from keras.layers import Dense, BatchNormalization, Dropout
 from keras.constraints import maxnorm
 from sklearn.cross_validation import StratifiedKFold
+from keras.optimizers import SGD, Adam
+from MovieProject.preprocessing import Preprocessor
 
 epoch = 800
 batch = 64
+
 
 def createModel(dataLen = 0):
     '''
@@ -102,7 +104,7 @@ def createTrainModelDico(mat, labels, iTest = [], iTrain = [], doTest=False):
 
     return model, scores
 
-def buildModel(mat, labels):
+def buildModel(mat = [], labels = []):
     '''
         Builds the model that matches the movies represented in mat and the labels (like/dislike)
         
@@ -115,6 +117,7 @@ def buildModel(mat, labels):
     '''
 
     model, _ = createTrainModelDico(mat, labels)
+#    model = createModelUniq()
     return model
     
 def buildTestModel(mat, labels, folds):
@@ -150,3 +153,33 @@ def buildTestModel(mat, labels, folds):
     mean_score = np.mean(cvscores)
     print("%.2f%% (+/- %.2f%%)" % (np.mean(cvscores), np.std(cvscores)))
     return model, mean_score
+
+
+def preprocessDataTrainModel(usermovies, **params):
+    '''
+        Preprocess the data from the movies a user has rated
+        Builds the model fitting these movies
+        
+        Params :
+            usermovies : a dict of movies as key and their rating as value
+        
+        Returns : the model for the user that has rated usermovies
+        
+    '''
+
+    #extract the ids and the labels of each movie
+    ids = [int(key) for key in usermovies]
+    labels = np.array([usermovies[key] for key in usermovies])
+    
+    print "Movies extracted"
+    
+    pProcessor = Preprocessor(**params)
+
+    #preprocess data
+    data = pProcessor.preprocess(ids)
+    
+    print "Movies loaded, building model"
+    
+    model = buildModel(data, labels)
+    
+    return model
