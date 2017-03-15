@@ -83,7 +83,7 @@ def buildModelUniq():
         Creates the global model and saves it into a file
         Returns : the keras model
     '''
-    
+    print "get data from DB"
     #Get data from DB
     t = dbPreprocessingTools()
     users, movies, ratings = t.preprocessingUserMovies()
@@ -98,6 +98,7 @@ def buildModelUniq():
     print 'Movies:', movies, ', shape =', len(movies)
     print 'Ratings:', ratings, ', shape =', len(ratings)
     
+    print "creating the model"
     	#Create the model
     model = DeepModel(maxUserid + 1, maxMovieid + 1, K_FACTORS)
     model.compile(loss='mse', optimizer='adamax')
@@ -127,6 +128,8 @@ def suggestMoviesSaveNBest(user, n=0):
             
         Returns : the list of all the movies in the database witht their rating prediciton
     '''
+    
+    print "get model"
     #Get the model from file
     model = getModel()
     
@@ -135,6 +138,7 @@ def suggestMoviesSaveNBest(user, n=0):
         raise
         #TODO : raise an error
     
+    print "get the movies the user didn't rate from TMDB"
     #Get movies the user didn't rate from DB
     manager = DatabaseManager()
     moviesList = manager.getNotRatedMoviesfromUser(user)
@@ -146,6 +150,7 @@ def suggestMoviesSaveNBest(user, n=0):
     for m in moviesList :
         userPredictions[str(m)] = _predictRating(user, m, model).item()
     
+    print "movies predicted"
     saved = 0
     nBest = {}
     #Iterate over dict in order 
@@ -155,6 +160,7 @@ def suggestMoviesSaveNBest(user, n=0):
         nBest[key] = value
         saved += 1
     
+    print "best movies predicted"
     #Save nBest to file
     moviesFilepath = join(RES_PREDICTIONS_PATH, str(user) + '_predictions.json')
     
@@ -165,6 +171,7 @@ def suggestMoviesSaveNBest(user, n=0):
     with open(moviesFilepath, 'w') as f:
         pickle.dump(nBest, f)
     
+    print "best movies saved"
     return userPredictions, nBest
 
 def getNBestMovies(user, n=0):
