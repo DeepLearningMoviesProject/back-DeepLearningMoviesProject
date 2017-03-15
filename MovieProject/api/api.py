@@ -171,7 +171,7 @@ def predictMoviesFM():
     username = g.user_name
     userID = dbManager.getUser(username).id
     
-    movies = getNBestMovies(userID, n=10)
+    movies = getNBestMovies(userID, n=30)
     
     return jsonify(movies)
     
