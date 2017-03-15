@@ -10,11 +10,25 @@ from __future__ import unicode_literals
 import numpy as np
 from random import randint
 from MovieProject.preprocessing import Preprocessor
-from flask import json, jsonify
+#from flask import json, jsonify
 #from MovieProject.preprocessing.tools import getMovie
 import tmdbsimple as tmdb
 
 batch = 500
+
+params = { "titles":True,
+           "rating":True,
+           "overviews":True,
+           "keywords":True,
+           "genres":True,
+           "actors":True,
+           "directors":True,
+          "compagnies" : True,
+          "language" : True,
+          "belongs" : True,
+          "runtime" : True,
+          "date" : True }
+    
 
 def predictMovies(movies, model, **kwargs):
     '''
@@ -51,9 +65,12 @@ def suggestNMovies(model, n, **kwargs):
     suggestion = []
     checkedIds = []
     toFind = n
+    nTry = 0
+    tryMax = 3
     
     #While we haven't found all of the movies
-    while(toFind > 0):
+    while(toFind > 0 and nTry < tryMax):
+        initSuggLen = len(suggestion)
         
         #Get the amount of pages from tmdb that suits our criteria
         pages = tmdb.Discover().movie(vote_count_gte=20)
@@ -66,7 +83,7 @@ def suggestNMovies(model, n, **kwargs):
         while(len(movies) < toFind):
             #We pick a random page and a random movie in this page
             iPage =  randint(1,totalPages)
-            page = tmdb.Discover().movie(page=iPage, vote_count_gte=20)
+            page = tmdb.Discover().movie(page=iPage, vote_count_gte=20, language='fr-FR')
             result = page["results"]
             iMovie = randint(0,len(result)-1)
             resMovie = result[iMovie]
@@ -84,6 +101,8 @@ def suggestNMovies(model, n, **kwargs):
         predictions = predictMovies(moviesIds, model, **kwargs)
 
         print "predictions done, we sort the results to keep"
+        print predictions 
+        print moviesIds 
         
         i = 0
         added = 0
@@ -96,10 +115,15 @@ def suggestNMovies(model, n, **kwargs):
                 #Add the accuracy of the movie according to the model
                 movie = movies[i]
                 movie[u'accuracy'] = pred
-#                print movie, " is selected with accuracy ", pred, "!!!!!!!!!!!!!!"
+                print moviesIds[i], " is selected with accuracy ", pred, "!!!!!!!!!!!!!!"
                 suggestion.append(movie)
                 added += 1
             i += 1
         toFind -= added
+        #If we added at least movie in suggestion we reset the amount of try
+        if(initSuggLen < len(suggestion)):
+            nTry += 0
+        else:
+            nTry += 1
 
     return suggestion    

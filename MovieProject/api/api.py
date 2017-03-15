@@ -14,17 +14,15 @@ from functools import wraps
 from jwt import encode, decode, DecodeError, ExpiredSignature
 
 from MovieProject.learning import sentimentPrediction as pred
-from MovieProject.preprocessing import Preprocessor
 from MovieProject.sql import User, DatabaseManager
 from MovieProject.preprocessing.tools import createCorpusOfAbtracts, gloveDict, D2VOnCorpus
-from MovieProject.learning import buildModel, suggestNMovies, sentimentAnalysis
+from MovieProject.learning import getNBestMovies, saveModel, loadModel, preprocessDataTrainModel, suggestNMovies, sentimentAnalysis
 from MovieProject.resources import GLOVE_DICT_FILE, OVERVIEWS_TR_FILE, OVERVIEW_MODEL, SENTIMENT_ANALYSIS_MODEL
 
-import numpy as np
+#import numpy as np
 from os.path import isfile
 
 from exceptions import Exception
-
 
 
 app = Flask(__name__)
@@ -41,8 +39,18 @@ dbManager = DatabaseManager()
 
 movieIds = {"415":1, "9320":0, "26914":1, "11059":1}
 
-
-
+params = {"titles" : False,
+          "rating" : True,
+          "overviews" : True,
+          "keywords" : False,
+          "genres" : True,
+          "actors" : False,
+          "directors" : True,
+          "compagnies" : True,
+          "language" : False,
+          "belongs" : True,
+          "runtime" : True,
+          "date" : False }
 
 def createToken(user):
     """
@@ -101,15 +109,6 @@ def loginRequired(f):
     return decorated_function
 
 
-def getIdFromLikedMovies(username, isLiked):
-    """
-    
-    """
-    
-    movies = dbManager.getMoviesLikedByUser(username,isLiked)
-    return { str(movie.idMovie) : int(movie.liked) for movie in movies}
-
-
 @app.route('/testId', methods=['GET'])
 @cross_origin()
 @loginRequired
@@ -120,47 +119,20 @@ def get_tasks():
 @app.route('/api/train', methods=['POST'])
 @cross_origin()
 @loginRequired
-def trainModel():    
-    
-    dico = json.loads(request.data)
-    ids = [int(key) for key in dico]
-    
-    #X_train = searchData(ids)
-    labels = np.array([dico[key] for key in dico])
-    
-    print "Movies received"
+def trainModel():
 
-    params = { "titles":True,
-               "rating":True,
-               "overviews":True,
-               "keywords":True,
-               "genres":True,
-               "actors":True,
-               "directors":True,
-              "compagnies" : True,
-              "language" : True,
-              "belongs" : True,
-              "runtime" : True,
-              "date" : True }
-    
-    pProcessor = Preprocessor(**params)
+    #Retrieve the user movies
+    username = g.user_name
+#    username = 'User1'
+    userMovies = dbManager.getIdFromLikedMovies(username, None)
+    model = preprocessDataTrainModel(userMovies, **params)
 
-    #preprocess data
-    data = pProcessor.preprocess(ids)
+    print "Saving model to file ..."
     
-    print "Movies loaded, building model"
-    
-    model = buildModel(data, labels)
-    
+    saveModel(username, model)
+
+    #Tell to the front that the model is ready
     return jsonify({'result': "ok"})
-    
-#    print "Model built, start prediction"
-#    
-#    sugg = suggestNMovies(model, 10, **params)
-#    
-#    print "Movies predicted !"
-#    
-#    return jsonify(sugg)
 
 
 @app.route('/api/prediction', methods=['GET'])
@@ -168,48 +140,41 @@ def trainModel():
 @loginRequired
 def predictMovies():
     
-    #Here we create a model but in the end we will load it from the DB
-    movies = {"11":1,"18":1,"22":1}
-     
-    ids = [int(key) for key in movies]
+    #Here we load the model for the user
+    username = g.user_name
+#    username = 'User1'
     
-    labels = np.array([movies[key] for key in movies])
+    model = loadModel(username)
     
-    print "Movies received"
+    print "Model retrieved !"
+    
+    if model is None :
+        userMovies = dbManager.getIdFromLikedMovies(username, None)
+        model = preprocessDataTrainModel(userMovies, **params)
+    
+    if model is not None :
+        #Here we suggest 10 movies
+        sugg = suggestNMovies(model, 10, **params)
+    
+        print "Movies predicted !"
+        return jsonify(sugg)
+    else:
+        return jsonify({'error': "Failed to create model for this user."})
+    
 
-    params = { "titles":True,
-               "rating":True,
-               "overviews":True,
-               "keywords":True,
-               "genres":True,
-               "actors":True,
-               "directors":True,
-              "compagnies" : True,
-              "language" : True,
-              "belongs" : True,
-              "runtime" : True,
-              "date" : True }
+@app.route('/api/predictionFM', methods=['GET'])
+@cross_origin()
+@loginRequired
+def predictMoviesFM():
     
-    pProcessor = Preprocessor(**params)
-
-        #preprocess data
-    data = pProcessor.preprocess(ids)
+    #Here we load the model for the user
+    username = g.user_name
+    userID = dbManager.getUser(username).id
     
-    print "Movies loaded, building model"
+    movies = getNBestMovies(userID, n=30)
     
-    model = buildModel(data, labels)
+    return jsonify(movies)
     
-    print "Model built, start prediction"
-    
-    #This is what we will do after we get the model from DB
-    
-    sugg = suggestNMovies(model, 10, **params)
-    
-    print "Movies predicted !"
-    return jsonify(sugg)
-
-
-
 @app.route('/api/updateMovies', methods=["POST"])
 @cross_origin()
 @loginRequired
@@ -219,9 +184,9 @@ def updateMovies():
     try:
         dbManager.updateLikedMoviesForUser(g.user_name, data)
     except Exception as e:
-        return jsonify(error=str(e), movies=getIdFromLikedMovies(g.user_name, None)), 500
+        return jsonify(error=str(e), movies=dbManager.getIdFromLikedMovies(g.user_name, None)), 500
     else:
-        return jsonify(movies=getIdFromLikedMovies(g.user_name, None)), 200
+        return jsonify(movies=dbManager.getIdFromLikedMovies(g.user_name, None)), 200
     
 
 @app.route('/api/likedMovies/<string:opinion>', methods=["GET"])
@@ -233,7 +198,7 @@ def likedMovies(opinion):
     elif opinion == "all" : isLiked = None 
     else : return jsonify(error="Argument \"%s\" not authorized" %(opinion)), 400
     
-    return jsonify(movies=getIdFromLikedMovies(g.user_name, isLiked)), 200
+    return jsonify(movies=dbManager.getIdFromLikedMovies(g.user_name, isLiked)), 200
 
 
 @app.route('/api/likedMovie/<int:idMovie>/<int:isLiked>', methods=["POST", "PUT"])
@@ -256,8 +221,8 @@ def likedMovie(idMovie, isLiked):
 def checkPopularity():   
    
     data = json.loads(request.data)
-    popularity, sentiments = pred.classificationMovies(data['movies']) 
-    return jsonify({"popularity" : popularity, "sentiments" : sentiments})
+    popularity = pred.classificationMovies(data['movies']) 
+    return jsonify(popularity)
 
     
 @app.route('/api/likedMovie/<int:idMovie>', methods=["DELETE"])
@@ -325,6 +290,14 @@ def logout():
     session.pop('logged_in', None)
     return jsonify({'result': 'success'}), 200    
 
+
+@app.route('/api/user',methods=['GET'])
+@cross_origin()
+@loginRequired
+def get_user_info():
+    user = dbManager.getUser(g.user_name)
+    dico = {"name": g.user_name, "email": user.email}
+    return jsonify(dico), 200
     
     
 def _initAPI():
@@ -351,4 +324,3 @@ if __name__ == '__main__':
     _initAPI()
     
     app.run(debug=False, host= '0.0.0.0')
-

@@ -21,7 +21,7 @@ DB_CONFIG_DICT = { "database" : DB_NAME,
                    "host" : "deepmoviesdb.cz8sn0m4yqrw.eu-west-1.rds.amazonaws.com",
                    "port" : "3306" }
 
-DB_CONN_FORMAT = "mysql://{user}:{password}@{host}:{port}/{database}"
+DB_CONN_FORMAT = "mysql+pymysql://{user}:{password}@{host}:{port}/{database}"
 
 DB_OPTIONS = "?charset=utf8&use_unicode=0"                     
 
@@ -33,10 +33,8 @@ dbSession = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=
 Base = declarative_base()
 Base.query = dbSession.query_property()
 
-
 def initDb():
     # import all modules here that might define models so that
     # they will be registered properly on the metadata.  Otherwise
     # you will have to import them first before calling init_db()
-    import models
     Base.metadata.create_all(bind=engine)

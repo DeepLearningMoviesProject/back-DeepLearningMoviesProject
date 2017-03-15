@@ -10,7 +10,7 @@ Created on Tue Feb  7 11:21 2017
 from MovieProject.preprocessing.tools.apiTMDB import *
 import unittest
 
-class TextTest(unittest.TestCase):
+class ApiTMDBTest(unittest.TestCase):
     """Test case used to test 'preprocessing.tools.apiTMDB'."""
 
     moviesId = []
