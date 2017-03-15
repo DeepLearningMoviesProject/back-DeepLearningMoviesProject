@@ -95,6 +95,7 @@ def classificationMovies(idMovies):
             tweet = tw.removeMovie(tweet, title)
             p = predict(tweet, model, dico)
             sentiments = sentiments - 1 if p==-1 else sentiments + p
+            if i == 1000 : break
 
         sentiments = sentiments / len(tweets) if len(tweets)>0 else 0
     
