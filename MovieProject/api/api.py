@@ -152,7 +152,6 @@ def predictMovies():
         userMovies = dbManager.getIdFromLikedMovies(username, None)
         model = preprocessDataTrainModel(userMovies, **params)
         saveModel(username, model)
-
     
     if model is not None :
         #Here we suggest 10 movies
@@ -173,7 +172,7 @@ def predictMoviesFM():
     username = g.user_name
     userID = dbManager.getUser(username).id
     
-    movies = getNBestMovies(userID, n=30)
+    movies = getNBestMovies(userID, n=14)
     
     return jsonify(movies)
     
