@@ -151,6 +151,8 @@ def predictMovies():
     if model is None :
         userMovies = dbManager.getIdFromLikedMovies(username, None)
         model = preprocessDataTrainModel(userMovies, **params)
+        saveModel(username, model)
+
     
     if model is not None :
         #Here we suggest 10 movies
