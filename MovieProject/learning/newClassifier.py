@@ -30,7 +30,7 @@ filename = GLOBAL_MODEL_FILE.replace(path, '')
 filename = filename.replace('.h5', '')
 
 
-#Copy from CFModel
+#Those two classes has been find in a github repository named keras-movielens-cf-master
 
 def _predictRating(userid, movieid, model):
     '''
@@ -151,7 +151,7 @@ def suggestMoviesSaveNBest(user, n=0):
         userPredictions[str(m)] = _predictRating(user, m, model).item()
     
     print "movies predicted"
-    saved = 0
+    saved = 1
     nBest = {}
     #Iterate over dict in order 
     for key, value in sorted(userPredictions.iteritems(), key=lambda (k,v): (v,k),reverse=True):  
@@ -174,7 +174,7 @@ def suggestMoviesSaveNBest(user, n=0):
     print "best movies saved"
     return userPredictions, nBest
 
-def getNBestMovies(user, n=0):
+def getNBestMovies(user, n=1):
     '''
         Retrieves the best movies for a user that has been saved in a file
         If the file doesn't exists, we do the suggestion
@@ -197,7 +197,7 @@ def getNBestMovies(user, n=0):
         with open(moviesFilepath, 'r') as f:
             nBest = pickle.load(f)
     
-    if(len(nBest) < n):
+    if(len(nBest) < n) or (len(nBest) > n):
         allPred, nBest = suggestMoviesSaveNBest(user, n)
         
     return nBest
