@@ -1,17 +1,19 @@
-# Routes de l'API
+# API Routes
 
-Pour utiliser pleinement l'API, il faut que l'utilisateur soit connecté car les données enregistrées en BD sont associées à l'id de l'utilisateur. Ceci permet à chaque utilisateur d'avoir ses données propres et de les conserver entre deux connexions. 
+To fully use the API, the user must be logged in because data stored in BD are associated with the user's id. This allows each user to have their own data and to keep them between two connections.
 
-| Requête| Route                                    | Description                                                                      | Permission          |
-| :----- | :--------------------------------------- | :------------------------------------------------------------------------------- | :------------------ |
-| POST   | /auth/signup                             | Création d'un compte utilisateur                                                 |                     |
-| POST   | /auth/login                              | Connexion d'un utilisateur                                                       |                     |
-|        | /auth/logout                             | Déconnexion d'un utilisateur                                                     | utilisateur connecté| 
-| POST   | /api/updateMovies                        | Met à jours la liste des films annotés par l'utilisateur                         | utilisateur connecté|
-| GET    | /api/likedMovies/string:opinion          | Récupère en base de données, la liste des films que l'utilisateur à aimé si opinion="liked", pas aimé si opinion="disliked" ou alors tous les films si opinion="all".                                                                           | utilisateur connecté|
-| POST   | /api/likedMovie/int:idMovie/int:isLiked  | Ajoute en base de données, le film d'idMovie=idTMDB avec isLiked=0 si le film n'a pas été apprécié ou isLiked=1 si le film à été apprécié                                                                                                                    | utilisateur connecté|
-| PUT    | /api/likedMovie/int:idMovie/int:isLiked  | Met à jours en base de données, le film d'idMovie=idTMDB avec isLiked=0 si le film n'a pas été apprécié ou isLiked=1 si le film à été apprécié                                                                                                                 | utilisateur connecté|
-| DELETE | /api/likedMovie/int:idMovie              | Supprime de la base de données, le film d'idMovie=idTMDB associé à l'utilisateur | utilisateur connecté|
-| POST   | /api/train                               | Lance l'entrainement du modèle avec les films annotés par l'utilisateur, présents en base de données.                                                                                                                               | utilisateur connecté|
-| GET    | /api/prediction                          | Lance une prédiction à partir du modèle de l'utilisateur et retourne une liste de recommandation de films.                                                                                                                                 | utilisateur connecté|
-| POST   | /api/popularity                          | Lance la recherche de popularité sur Twitter et retourne une liste de films ordonnée par popularité décroissante et une seconde liste ordonnée par avis décroissant                                                                                            | utilisateur connecté|   
+| Request| Route                                    | Description                                                                                      | Permission      |
+| :----- | :--------------------------------------- | :----------------------------------------------------------------------------------------------- | :-------------- |
+| POST   | /auth/signup                             | Create a user account                                                                            |                 |
+| POST   | /auth/login                              | Connect a user                                                                                   |                 |
+|        | /auth/logout                             | Disonnect a user                                                                                 | user logged in  | 
+| GET    | /api/user                                | Return user information                                                                          | user logged in  |     
+| POST   | /api/updateMovies                        | Updates the annotated movies list by the user                                                    | user logged in  |
+| GET    | /api/likedMovies/string:opinion          | Recovers in the database, the list of movies that the user liked if opinion = "liked", not liked if opinion = "disliked" or all the films if opinion = "all"                                                                                                                    | user logged in  |
+| POST   | /api/likedMovie/int:idMovie/int:isLiked  | Adds into the database the idMovie = idTMDB with isLiked = 0 if the movie wasn't appreciated or isLiked = 1 if the movie was appreciated by user                                                                                                                                | user logged in  |
+| PUT    | /api/likedMovie/int:idMovie/int:isLiked  | Updates into the database, the idMovie movie = idTMDB with isLiked = 0 if the movie wasn't appreciated or isLiked = 1 if the movie was appreciated                                                                                                                              | user logged in  |
+| DELETE | /api/likedMovie/int:idMovie              | Removes into the database, the idMovie = idTMDB associated with the user                         | user logged in  |
+| POST   | /api/train                               | Run model training with annoted movies by user                                                   | user logged in  |
+| GET    | /api/prediction                          | Run prediction thank to user model and return a list of movies recommanded                       | user logged in  |
+| GET    | /api/predictionFM                        | Run prediction thank to global model and return a list of movies recommanded                     | user logged in  |
+| POST   | /api/popularity                          | Run sentiment analysis on Twitter and return popularity ratting and review ratting on each movie | user logged in  |
