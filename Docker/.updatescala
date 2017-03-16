@@ -1,0 +1,25 @@
+# Author: Daniel Gordon
+# License: MIT
+# Created: 10/28/2016
+#
+# Mini Script for Updating Scala to some Scala version
+# Does not update SBT. Just Scala.
+# See <http://www.scala-sbt.org/0.13/docs/Installing-sbt-on-Linux.html> for upgrading SBT
+# This is for Debian/Mint/Ubuntu distributions only
+# 
+#   TO USE AS A SCRIPT:
+#   Download this as a file and rename it so updateScalaVersion.sh to use it as a script
+#   Comment out the first line of code and uncomment the line above it to use as a script like this:
+#     ./updateScalaVersion 2.11.8
+#   Don't forget to run "chmod +x" on the script, and you will likely need to run it in `sudo`
+#   Running as a script is UNTESTED as of this writing.
+# 
+#   ALL COMMANDS NEED TO BE RUN WITH "SUDO"
+
+# scalaVer="$1"
+scalaVer="2.11.8"
+apt-get remove scala-library scala
+wget www.scala-lang.org/files/archive/scala-"$scalaVer".deb
+dpkg -i scala-"$scalaVer".deb
+apt-get update
+apt-get install scala
