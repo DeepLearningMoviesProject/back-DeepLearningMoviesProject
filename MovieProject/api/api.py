@@ -111,7 +111,7 @@ def loginRequired(f):
 
 @app.route('/testId', methods=['GET'])
 @cross_origin()
-@loginRequired
+#@loginRequired
 def get_tasks():
     return jsonify(movieIds), 200
 
@@ -221,9 +221,10 @@ def likedMovie(idMovie, isLiked):
 @loginRequired
 def checkPopularity():   
    
-    data = json.loads(request.data)
-    popularity = pred.classificationMovies(data['movies']) 
-    return jsonify(popularity)
+#    data = json.loads(request.data)
+#    popularity = pred.classificationMovies(data['movies']) 
+#    return jsonify(popularity)
+    return jsonify(movieIds)
 
     
 @app.route('/api/likedMovie/<int:idMovie>', methods=["DELETE"])
@@ -301,7 +302,7 @@ def get_user_info():
     return jsonify(dico), 200
     
     
-def _initAPI():
+def initAPI():
     """
         Create all resources needed if they don't already exist
     """
@@ -322,6 +323,6 @@ def _initAPI():
     
 if __name__ == '__main__':
     
-    _initAPI()
+    initAPI()
     
     app.run(debug=False, host= '0.0.0.0')

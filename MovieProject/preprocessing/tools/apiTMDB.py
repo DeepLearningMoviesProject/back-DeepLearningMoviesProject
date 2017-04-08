@@ -40,6 +40,7 @@ class RunRequest(threading.Thread):
         self._args = args
         self.res = result
         self.maxTime = 0.8
+        #self.maxTime = 3.2
         threading.Thread.__init__(self)
  
     def run(self):
