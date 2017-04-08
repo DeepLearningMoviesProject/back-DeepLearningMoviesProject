@@ -39,8 +39,8 @@ class RunRequest(threading.Thread):
         self._target = target
         self._args = args
         self.res = result
-        self.maxTime = 0.8
-        #self.maxTime = 3.2
+        #self.maxTime = 0.8
+        self.maxTime = 2    #maxTime = 2 allow normally two users safelly
         threading.Thread.__init__(self)
  
     def run(self):
